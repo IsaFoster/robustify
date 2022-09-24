@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 setup(
-    name='libraryTestCERN',
-    packages=find_packages(include=['libraryTestCERN']),
+    name='Robustness',
+    packages=find_packages(include=['Robustness']),
     version='0.1.0',
     description='My first Python library',
     author='Isabel Foster',
