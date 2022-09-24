@@ -1,32 +1,50 @@
-from math import radians, cos, sin, asin, sqrt
+from RandomNoise import addNoise, evaluate
+from readData import getData
 import numpy as np
-from sklearn import metrics
-
-def plus(numbers: list):
-    value = 0 
-    for number in numbers:
-        value += number
-    return value
+from matplotlib import pyplot as plt
+import numpy as np
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
 
-def addNoise(X, scale=0.1):
-    print(X)
-    return X + np.random.normal(0, scale, X.shape)
-    
+'***************** Load and Split Data ****************'
+df_train, df_val, df_test = getData()
+y_train = df_train[['data_type']]
+X_train = df_train.drop(['data_type'], axis=1)
+y_val = df_val[['data_type']]
+X_val =  df_val.drop(['data_type'], axis=1)
+y_test = df_test[['data_type']]
+X_test = df_test.drop(['data_type'], axis=1)
+'********************************************'
 
-'''def evaluate(classifier, X, y, scales = np.linspace(0, 0.5, 30), N = 5):
-    out = []
-    for s in scales:
-        avg = 0.0
-        for r in range(N):
-            avg += metrics.accuracy_score(y, classifier.predict(addNoise(X, s)))
-        out.append(avg / N)
-    return out, scales'''
+'**************** Train Models **************'
+m2 = RandomForestClassifier(random_state=42)
+m2.fit(X_train, y_train)
 
+preds = m2.predict(X_val)
+print("Accuracy:", accuracy_score(y_val, preds))
+'********************************************'
 
-def evaluate(model, X_train, y_train, X_test, y_test, values= np.linspace(0, 0.5, 30)):
-    accuracy_scores = []
-    for value in values: 
-        model.fit(addNoise(X_train, value), y_train)
-        accuracy_scores.append(metrics.accuracy_score(y_test, model.predict(X_test)))
-    return accuracy_scores, values
+'*************** Plot Accuracy **************'
+conf = confusion_matrix(y_val, preds)
+conf_matrix = ConfusionMatrixDisplay(conf)
+conf_matrix.plot()
+plt.show()
+
+accuracy_scores = evaluate(m2, X_train, y_train, X_test, y_test)
+
+print('base accuracy:', accuracy_score[0])
+print('pertubateed up accuracy:', accuracy_score[1])
+print('pertubated down accuracy:', accuracy_score[2])
+
+'''plt.figure()
+lw = 2
+plt.plot(jitters, mdl1_scores, color='darkorange',
+         lw=lw, label='random forrest')
+plt.xlabel('Amount of Noise')
+plt.ylabel('Accuracy')
+plt.title('Accuracy for increasing noise')
+plt.legend(loc="lower right")
+plt.show()'''
+'********************************************'
