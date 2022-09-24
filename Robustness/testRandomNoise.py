@@ -32,13 +32,9 @@ conf_matrix = ConfusionMatrixDisplay(conf)
 conf_matrix.plot()
 plt.show()
 
-accuracy_scores = evaluate(m2, X_train, y_train, X_test, y_test)
+mdl1_scores, jitters = evaluate(m2, X_train, y_train, X_test, y_test)
 
-print('base accuracy:', accuracy_score[0])
-print('pertubateed up accuracy:', accuracy_score[1])
-print('pertubated down accuracy:', accuracy_score[2])
-
-'''plt.figure()
+plt.figure()
 lw = 2
 plt.plot(jitters, mdl1_scores, color='darkorange',
          lw=lw, label='random forrest')
@@ -46,5 +42,5 @@ plt.xlabel('Amount of Noise')
 plt.ylabel('Accuracy')
 plt.title('Accuracy for increasing noise')
 plt.legend(loc="lower right")
-plt.show()'''
+plt.show()
 '********************************************'
