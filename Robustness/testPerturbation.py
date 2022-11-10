@@ -18,7 +18,7 @@ X_test = df_test.drop(['data_type'], axis=1)
 '********************************************'
 
 '**************** Train Models **************'
-m2 = RandomForestClassifier(random_state=42)
+m2 = RandomForestClassifier(random_state=42, verbose=1)
 m2.fit(X_train, y_train.values.ravel())
 
 preds = m2.predict(X_val)
