@@ -1,8 +1,7 @@
 import numpy as np
 from sklearn import metrics
 
-def addNoise(X, scale=0.1):
-    print(X)
+def addNoise(X, percentage=0.2, scale=0.1):
     return X + np.random.normal(0, scale, X.shape)
     ## should only affect a certain percentage of the datapoints?? 
 
