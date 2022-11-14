@@ -1,0 +1,83 @@
+from readData import getData
+import numpy as np
+from matplotlib import pyplot as plt
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+import pandas as pd
+import plotly.graph_objs as go
+from plotly.offline import plot
+import plotly.express as px
+from tqdm import tqdm
+
+'*********** Load and Split Data ***********'
+df_train, df_val, df_test = getData()
+
+signal = df_train.loc[df_train['data_type'] == 1]
+backgrond = df_train.loc[df_train['data_type'] == 0]
+
+df_train_short = pd.concat([signal.iloc[:1000, :], backgrond.iloc[:9000, :]])
+y_train_short = df_train_short[['data_type']]
+df_train_short = df_train_short.drop(['data_type'], axis=1)
+
+
+signal_test = df_test.loc[df_test['data_type'] == 1]
+backgrond_test = df_test.loc[df_test['data_type'] == 0]
+
+df_test_short = pd.concat([signal_test.iloc[:100, :], backgrond_test.iloc[:900, :]])
+y_test_short = df_test_short[['data_type']]
+df_test_short = df_test_short.drop(['data_type'], axis=1)
+
+'*********************************************'
+
+def addNoiseDf(df, factor):
+    df_temp = df.copy()
+    for (name, feature) in df.items():
+        new_feature = addNoiseColumn(feature, factor)
+        df_temp[name] = new_feature
+    return df_temp
+
+def addNoiseColumn(feature, factor):
+    sd = np.std(feature)
+    q = factor * sd 
+    noise = np.random.normal(0, q, len(feature))
+    a = feature + noise
+    return a
+
+'***********************************************'
+
+def doAll(X, y, X_test, y_test, model, corruptions=10, levels=np.linspace(0, 1, 11)):
+    feature_names = X.columns
+    
+    pbar_outer = tqdm(levels, desc="Total progress: ", position=0)
+    df_plot = pd.DataFrame(columns=['feature_name', 'average_value', 'level'])
+
+    average_accuracy_all = []
+
+    for level in pbar_outer:
+        parameter_values = []
+        accuracy_values = []
+        pbar = tqdm(range (corruptions), desc="Level: {}".format(level), position=1, leave=False)
+        for _ in pbar:
+            corrupted_noise = addNoiseDf(X, level)
+            model.fit(corrupted_noise, y.values.ravel())
+            parameter_values.append(model.feature_importances_)
+            accuracy_values.append(accuracy_score(model.predict(X_test), y_test))
+        
+        average_accuracy_all.append(np.average(accuracy_values))
+
+        parameter_values_np = np.array(parameter_values)
+        average_level_value = np.average(parameter_values_np, axis=0)
+        df_temp = pd.DataFrame({'feature_name': feature_names, 'average_value': average_level_value, 'level': np.array([level]*len(feature_names))})
+        df_plot = pd.concat([df_plot, df_temp], axis=0)
+    return df_plot
+
+model = RandomForestClassifier(random_state=42)
+
+df_plot = doAll(df_train_short, y_train_short, df_test_short, y_test_short, model, corruptions=100)
+'************************************************'
+
+fig = px.line(df_plot, x="level", y="average_value", title="Average feature importance over 100 replacement noise corruptions at increasing noise levels", color='feature_name') 
+fig.show()
