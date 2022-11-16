@@ -3,7 +3,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 import pandas as pd
@@ -48,6 +47,15 @@ def addNoiseColumn(feature, factor):
 
 '***********************************************'
 
+def sort_df(df):
+    df_temp = df.copy()
+    df_temp.sort_values(by=['average_value'])
+    return df_temp
+
+def plotAll(df):
+    fig = px.line(df, x="level", y="average_value", title="Average feature importance over 100 replacement noise corruptions at increasing noise levels", color='feature_name') 
+    fig.show()
+
 def doAll(X, y, X_test, y_test, model, corruptions=10, levels=np.linspace(0, 1, 11)):
     feature_names = X.columns
     
@@ -61,23 +69,30 @@ def doAll(X, y, X_test, y_test, model, corruptions=10, levels=np.linspace(0, 1, 
         accuracy_values = []
         pbar = tqdm(range (corruptions), desc="Level: {}".format(level), position=1, leave=False)
         for _ in pbar:
+            # montecarlo sampling ??
             corrupted_noise = addNoiseDf(X, level)
             model.fit(corrupted_noise, y.values.ravel())
-            parameter_values.append(model.feature_importances_)
+            if hasattr(model, 'feature_importances_'):
+                parameter_values.append(model.feature_importances_)
+            elif hasattr(model, 'coef_'):
+                parameter_values.append(model.coef_)
+            else:
+                print("cound not calculate coefficients of feature importance")
+                return 
             accuracy_values.append(accuracy_score(model.predict(X_test), y_test))
-        
         average_accuracy_all.append(np.average(accuracy_values))
 
         parameter_values_np = np.array(parameter_values)
         average_level_value = np.average(parameter_values_np, axis=0)
-        df_temp = pd.DataFrame({'feature_name': feature_names, 'average_value': average_level_value, 'level': np.array([level]*len(feature_names))})
+        df_temp = pd.DataFrame({'feature_name': feature_names, 'average_value': average_level_value.flatten(), 'level': np.array([level]*len(feature_names))})
         df_plot = pd.concat([df_plot, df_temp], axis=0)
+    df_plot = sort_df(df_plot)
+    plotAll(df_plot)
     return df_plot
 
-model = RandomForestClassifier(random_state=42)
+model_1 = RandomForestClassifier(random_state=42)
+model_2 = SVC(kernel='linear')
 
-df_plot = doAll(df_train_short, y_train_short, df_test_short, y_test_short, model, corruptions=100)
+#df_plot = doAll(df_train_short, y_train_short, df_test_short, y_test_short, model_1, corruptions=10)
+df_plot = doAll(df_train_short, y_train_short, df_test_short, y_test_short, model_2, corruptions=10)
 '************************************************'
-
-fig = px.line(df_plot, x="level", y="average_value", title="Average feature importance over 100 replacement noise corruptions at increasing noise levels", color='feature_name') 
-fig.show()
