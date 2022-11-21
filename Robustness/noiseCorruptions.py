@@ -1,7 +1,6 @@
 from _readData import getData
 from _sampling import sampleData
-from _plot import plotAll
-import numpy as np
+from _plot import plotNoiseCorruptions
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -17,7 +16,7 @@ backgrond = df_train.loc[df_train['data_type'] == 0]
 
 df_train_short = pd.concat([signal.iloc[:1000, :], backgrond.iloc[:9000, :]])
 #y_train_short = df_train_short[['data_type']]
-#df_train_short = df_train_short.drop(['data_type'], axis=1)
+X_train_short = df_train_short.drop(['data_type'], axis=1)
 
 
 signal_test = df_test.loc[df_test['data_type'] == 1]
@@ -87,13 +86,13 @@ def doAll(df, X_test, y_test, model, corruptions=10, levels=np.linspace(0, 1, 11
         df_temp = pd.DataFrame({'feature_name': feature_names, 'average_value': average_level_value.flatten(), 'level': np.array([level]*len(feature_names))})
         df_plot = pd.concat([df_plot, df_temp], axis=0)
     df_plot = sort_df(df_plot)
-    plotAll(df_plot, str(model), measured, corruptions)
+    plotNoiseCorruptions(df_plot, str(model), measured, corruptions)
     return df_plot
 
 model_1 = RandomForestClassifier(random_state=42)
 model_2 = SVC(kernel='linear')
 
-df_plot = doAll(df_train_short, df_test_short, y_test_short, model_1, corruptions=100)
-df_plot = doAll(df_train_short, df_test_short, y_test_short, model_2, corruptions=100)
+df_plot = doAll(df_train_short, df_test_short, y_test_short, model_1, corruptions=10)
+df_plot = doAll(df_train_short, df_test_short, y_test_short, model_2, corruptions=10)
 
 '************************************************'
