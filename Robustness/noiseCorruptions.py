@@ -96,3 +96,5 @@ df_plot = doAll(df_train_short, df_test_short, y_test_short, model_1, corruption
 df_plot = doAll(df_train_short, df_test_short, y_test_short, model_2, corruptions=10)
 
 '************************************************'
+
+# TODO: sort df before plotting
