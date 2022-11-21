@@ -1,10 +1,8 @@
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
-def top5features(df):
-    #df_ordered = df.loc[df['level'] == 0.0].groupby('feature_name').nlargest(5)
-    #print(df_ordered.head(5))
-
+def topFromDf(df, n):
     df_grouped = df.groupby('level')
     df_group = df_grouped.get_group(0.0)
     sorted = df_group.sort_values('average_value', ascending=False)
@@ -22,8 +20,8 @@ def mostDiff(df):
     sorted = df_temp.sort_values('most_diff', ascending=False)
     return sorted['feature_name'].tolist()[:5]
 
-def plotAll(df, model_name, measured, corruptions):
-    visible_features = top5features(df)
+def plotNoiseCorruptions(df, model_name, measured, corruptions):
+    visible_features = topFromDf(df, 5)
     different_features = mostDiff(df)
     title = "Average {} over {} replacement noise corruptions at increasing noise levels for {}".format(measured, corruptions, model_name)
     fig = px.line(df, x="level", y="average_value", title=title, color='feature_name').update_traces(visible="legendonly", selector=lambda t: not t.name in visible_features) 
@@ -61,5 +59,51 @@ def plotAll(df, model_name, measured, corruptions):
                             yanchor="top"
                         ),
                     ]
+              ))
+    fig.show()
+
+
+def topFromSeries(df, num):
+    df2 = df.mean(axis=0)
+    sorted = df2.sort_values(ascending=False)
+    return sorted.index[:5]
+
+def plotPermutationImportance(df):
+    visible_features = topFromSeries(df, 5)
+
+    fig = go.Figure()
+    for (columnName, columnData) in df.items():
+        fig.add_trace(go.Box(x=columnData, boxmean=True, name=columnName))
+
+    fig.update_layout(dict(updatemenus=[
+                        dict(
+                            type = "buttons",
+                            direction = "left",
+                            buttons=list([
+                                dict(
+                                    args=["visible", "legendonly"],
+                                    label="Deselect All",
+                                    method="restyle"
+                                ),
+                                dict(
+                                    args=["visible", True],
+                                    label="Select All",
+                                    method="restyle"
+                                ),
+                                dict(
+                                    args=[{"visible": [i in visible_features for i in df.columns]}],
+                                    label="Top 5",
+                                    method="restyle"
+                                )
+                            ]),
+                            pad={"r": 10, "t": 10},
+                            showactive=False,
+                            x=1,
+                            xanchor="right",
+                            y=1.1,
+                            yanchor="top"
+                        ),
+                    ],
+                    legend={'traceorder': 'reversed'}
               ))
     fig.show()
