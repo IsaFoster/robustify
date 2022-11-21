@@ -98,3 +98,4 @@ df_plot = doAll(df_train_short, df_test_short, y_test_short, model_2, corruption
 '************************************************'
 
 # TODO: sort df before plotting
+# TODO: make reproducible
