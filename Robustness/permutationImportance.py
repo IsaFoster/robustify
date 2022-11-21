@@ -44,25 +44,4 @@ importances = pd.DataFrame(
     columns=X_train_short.columns[sorted_importances_idx],
 )
 
-'''ax = importances.plot.box(vert=False, whis=10)
-ax.set_title("Permutation Importances (test set)")
-ax.axvline(x=0, color="k", linestyle="--")
-ax.set_xlabel("Decrease in accuracy score")
-ax.figure.tight_layout()
-ax.figure.show()
-'''
-
-#import plotly.express as px
-#fig = px.box(importances, orientation='h')
-#fig.show()
-
-
 plotPermutationImportance(importances)
-
-'''
-fig = go.Figure()
-# Use x instead of y argument for horizontal plot
-for (columnName, columnData) in importances.iteritems():
-    fig.add_trace(go.Box(x=columnData))
-
-fig.show()'''
