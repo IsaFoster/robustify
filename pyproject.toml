@@ -14,9 +14,13 @@ tqdm = "^4.64.1"
 plotly = "^5.11.0"
 
 [tool.poetry.dev-dependencies]
+python = "^3.10"
 numpy = "^1.23.4"
 sklearn = "^0.0"
 matplotlib = "^3.6.2"
+pandas = "^1.5.1"
+tqdm = "^4.64.1"
+plotly = "^5.11.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
