@@ -1,5 +1,5 @@
 from _readData import getData
-from _plot import plotPermutationImportance
+from _plot import plotPermutationImportance, plotMeanAccuracyDecrease
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -27,6 +27,8 @@ X_test_short = df_test_short.drop(['data_type'], axis=1)
 
 '*******************************************'
 
+
+
 model = RandomForestClassifier(random_state=42)
 model.fit(X_train_short, y_train_short.values.ravel())
 
@@ -46,5 +48,10 @@ importances = pd.DataFrame(
 
 plotPermutationImportance(importances)
 
+
+feature_names = X_train_short.columns
+forest_importances = pd.Series(result.importances_mean, index=feature_names)
+
+plotMeanAccuracyDecrease(forest_importances, result)
 
 # TODO: make reproducible

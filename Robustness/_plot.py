@@ -66,7 +66,7 @@ def plotNoiseCorruptions(df, model_name, measured, corruptions):
 def topFromSeries(df, num):
     df2 = df.mean(axis=0)
     sorted = df2.sort_values(ascending=False)
-    return sorted.index[:5]
+    return sorted.index[:num]
 
 def plotPermutationImportance(df):
     visible_features = topFromSeries(df, 5)
@@ -106,4 +106,62 @@ def plotPermutationImportance(df):
                     ],
                     legend={'traceorder': 'reversed'}
               ))
+    fig.show()
+
+def topFromSeries2(df, num):
+    sorted = df.sort_values(ascending=False)
+    return sorted.index[:num]
+
+def plotMeanAccuracyDecrease(df, result):
+    visible_features = topFromSeries2(df, 5)
+    title = "Feature importances using permutation on full model"
+    df_temp = pd.DataFrame(columns=['feature_name', 'value', 'error'])
+    df_temp['feature_name'] = df.index.values.tolist()
+    df_temp['value'] = df.values.tolist()
+    df_temp['error'] = result.importances_std
+    df_temp = df_temp.sort_values('value', ascending=False)
+
+    #fig = go.Figure(go.Bar(y=df, x=df.index.values.tolist(), error_y=dict(type='data', array=result.importances_std), marker_color=colors))
+    fig = go.Figure()
+    for (_, rowData) in df_temp.iterrows():
+        fig.add_trace(
+            go.Bar(
+                x=[rowData['feature_name']],
+                y=[rowData['value']],
+                name=rowData['feature_name'],
+                error_y={'type':'data', 'array':[rowData['error']]}
+            )
+        )
+    fig.update_layout(dict(updatemenus=[
+                        dict(
+                            type = "buttons",
+                            direction = "left",
+                            buttons=list([
+                                dict(
+                                    args=["visible", "legendonly"],
+                                    label="Deselect All",
+                                    method="restyle"
+                                ),
+                                dict(
+                                    args=["visible", True],
+                                    label="Select All",
+                                    method="restyle"
+                                ),
+                                dict(
+                                    args=[{"visible": [i in visible_features for i in df.index.values.tolist()]}],
+                                    label="Top 5",
+                                    method="restyle"
+                                )
+                            ]),
+                            pad={"r": 10, "t": 10},
+                            showactive=False,
+                            x=1,
+                            xanchor="right",
+                            y=1.1,
+                            yanchor="top"
+                        ),
+                    ],
+              ),     
+            title=title,
+            yaxis_title="Mean accuracy decrease")
     fig.show()
