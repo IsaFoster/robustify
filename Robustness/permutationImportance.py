@@ -8,7 +8,6 @@ from sklearn.inspection import permutation_importance
 import random
 
 '*********** Load and Split Data ***********'
-
 df_train, df_val, df_test = getDataFromFile()
 
 '********** Reduced set ******************'
@@ -39,14 +38,12 @@ np.random.seed(seed=seed)
 
 model = RandomForestClassifier(random_state=seed)
 model.fit(X_train_short, y_train_short.values.ravel())
-
 '*******************************************'
 
 def permutationImportance(model, X_test, y_test, n_repeats):
     return permutation_importance(model, X_test, y_test, n_repeats=n_repeats, random_state=seed, n_jobs=-1)
 
-
-result = permutationImportance(model, X_test_short, y_test_short, 10)
+result = permutationImportance(model, X_test, y_test, 10)
 
 sorted_importances_idx = result.importances_mean.argsort()
 importances = pd.DataFrame(
