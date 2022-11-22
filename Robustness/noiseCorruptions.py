@@ -1,4 +1,4 @@
-from _readData import getData
+from _readData import getData, getDataFromFile
 from _sampling import sampleData
 from _plot import plotNoiseCorruptions
 import numpy as np
@@ -9,7 +9,7 @@ import pandas as pd
 from tqdm import tqdm
 
 '*********** Load and Split Data ***********'
-df_train, df_val, df_test = getData()
+df_train, df_val, df_test = getDataFromFile()
 
 signal = df_train.loc[df_train['data_type'] == 1]
 backgrond = df_train.loc[df_train['data_type'] == 0]
