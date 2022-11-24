@@ -1,10 +1,7 @@
 import pandas as pd
-import numpy as np
 import math
 import gc
 from sklearn.utils import shuffle
-
-
 
 def train_valid_test_split(df, test_pct, valid_pct):
   number_of_train_valid_rows = math.floor(df.shape[0] * (1 - test_pct))
@@ -14,7 +11,6 @@ def train_valid_test_split(df, test_pct, valid_pct):
   df_train, df_valid = df_train_valid.iloc[:number_of_train_rows].copy(),df_train_valid.iloc[number_of_train_rows:].copy() 
 
   return df_train, df_valid, df_test
-
 
 def get_val_idx(df, valid_pct):
     row_cutoff = math.ceil(df.shape[0] * (valid_pct))
@@ -74,7 +70,6 @@ def getAndPrepareData():
 	del Wenu
 	del Ztautau
 	gc.collect()
-
 
 	features_from_feature_importance = [
 										"met_et",
@@ -150,12 +145,10 @@ def getAndPrepareData():
 	background_test = [None]*len(background)
 	background_train_valid = [None]*len(background)
 
-
 	for i in range(len(background)):
 		background[i].reset_index()
 		background_train[i], background_valid[i], background_test[i] = train_valid_test_split(background[i], 0.6, 0.3)
 		background_train_valid[i] = pd.concat([background_train[i][features], background_valid[i][features]])
-
 
 	signal.reset_index()
 	signal_train, signal_valid, signal_test = train_valid_test_split(signal, 0.6, 0.3)
@@ -193,12 +186,10 @@ def getAndPrepareData():
 	df_train_valid.reindex(columns=features)
 	features.remove('data_type')
 
-
 	#Normalizing the train_valid dataset
 	[df_train_valid[col].update((df_train_valid[col] - df_train_valid[col].min()) / (df_train_valid[col].max() - df_train_valid[col].min())) for col in df_train_valid[features].columns]
 	#Normalizing the test dataset
 	[df_test[col].update((df_test[col] - df_test[col].min()) / (df_test[col].max() - df_test[col].min())) for col in df_test[features].columns]
-
 
 	df_train_valid = df_train_valid.sample(frac=1, random_state=fixed_seed).reset_index(drop=True)
 	df_train_valid["data_type"] = df_train_valid["data_type"].astype("category")
@@ -251,5 +242,4 @@ def getXandYShortFromFile():
 
 	y_test = df_test[['data_type']]
 	X_test = df_test.drop(['data_type'], axis=1)
-	
 	return X_train.iloc[:10000, :], y_train.iloc[:10000, :], X_test.iloc[:1000, :], y_test.iloc[:1000, :]
