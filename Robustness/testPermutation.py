@@ -1,13 +1,10 @@
-from _readData import getData, getDataFromFile
-from _plot import plotPermutationImportance, plotMeanAccuracyDecrease
+from _readData import getDataFromFile
 from permutationImportance import permutationImportance, meanAccuracyDecrease
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 import pandas as pd
-from sklearn.inspection import permutation_importance
 import random
-from sklearn.ensemble import GradientBoostingClassifier
 
 '*********** Load and Split Data ***********'
 df_train, df_val, df_test = getDataFromFile()
@@ -40,11 +37,12 @@ random.seed(seed)
 np.random.seed(seed=seed)
 
 print('Training')
-model = GradientBoostingClassifier(n_estimators=10, verbose=1)
+#model = GradientBoostingClassifier(n_estimators=10)
+model = SVC()
 model.fit(X_train, y_train.values.ravel())
 print('Training finished')
 n_repeats = 10
 random_state = 44
 
-result = permutationImportance(model, X_test, y_test, n_repeats, random_state)
-meanAccuracyDecrease(result, model, X_test, y_test, n_repeats, random_state)
+permutationImportance(model, X_test, y_test, n_repeats, random_state)
+meanAccuracyDecrease(model, X_test, y_test, n_repeats, random_state)
