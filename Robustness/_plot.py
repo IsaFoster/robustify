@@ -2,11 +2,20 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-def topFromDf(df, n):
-    df_grouped = df.groupby('level')
-    df_group = df_grouped.get_group(0.0)
-    sorted = df_group.sort_values('average_value', ascending=False)
-    return sorted['feature_name'].tolist()[:5]
+def topFromDfGrouped(df, group, groupValue, value, feature, num):
+    df_grouped = df.groupby(group)
+    df_group = df_grouped.get_group(groupValue)
+    sorted = df_group.sort_values(value, ascending=False)
+    return sorted[feature].tolist()[:num]
+
+def topFromDf(df, value, feature, num):
+    sorted = df.sort_values(value, ascending=False)
+    return sorted[feature].iloc[:num]
+
+def topFromSeries(df, num):
+    df_temp = df.mean(axis=0)
+    sorted = df_temp.sort_values(ascending=False)
+    return sorted.index[:num]
 
 def mostDiff(df):
     df_temp = pd.DataFrame(columns=['feature_name', 'most_diff'])
@@ -21,7 +30,7 @@ def mostDiff(df):
     return sorted['feature_name'].tolist()[:5]
 
 def plotNoiseCorruptions(df, model_name, measured, corruptions):
-    visible_features = topFromDf(df, 5)
+    visible_features = topFromDfGrouped(df, 'level', 0.0, 'average_value', 'feature_name', 5)
     different_features = mostDiff(df)
     title = "Average {} over {} replacement noise corruptions at increasing noise levels for {}".format(measured, corruptions, model_name)
     fig = px.line(df, x="level", y="average_value", title=title, color='feature_name').update_traces(visible="legendonly", selector=lambda t: not t.name in visible_features) 
@@ -61,12 +70,6 @@ def plotNoiseCorruptions(df, model_name, measured, corruptions):
                     ]
               ))
     fig.show()
-
-
-def topFromSeries(df, num):
-    df2 = df.mean(axis=0)
-    sorted = df2.sort_values(ascending=False)
-    return sorted.index[:num]
 
 def plotPermutationImportance(df):
     visible_features = topFromSeries(df, 5)
@@ -109,10 +112,6 @@ def plotPermutationImportance(df):
               title=title,
               xaxis_title="Decrease in accuracy score")
     fig.show()
-
-def topFromDf(df, value, feature, num):
-    sorted = df.sort_values(value, ascending=False)
-    return sorted[feature][:num]
 
 def plotMeanAccuracyDecrease(df, result, permutations, modelName):
     title = "Feature importances using n={} permutation on {}".format(permutations, modelName)
