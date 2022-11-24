@@ -1,11 +1,13 @@
 from _readData import getData, getDataFromFile
 from _plot import plotPermutationImportance, plotMeanAccuracyDecrease
+from permutationImportance import permutationImportance, meanAccuracyDecrease
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 import pandas as pd
 from sklearn.inspection import permutation_importance
 import random
+from sklearn.ensemble import GradientBoostingClassifier
 
 '*********** Load and Split Data ***********'
 df_train, df_val, df_test = getDataFromFile()
@@ -32,32 +34,17 @@ X_train = df_train.drop(['data_type'], axis=1)
 y_test = df_test[['data_type']]
 X_test = df_test.drop(['data_type'], axis=1)
 '*******************************************'
-'''seed = 39
+
+seed = 39
 random.seed(seed)
 np.random.seed(seed=seed)
 
-model = RandomForestClassifier(random_state=seed, verbose=1, n_jobs=-1)
-model.fit(X_train_short, y_train_short.values.ravel())'''
-'*******************************************'
+print('Training')
+model = GradientBoostingClassifier(n_estimators=10, verbose=1)
+model.fit(X_train, y_train.values.ravel())
+print('Training finished')
+n_repeats = 10
+random_state = 44
 
-def permutationImportance(model, X_test, y_test, n_repeats, random_state):
-    result = permutation_importance(model, X_test, y_test, n_repeats=n_repeats, random_state=random_state, n_jobs=-1)
-
-    sorted_importances_idx = result.importances_mean.argsort()
-    importances = pd.DataFrame(
-        result.importances[sorted_importances_idx].T,
-        columns=X_train_short.columns[sorted_importances_idx],
-    )
-
-    plotPermutationImportance(importances)
-    return result
-
-def meanAccuracyDecrease(result, model, X_test, y_test, n_repeats, random_state):
-    #result = permutationImportance(model, X_test, y_test, n_repeats, random_state)
-    feature_names = model.classes_
-    forest_importances = pd.Series(result.importances_mean, index=feature_names.tolist())
-
-    plotMeanAccuracyDecrease(forest_importances, result)
-
-# TODO: add title and labels to plots
-# TODO: take in whole df for test
+result = permutationImportance(model, X_test, y_test, n_repeats, random_state)
+meanAccuracyDecrease(result, model, X_test, y_test, n_repeats, random_state)
