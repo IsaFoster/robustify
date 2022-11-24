@@ -1,9 +1,6 @@
-from _readData import getData, getDataFromFile
 from _sampling import sampleData
-from _plot import plotNoiseCorruptions
+from _plot import plotNoiseCorruptionsAverageFeatureValue, plotNoiseCorruptionsVariance
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 import pandas as pd
 from tqdm import tqdm
@@ -24,12 +21,12 @@ def addNoiseColumn(feature, factor):
 
 def sort_df(df):
     df_temp = df.copy()
-    df_temp = df_temp.sort_values(by=['feature_name'])
+    df_temp = df_temp.sort_values(by=['average_value'])
     return df_temp
 
 '***********************************************'
 
-def doAll(df, X_test, y_test, model, corruptions=10, levels=np.linspace(0, 1, 11)):
+def noiseCorruptions(df, X_test, y_test, model, corruptions=10, levels=np.linspace(0, 1, 11)):
     pbar_outer = tqdm(levels, desc="Total progress: ", position=0)
     df_plot = pd.DataFrame(columns=['feature_name', 'average_value', 'level'])
 
@@ -40,10 +37,7 @@ def doAll(df, X_test, y_test, model, corruptions=10, levels=np.linspace(0, 1, 11
         accuracy_values = []
         pbar = tqdm(range (corruptions), desc="Level: {}".format(level), position=1, leave=False)
         for _ in pbar:
-
-            # sample
-            df_ttemp = df.copy()
-            X, y = sampleData(df_ttemp, 0.2)
+            X, y = sampleData(df, 0.2)
 
             # corrupt
             corrupted_noise = addNoiseDf(X, level)
@@ -66,14 +60,10 @@ def doAll(df, X_test, y_test, model, corruptions=10, levels=np.linspace(0, 1, 11
         df_temp = pd.DataFrame({'feature_name': feature_names, 'average_value': average_level_value.flatten(), 'level': np.array([level]*len(feature_names))})
         df_plot = pd.concat([df_plot, df_temp], axis=0)
     df_plot = sort_df(df_plot)
-    plotNoiseCorruptions(df_plot, str(model), measured, corruptions)
+
+    plotNoiseCorruptionsAverageFeatureValue(df_plot, str(model), measured, corruptions)
+    plotNoiseCorruptionsVariance()
     return df_plot
-
-model_1 = RandomForestClassifier(random_state=42)
-model_2 = SVC(kernel='linear')
-
-df_plot = doAll(df_train_short, X_test, y_test, model_1, corruptions=10)
-df_plot = doAll(df_train_short, X_test, y_test_short, model_2, corruptions=10)
 
 '************************************************'
 

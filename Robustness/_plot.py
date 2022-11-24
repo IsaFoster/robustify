@@ -29,7 +29,37 @@ def mostDiff(df):
     sorted = df_temp.sort_values('most_diff', ascending=False)
     return sorted['feature_name'].tolist()[:5]
 
-def plotNoiseCorruptions(df, model_name, measured, corruptions):
+def plotButtons(visibleFeaturesList):
+    return [dict(
+        type = "buttons",
+        direction = "left",
+        buttons=list([
+            dict(
+                args=["visible", "legendonly"],
+                label="Deselect All",
+                method="restyle"
+            ),
+            dict(
+                args=["visible", True],
+                label="Select All",
+                method="restyle"
+            ),
+            dict(
+                args=[{"visible": visibleFeaturesList}],
+                label="Top 5",
+                method="restyle"
+            )
+        ]),
+        pad={"r": 10, "t": 10},
+        showactive=False,
+        x=1,
+        xanchor="right",
+        y=1.1,
+        yanchor="top"
+        ),
+    ]
+
+def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruptions):
     visible_features = topFromDfGrouped(df, 'level', 0.0, 'average_value', 'feature_name', 5)
     different_features = mostDiff(df)
     title = "Average {} over {} replacement noise corruptions at increasing noise levels for {}".format(measured, corruptions, model_name)
@@ -78,35 +108,7 @@ def plotPermutationImportance(df):
     for (columnName, columnData) in df.items():
         fig.add_trace(go.Box(x=columnData, boxmean=True, name=columnName))
 
-    fig.update_layout(dict(updatemenus=[
-                        dict(
-                            type = "buttons",
-                            direction = "left",
-                            buttons=list([
-                                dict(
-                                    args=["visible", "legendonly"],
-                                    label="Deselect All",
-                                    method="restyle"
-                                ),
-                                dict(
-                                    args=["visible", True],
-                                    label="Select All",
-                                    method="restyle"
-                                ),
-                                dict(
-                                    args=[{"visible": [i in visible_features for i in df.columns]}],
-                                    label="Top 5",
-                                    method="restyle"
-                                )
-                            ]),
-                            pad={"r": 10, "t": 10},
-                            showactive=False,
-                            x=1,
-                            xanchor="right",
-                            y=1.1,
-                            yanchor="top"
-                        ),
-                    ],
+    fig.update_layout(dict(updatemenus=plotButtons(visible_features),
                     legend={'traceorder': 'reversed'}
               ),
               title=title,
@@ -132,35 +134,7 @@ def plotMeanAccuracyDecrease(df, result, permutations, modelName):
                 error_y={'type':'data', 'array':[rowData['error']]}
             )
         )
-    fig.update_layout(dict(updatemenus=[
-                        dict(
-                            type = "buttons",
-                            direction = "left",
-                            buttons=list([
-                                dict(
-                                    args=["visible", "legendonly"],
-                                    label="Deselect All",
-                                    method="restyle"
-                                ),
-                                dict(
-                                    args=["visible", True],
-                                    label="Select All",
-                                    method="restyle"
-                                ),
-                                dict(
-                                    args=[{"visible": [i in visible_features for i in df.index.values.tolist()]}],
-                                    label="Top 5",
-                                    method="restyle"
-                                )
-                            ]),
-                            pad={"r": 10, "t": 10},
-                            showactive=False,
-                            x=1,
-                            xanchor="right",
-                            y=1.1,
-                            yanchor="top"
-                        ),
-                    ],
+    fig.update_layout(dict(updatemenus=plotButtons(visible_features),
               ),     
             title=title,
             yaxis_title="Mean accuracy decrease")
