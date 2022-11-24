@@ -219,8 +219,20 @@ def saveToFile(df_train, df_valid, df_test):
 
 #saveToFile( df_train, df_valid, df_test)
 
-def getDataFromFile():
+def getDataFramesFromFile():
     df_train = pd.read_csv('../ReducedFiles/df_train.csv', index_col=0)
     df_valid = pd.read_csv('../ReducedFiles/df_valid.csv', index_col=0)
     df_test = pd.read_csv('../ReducedFiles/df_test.csv', index_col=0)
     return df_train, df_valid, df_test
+
+def getXandYFromFile():
+	df_train = pd.read_csv('../ReducedFiles/df_train.csv', index_col=0)
+	df_valid = pd.read_csv('../ReducedFiles/df_valid.csv', index_col=0)
+	df_test = pd.read_csv('../ReducedFiles/df_test.csv', index_col=0)
+
+	y_train = df_train[['data_type']]
+	X_train = df_train.drop(['data_type'], axis=1)
+
+	y_test = df_test[['data_type']]
+	X_test = df_test.drop(['data_type'], axis=1)
+	return X_train, y_train, X_test, y_test
