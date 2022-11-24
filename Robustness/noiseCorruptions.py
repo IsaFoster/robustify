@@ -15,16 +15,18 @@ signal = df_train.loc[df_train['data_type'] == 1]
 backgrond = df_train.loc[df_train['data_type'] == 0]
 
 df_train_short = pd.concat([signal.iloc[:1000, :], backgrond.iloc[:9000, :]])
-#y_train_short = df_train_short[['data_type']]
+y_train_short = df_train_short[['data_type']]
 X_train_short = df_train_short.drop(['data_type'], axis=1)
 
 
 signal_test = df_test.loc[df_test['data_type'] == 1]
 backgrond_test = df_test.loc[df_test['data_type'] == 0]
 
+y_test = df_test[['data_type']]
+X_test = df_test.drop(['data_type'], axis=1)
 df_test_short = pd.concat([signal_test.iloc[:100, :], backgrond_test.iloc[:900, :]])
 y_test_short = df_test_short[['data_type']]
-df_test_short = df_test_short.drop(['data_type'], axis=1)
+X_test_short = df_test_short.drop(['data_type'], axis=1)
 
 '*********************************************'
 
@@ -92,8 +94,8 @@ def doAll(df, X_test, y_test, model, corruptions=10, levels=np.linspace(0, 1, 11
 model_1 = RandomForestClassifier(random_state=42)
 model_2 = SVC(kernel='linear')
 
-df_plot = doAll(df_train_short, df_test_short, y_test_short, model_1, corruptions=10)
-df_plot = doAll(df_train_short, df_test_short, y_test_short, model_2, corruptions=10)
+df_plot = doAll(df_train_short, X_test, y_test, model_1, corruptions=10)
+df_plot = doAll(df_train_short, X_test, y_test_short, model_2, corruptions=10)
 
 '************************************************'
 

@@ -36,7 +36,7 @@ seed = 39
 random.seed(seed)
 np.random.seed(seed=seed)
 
-model = RandomForestClassifier(random_state=seed)
+model = RandomForestClassifier(random_state=seed, verbose=1, n_jobs=-1)
 model.fit(X_train_short, y_train_short.values.ravel())
 '*******************************************'
 
