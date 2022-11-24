@@ -4,15 +4,12 @@ from sklearn.inspection import permutation_importance
 
 def permutationImportance(model, X_test, y_test, n_repeats, random_state):
     result = permutation_importance(model, X_test, y_test, n_repeats=n_repeats, random_state=random_state, n_jobs=-1)
-
     sorted_importances_idx = result.importances_mean.argsort()
     importances = pd.DataFrame(
         result.importances[sorted_importances_idx].T,
         columns=model.feature_names_in_[sorted_importances_idx],
     )
-
-    plotPermutationImportance(importances)
-    return result
+    plotPermutationImportance(importances, str(n_repeats), str(model))
 
 def meanAccuracyDecrease(model, X_test, y_test, n_repeats, random_state):
     result = permutation_importance(model, X_test, y_test, n_repeats=n_repeats, random_state=random_state, n_jobs=-1)

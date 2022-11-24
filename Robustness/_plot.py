@@ -10,12 +10,13 @@ def topFromDfGrouped(df, group, groupValue, value, feature, num):
 
 def topFromDf(df, value, feature, num):
     sorted = df.sort_values(value, ascending=False)
-    return sorted[feature].iloc[:num]
+    return sorted[feature].iloc[:num].tolist()
 
 def topFromSeries(df, num):
     df_temp = df.mean(axis=0)
     sorted = df_temp.sort_values(ascending=False)
-    return sorted.index[:num]
+    print("topFromSeries:", sorted.index[:num].tolist())
+    return sorted.index[:num].tolist()
 
 def mostDiff(df):
     df_temp = pd.DataFrame(columns=['feature_name', 'most_diff'])
@@ -29,7 +30,7 @@ def mostDiff(df):
     sorted = df_temp.sort_values('most_diff', ascending=False)
     return sorted['feature_name'].tolist()[:5]
 
-def plotButtons(visibleFeaturesList):
+def plotButtons(visibleFeaturesList, featureNames):
     return [dict(
         type = "buttons",
         direction = "left",
@@ -45,7 +46,7 @@ def plotButtons(visibleFeaturesList):
                 method="restyle"
             ),
             dict(
-                args=[{"visible": visibleFeaturesList}],
+                args=[{"visible": [i in visibleFeaturesList for i in featureNames]}],
                 label="Top 5",
                 method="restyle"
             )
@@ -101,14 +102,17 @@ def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruption
               ))
     fig.show()
 
-def plotPermutationImportance(df):
+def plotNoiseCorruptionsVariance():
+    pass
+
+def plotPermutationImportance(df, n_repeats, modelName):
     visible_features = topFromSeries(df, 5)
-    title = "Permutation Importances (test set)"
+    title = "Permutation Importances using n={} for {}".format(n_repeats, modelName)
     fig = go.Figure()
     for (columnName, columnData) in df.items():
         fig.add_trace(go.Box(x=columnData, boxmean=True, name=columnName))
 
-    fig.update_layout(dict(updatemenus=plotButtons(visible_features),
+    fig.update_layout(dict(updatemenus=plotButtons(visible_features, df.columns),
                     legend={'traceorder': 'reversed'}
               ),
               title=title,
@@ -134,7 +138,7 @@ def plotMeanAccuracyDecrease(df, result, permutations, modelName):
                 error_y={'type':'data', 'array':[rowData['error']]}
             )
         )
-    fig.update_layout(dict(updatemenus=plotButtons(visible_features),
+    fig.update_layout(dict(updatemenus=plotButtons(visible_features, df.index.values.tolist()),
               ),     
             title=title,
             yaxis_title="Mean accuracy decrease")

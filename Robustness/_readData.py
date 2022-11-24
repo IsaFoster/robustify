@@ -217,10 +217,18 @@ def getDataFramesFromFile():
     return df_train, df_valid, df_test
 
 def getDataFramesShortFromFile():
-    df_train = pd.read_csv('../ReducedFiles/df_train.csv', index_col=0)
-    df_valid = pd.read_csv('../ReducedFiles/df_valid.csv', index_col=0)
-    df_test = pd.read_csv('../ReducedFiles/df_test.csv', index_col=0)
-    return df_train.iloc[:10000, :], df_valid, df_test.iloc[:1000, :]
+	df_train = pd.read_csv('../ReducedFiles/df_train.csv', index_col=0)
+	df_test = pd.read_csv('../ReducedFiles/df_test.csv', index_col=0)
+
+	signal = df_train.loc[df_train['data_type'] == 1]
+	backgrond = df_train.loc[df_train['data_type'] == 0]
+	df_train_short = pd.concat([signal.iloc[:1000, :], backgrond.iloc[:9000, :]])
+
+	signal_test = df_test.loc[df_test['data_type'] == 1]
+	backgrond_test = df_test.loc[df_test['data_type'] == 0]
+
+	df_test_short = pd.concat([signal_test.iloc[:100, :], backgrond_test.iloc[:900, :]])
+	return df_train_short, df_test_short
 
 def getXandYFromFile():
 	df_train = pd.read_csv('../ReducedFiles/df_train.csv', index_col=0)
@@ -237,9 +245,17 @@ def getXandYShortFromFile():
 	df_train = pd.read_csv('../ReducedFiles/df_train.csv', index_col=0)
 	df_test = pd.read_csv('../ReducedFiles/df_test.csv', index_col=0)
 
-	y_train = df_train[['data_type']]
-	X_train = df_train.drop(['data_type'], axis=1)
+	signal = df_train.loc[df_train['data_type'] == 1]
+	backgrond = df_train.loc[df_train['data_type'] == 0]
 
-	y_test = df_test[['data_type']]
-	X_test = df_test.drop(['data_type'], axis=1)
-	return X_train.iloc[:10000, :], y_train.iloc[:10000, :], X_test.iloc[:1000, :], y_test.iloc[:1000, :]
+	df_train_short = pd.concat([signal.iloc[:1000, :], backgrond.iloc[:9000, :]])
+	y_train = df_train_short[['data_type']]
+	X_train = df_train_short.drop(['data_type'], axis=1)
+
+	signal_test = df_test.loc[df_test['data_type'] == 1]
+	backgrond_test = df_test.loc[df_test['data_type'] == 0]
+
+	df_test_short = pd.concat([signal_test.iloc[:100, :], backgrond_test.iloc[:900, :]])
+	y_test = df_test_short[['data_type']]
+	X_test = df_test_short.drop(['data_type'], axis=1)
+	return X_train, y_train, X_test, y_test
