@@ -18,11 +18,11 @@ def topFromSeries(df, num):
     print("topFromSeries:", sorted.index[:num].tolist())
     return sorted.index[:num].tolist()
 
-def mostDiff(df):
+def mostDiff(df, groupValue):
     df_temp = pd.DataFrame(columns=['feature_name', 'most_diff'])
     df_grouped = df.groupby('feature_name')
     for group in df_grouped:
-        li = group[1]['average_value'].tolist()
+        li = group[1][groupValue].tolist()
         diff = max(li)- min(li)
         row = pd.Series([group[0], diff])
         row = pd.DataFrame([[group[0], diff]], columns=['feature_name', 'most_diff'])
@@ -60,11 +60,11 @@ def plotButtons(visibleFeaturesList, featureNames):
         ),
     ]
 
-def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruptions):
-    visible_features = topFromDfGrouped(df, 'level', 0.0, 'average_value', 'feature_name', 5)
-    different_features = mostDiff(df)
-    title = "Average {} over {} replacement noise corruptions at increasing noise levels for {}".format(measured, corruptions, model_name)
-    fig = px.line(df, x="level", y="average_value", title=title, color='feature_name').update_traces(visible="legendonly", selector=lambda t: not t.name in visible_features) 
+def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruptions, lalal):
+    visible_features = topFromDfGrouped(df, 'level', 0.0, lalal, 'feature_name', 5)
+    different_features = mostDiff(df, lalal)
+    title = "Average {} of {} over {} replacement noise corruptions at increasing noise levels for {}".format(lalal, measured, corruptions, model_name)
+    fig = px.line(df, x="level", y=lalal, title=title, color='feature_name').update_traces(visible="legendonly", selector=lambda t: not t.name in visible_features) 
     fig.update_layout(dict(updatemenus=[
                         dict(
                             type = "buttons",
