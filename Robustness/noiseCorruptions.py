@@ -8,28 +8,6 @@ from sklearn.metrics import accuracy_score
 import pandas as pd
 from tqdm import tqdm
 
-'*********** Load and Split Data ***********'
-df_train, df_val, df_test = getDataFromFile()
-
-signal = df_train.loc[df_train['data_type'] == 1]
-backgrond = df_train.loc[df_train['data_type'] == 0]
-
-df_train_short = pd.concat([signal.iloc[:1000, :], backgrond.iloc[:9000, :]])
-y_train_short = df_train_short[['data_type']]
-X_train_short = df_train_short.drop(['data_type'], axis=1)
-
-
-signal_test = df_test.loc[df_test['data_type'] == 1]
-backgrond_test = df_test.loc[df_test['data_type'] == 0]
-
-y_test = df_test[['data_type']]
-X_test = df_test.drop(['data_type'], axis=1)
-df_test_short = pd.concat([signal_test.iloc[:100, :], backgrond_test.iloc[:900, :]])
-y_test_short = df_test_short[['data_type']]
-X_test_short = df_test_short.drop(['data_type'], axis=1)
-
-'*********************************************'
-
 def addNoiseDf(df, factor):
     df_temp = df.copy()
     for (name, feature) in df.items():
@@ -46,7 +24,7 @@ def addNoiseColumn(feature, factor):
 
 def sort_df(df):
     df_temp = df.copy()
-    df_temp.sort_values(by=['feature_name'])
+    df_temp = df_temp.sort_values(by=['feature_name'])
     return df_temp
 
 '***********************************************'
