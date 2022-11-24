@@ -110,9 +110,9 @@ def plotPermutationImportance(df):
               xaxis_title="Decrease in accuracy score")
     fig.show()
 
-def topFromSeries2(df, num):
-    sorted = df.sort_values('value', ascending=False)
-    return sorted['feature_name'][:num]
+def topFromDf(df, value, feature, num):
+    sorted = df.sort_values(value, ascending=False)
+    return sorted[feature][:num]
 
 def plotMeanAccuracyDecrease(df, result, permutations, modelName):
     title = "Feature importances using n={} permutation on {}".format(permutations, modelName)
@@ -121,7 +121,7 @@ def plotMeanAccuracyDecrease(df, result, permutations, modelName):
     df_temp['value'] = df.values.tolist()
     df_temp['error'] = result.importances_std
     df_temp = df_temp.sort_values('value', ascending=False)
-    visible_features = topFromSeries2(df_temp, 5)
+    visible_features = topFromDf(df_temp, 'value', 'feature_name', 5)
 
     fig = go.Figure()
     for (_, rowData) in df_temp.iterrows():
