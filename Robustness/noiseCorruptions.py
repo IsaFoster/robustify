@@ -51,6 +51,9 @@ def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=1
             elif hasattr(model, 'coef_'):
                 measured = 'coefficients'
                 parameter_values.append(model.coef_)
+            elif hasattr(model, 'coefs_'):  # TODO: see if this can be used 
+                measured = 'coefficients MLP'
+                parameter_values.append(model.coefs_)
             else:
                 print("cound not calculate coefficients or feature importance")
                 return 

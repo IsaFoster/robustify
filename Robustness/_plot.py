@@ -15,7 +15,6 @@ def topFromDf(df, value, feature, num):
 def topFromSeries(df, num):
     df_temp = df.mean(axis=0)
     sorted = df_temp.sort_values(ascending=False)
-    print("topFromSeries:", sorted.index[:num].tolist())
     return sorted.index[:num].tolist()
 
 def mostDiff(df, groupValue):

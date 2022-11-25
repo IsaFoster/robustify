@@ -12,15 +12,18 @@ seed = 39
 random.seed(seed)
 np.random.seed(seed=seed)
 
-_, _, X_test, y_test = getXandYShortFromFile()
-modelName = 'RF_reduced_set'
-
-#_, _, X_test, y_test = getXandYFromFile()
-#modelName = 'SVC_full_set'
-
-model = pickle.load(open('../Models/' + modelName, 'rb'))
-n_repeats = 10
+n_repeats = 100
 random_state = 44
 
-permutationImportance(model, X_test, y_test, n_repeats, random_state)
-meanAccuracyDecrease(model, X_test, y_test, n_repeats, random_state)
+_, _, X_test, y_test = getXandYShortFromFile()
+
+
+def permuteModel(modelName, X_test, y_test, n_repeats, random_state):
+    model = pickle.load(open('../Models/' + modelName, 'rb'))
+
+    permutationImportance(model, X_test, y_test, n_repeats, random_state)
+    meanAccuracyDecrease(model, X_test, y_test, n_repeats, random_state)
+
+permuteModel('RF_full_set', X_test, y_test, n_repeats, random_state)
+permuteModel('SVC_full_set', X_test, y_test, n_repeats, random_state)
+permuteModel('LDA_full_set', X_test, y_test, n_repeats, random_state)

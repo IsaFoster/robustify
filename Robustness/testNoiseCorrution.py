@@ -18,14 +18,13 @@ _, _, X_test, y_test = getXandYShortFromFile()
 
 def corruptModel(modelName, df_train, X_test, y_test, random_state, corruptions):
     model = pickle.load(open('../Models/' + modelName, 'rb'))
-    n_repeats = 10
-    random_state = 44
-
-    noiseCorruptions(df_train, X_test, y_test, model, random_state=seed, corruptions=10)
+    
+    noiseCorruptions(df_train, X_test, y_test, model, random_state, corruptions)
 
 
-corruptModel('RF_reduced_set', df_train, X_test, y_test, 50, 10)
-corruptModel('SVC_reduced_set', df_train, X_test, y_test, 50, 10)
+corruptModel('RF_full_set', df_train, X_test, y_test, 50, 100)
+corruptModel('SVC_full_set', df_train, X_test, y_test, 50, 100)
+corruptModel('LDA_full_set', df_train, X_test, y_test, 50, 100)
 
-corruptModel('RF_reduced_set', df_train, X_test, y_test, 50, 50)
-corruptModel('SVC_reduced_set', df_train, X_test, y_test, 50, 50)
+#corruptModel('SVC_reduced_set', df_train, X_test, y_test, 50, 50)
+
