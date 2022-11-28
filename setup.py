@@ -7,7 +7,7 @@ setup(
     author='Isabel Foster',
     license='MIT',
     install_requires=['numpy==1.23.4', 
-                      'sklearn==1.1.3', 
+                      'sklearn==0.0', 
                       'matplotlib==3.6.2', 
                       'pandas==1.5.1', 
                       'plotly==5.11.0', 
