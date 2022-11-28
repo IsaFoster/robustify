@@ -40,7 +40,7 @@ def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=1
         feature_variance = []
         pbar = tqdm(range (corruptions), desc="Level: {}".format(level), position=1, leave=False)
         for _ in pbar:
-            X, y = sampleData(df, 0.2, random_state)
+            X, y = sampleData(df, 'data_type', 0.2, random_state)
 
             # corrupt
             corrupted_noise = addNoiseDf(X, level, random_state)
