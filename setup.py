@@ -3,7 +3,7 @@ setup(
     name='Robustness',
     packages=find_packages(include=['Robustness']),
     version='0.1.0',
-    description='My first Python library',
+    description='no description',
     author='Isabel Foster',
     license='MIT',
     install_requires=['numpy', 'sklearn', 'matplotlib'], # list of packages that are absolutely needed, not standard library
