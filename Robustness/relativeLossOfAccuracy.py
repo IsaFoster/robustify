@@ -6,6 +6,18 @@ import random
 import numpy as np
 import plotly.express as px
 import pandas as pd
+import chart_studio
+import chart_studio.plotly as py
+import chart_studio.tools as tls
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+username = os.getenv('USER_NAME')
+api_key = os.getenv('API_KEY')
+
+tls.set_credentials_file(username=username, api_key=api_key)
 
 seed = 39
 random.seed(seed)
@@ -26,16 +38,19 @@ def plotRLA(model, X_train, y_train, X_test, y_test, seed):
     rla_list = []
     for accuracy in acc_list:
         rla_list.append(calculateRLA(acc_list[0], accuracy))
-    df_temp = pd.DataFrame(columns=['accuracy', 'level'])
-    df_temp['accuracy'] = rla_list
-    df_temp['level'] = np.linspace(0, 1, 11)
+    df_temp = pd.DataFrame(columns=['Noise Level', 'Accuracy', 'Relative Loss of Accuracy'])
+    df_temp['Relative Loss of Accuracy'] = rla_list
+    df_temp['Noise Level'] = np.linspace(0, 1, 11)
     title = "Relative loss off accuracy over feature noise"
-    fig = px.line(df_temp, x="level", y='accuracy', title=title)
+    fig = px.line(df_temp, x='Noise Level', y='Relative Loss of Accuracy', title=title)
     fig.show()
 
-    df_temp['accuracy'] = acc_list
-    fig_2 = px.line(df_temp, x="level", y='accuracy', title=title)
+    df_temp['Accuracy'] = acc_list
+    fig_2 = px.line(df_temp, x='Noise Level', y='Accuracy', title=title)
     fig_2.show()
+    py.plot(fig, filename='RelativeLossPlot')
+    py.plot(fig_2, filename='AccuracyPlot')
+    print(df_temp)
 
 def calculateRLA(accuracy_0, accuracy_x):
     return (accuracy_0 - accuracy_x) / accuracy_0
