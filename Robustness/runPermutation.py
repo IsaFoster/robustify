@@ -1,4 +1,4 @@
-from _readData import getDataFramesFromFile, getXandYFromFile, getXandYShortFromFile
+from Setup._readData import getDataFramesFromFile, getXandYFromFile, getXandYShortFromFile
 from permutationImportance import permutationImportance, meanAccuracyDecrease
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier

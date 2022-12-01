@@ -208,7 +208,8 @@ def saveToFile(df_train, df_valid, df_test):
 	df_valid.to_csv('../ReducedFiles/df_valid.csv')
 	df_test.to_csv('../ReducedFiles/df_test.csv')
 
-#saveToFile( df_train, df_valid, df_test)
+df_train, df_valid, df_test = getAndPrepareData()
+saveToFile(df_train, df_valid, df_test)
 
 def getDataFramesFromFile():
     df_train = pd.read_csv('../ReducedFiles/df_train.csv', index_col=0)
