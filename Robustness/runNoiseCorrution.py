@@ -1,4 +1,4 @@
-from _readData import getDataFramesFromFile, getDataFramesShortFromFile, getXandYFromFile, getXandYShortFromFile
+from Setup._readData import getDataFramesFromFile, getDataFramesShortFromFile, getXandYFromFile, getXandYShortFromFile
 from noiseCorruptions import noiseCorruptions
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
@@ -28,3 +28,4 @@ corruptModel('LDA_full_set', df_train, X_test, y_test, 50, 100)
 
 #corruptModel('SVC_reduced_set', df_train, X_test, y_test, 50, 50)
 
+# TODO: should not use pretrained model?

@@ -5,9 +5,9 @@ from sklearn.metrics import accuracy_score
 import pandas as pd
 from tqdm import tqdm
 
-def addNoiseDf(df, factor, random_state):
-    df_temp = df.copy()
-    for (name, feature) in df.items():
+def addNoiseDf(X, factor, random_state):
+    df_temp = X.copy()
+    for (name, feature) in X.items():
         new_feature = addNoiseColumn(feature, factor, random_state)
         df_temp[name] = new_feature
     return df_temp
@@ -27,7 +27,7 @@ def sort_df(df):
 
 '***********************************************'
 
-def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=10, levels=np.linspace(0, 1, 11)):
+def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=10, levels=np.linspace(0, 1, 11), plot=True):
     pbar_outer = tqdm(levels, desc="Total progress: ", position=0)
     df_plot_average_value = pd.DataFrame(columns=['feature_name', 'feature_value', 'level'])
     df_plot_feature_variance = pd.DataFrame(columns=['feature_name', 'feature_variance', 'level'])
@@ -69,10 +69,10 @@ def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=1
         df_temp_variance = pd.DataFrame({'feature_name': feature_names, 'feature_variance': average_feature_variance.flatten(), 'level': np.array([level]*len(feature_names))})
         df_plot_average_value = pd.concat([df_plot_average_value, df_temp_average], axis=0)
         df_plot_feature_variance = pd.concat([df_plot_feature_variance, df_temp_variance], axis=0)
-
-    plotNoiseCorruptionsAverageFeatureValue(df_plot_average_value, str(model), measured, corruptions, 'feature_value')
-    plotNoiseCorruptionsAverageFeatureValue(df_plot_feature_variance, str(model), measured, corruptions, 'feature_variance')
-
+    if plot:
+        plotNoiseCorruptionsAverageFeatureValue(df_plot_average_value, str(model), measured, corruptions, 'feature_value')
+        plotNoiseCorruptionsAverageFeatureValue(df_plot_feature_variance, str(model), measured, corruptions, 'feature_variance')
+    return average_accuracy_all
 '************************************************'
 
 # TODO: sort df before plotting NOOPE
