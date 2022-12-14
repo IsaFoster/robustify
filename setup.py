@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 setup(
     name='Robustness',
-    packages=find_packages(include=['Robustness']),
+    packages=find_packages(include=['Robustness', 'Setup', 'tests']),
     version='0.1.0',
     description='no description',
     author='Isabel Foster',
