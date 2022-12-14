@@ -6,7 +6,7 @@ setup(
     description='My first Python library',
     author='Isabel Foster',
     license='MIT',
-    install_requires=['numpy', 'sklearn', 'matplotlib'], # list of packages that are absolutely needed, not standard library
+    install_requires=['numpy', 'sklearn', 'matplotlib', 'chart_studio', 'python-dotenv'], # list of packages that are absolutely needed, not standard library
     setup_requires=['pytest-runner'], # only installed when required to run tests
     tests_require=['pytest==7.1.2'],
     test_suite='tests',
