@@ -5,13 +5,8 @@ Just testing...
 
 # Running:
 
-## Setup virtual environment (for development)
-
-To run virtual environment:
-in destination folder: source venv/scripts/activate
-
-## Deactivate virtual environment:
-Deactivate virtual environment: deactivate
+## Install requirements
+python setup.py install
 
 ## Run tests:
 python setup.py pytest
