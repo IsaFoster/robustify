@@ -10,3 +10,4 @@ Models/
 build/
 dist/
 .env
+Models/
