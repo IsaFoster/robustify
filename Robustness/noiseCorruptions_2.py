@@ -27,18 +27,15 @@ def sort_df(df):
 
 
 
-def percentage_shift(df, feature_name, percentages):
-    print(df[feature_name])
-    df[feature_name] = df[feature_name] * 1.1
-    print("doing percentage shifts as specified by percentages for {} with levels: {}".format(feature_name, percentages))
-    print(df[feature_name])
+def percentage_shift(df, feature_name, percentage):
+    add = (1+(percentage*0.1))
+    df[feature_name] = df[feature_name] * add
+    print("doing percentage shifts as specified by percentages for {} with level: {}".format(feature_name, add))
     return df
 
 def flip_sign(df, feature_name):
-    print(df[feature_name])
     df[feature_name] = df[feature_name] * (-1)
     print("doing flips signs for {}".format(feature_name))
-    print(df[feature_name])
     return df
 
 def gaussian_noise(df, feature_name, level):
@@ -46,10 +43,8 @@ def gaussian_noise(df, feature_name, level):
 
 def add_or_subtract(df, feature_name, level):
     # TODO: should be based of probability and value of other feature
-    print(df[feature_name])
-    df[feature_name] = df[feature_name] + 1
+    df[feature_name] = df[feature_name] + level
     print("adding fixed noise for {} with value: {}".format(feature_name, level))
-    print(df[feature_name])
     return df
     
 
@@ -63,76 +58,53 @@ def filter_on_method(df, method, feature_name, level=None):
     return switcher.get(method, lambda: print("Invalid corruption method for feature {}".format(feature_name)))()
 
 
-'''for listdict in list(my_dict.items()):
-    feature_name = listdict[0]
-    if (isinstance(listdict[1], dict)):
-        method = list(listdict[1].keys())[0]
-        level = list(listdict[1].values())[0]
-    elif (isinstance(listdict[1], set) and len(listdict[1]) == 1):
-        method = list(listdict[1])[0]
-        level=None
-    else:
-        print('Error getting values')
-        print(type(listdict[1]))
-   
-    filter_on_method(method, feature_name, level)
-
-'''
-
-
-
 '***********************************************'
 
 def noiseCorruptions_2(df, X_test, y_test, model, corruption_dict, random_state=None, plot=True):
-    pbar_outer = tqdm(corruption_dict, desc="Total progress: ", position=0)
+    pbar_outer = tqdm(list(corruption_dict.items()), desc="Total progress: ", position=0)
     df_plot_average_value = pd.DataFrame(columns=['feature_name', 'feature_value', 'level'])
     df_plot_feature_variance = pd.DataFrame(columns=['feature_name', 'feature_variance', 'level'])
 
     average_accuracy_all = []
 
+    corruptions = 10
+
     for level in pbar_outer:
-        print(level)
-        
         parameter_values = []
         accuracy_values = []
         feature_variance = []
 
-        for listdict in list(corruption_dict.items()):
-            feature_name = listdict[0]
-            if (isinstance(listdict[1], dict)):
-                method = list(listdict[1].keys())[0]
-                level = list(listdict[1].values())[0]
-            elif (isinstance(listdict[1], set) and len(listdict[1]) == 1):
-                method = list(listdict[1])[0]
-                level=None
-            else:
-                print('Error getting values')
-                print(type(listdict[1]))
-        
-            df = filter_on_method(df, method, feature_name, level)
-        '''
-        pbar = tqdm(range (corruptions), desc="Level: {}".format(level), position=1, leave=False)
-        for _ in pbar:
-            X, y = sampleData(df, 'data_type', 0.2, random_state)
-
-            # corrupt
-            corrupted_noise = addNoiseDf(X, level, random_state)
-            model.fit(corrupted_noise, y.values.ravel())
-            if hasattr(model, 'feature_importances_'):
-                measured = 'feature importance'
-                parameter_values.append(model.feature_importances_)
-            elif hasattr(model, 'coef_'):
-                measured = 'coefficients'
-                parameter_values.append(model.coef_)
-            elif hasattr(model, 'coefs_'):  # TODO: see if this can be used 
-                measured = 'coefficients MLP'
-                parameter_values.append(model.coefs_)
-            else:
-                print("cound not calculate coefficients or feature importance")
-                return 
-            accuracy_values.append(accuracy_score(model.predict(X_test), y_test))
-            feature_variance.append(corrupted_noise.var().tolist())
+        feature_name = level[0]
+        if (isinstance(level[1], dict)):
+            method = list(level[1].keys())[0]
+            level = list(level[1].values())[0]
+        elif (isinstance(level[1], set) and len(level[1]) == 1):
+            method = list(level[1])[0]
+            level=None
+        else:
+            print('Error getting values')
+            print(type(level[1]))
+        for tic in level:
+            for _ in tqdm(range (corruptions), desc="Level: {}".format(level), position=1, leave=False):
+                corrupted_noise = filter_on_method(df, method, feature_name, tic)
+                X, y = sampleData(corrupted_noise, 'data_type', 0.4, random_state)
+                model.fit(X, y.values.ravel())
+                if hasattr(model, 'feature_importances_'):
+                    measured = 'feature importance'
+                    parameter_values.append(model.feature_importances_)
+                elif hasattr(model, 'coef_'):
+                    measured = 'coefficients'
+                    parameter_values.append(model.coef_)
+                elif hasattr(model, 'coefs_'):  # TODO: see if this can be used 
+                    measured = 'coefficients MLP'
+                    parameter_values.append(model.coefs_)
+                else:
+                    print("cound not calculate coefficients or feature importance")
+                    return 
+                accuracy_values.append(accuracy_score(model.predict(X_test), y_test))
+                feature_variance.append(corrupted_noise.var().tolist())
         average_accuracy_all.append(np.average(accuracy_values))
+        
 
         parameter_values_np = np.array(parameter_values)
         average_level_value = np.average(parameter_values_np, axis=0)
@@ -145,7 +117,8 @@ def noiseCorruptions_2(df, X_test, y_test, model, corruption_dict, random_state=
     if plot:
         plotNoiseCorruptionsAverageFeatureValue(df_plot_average_value, str(model), measured, corruptions, 'feature_value')
         plotNoiseCorruptionsAverageFeatureValue(df_plot_feature_variance, str(model), measured, corruptions, 'feature_variance')
-    return average_accuracy_all'''
+    return average_accuracy_all
+
 '************************************************'
 
 # TODO: sort df before plotting NOOPE
