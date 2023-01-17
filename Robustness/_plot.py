@@ -1,6 +1,17 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import chart_studio.plotly as py
+import chart_studio.tools as tls
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+username = os.getenv('USER_NAME')
+api_key = os.getenv('API_KEY')
+
+tls.set_credentials_file(username=username, api_key=api_key)
 
 def topFromDfGrouped(df, group, groupValue, value, feature, num):
     df_grouped = df.groupby(group)
@@ -99,6 +110,7 @@ def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruption
                         ),
                     ]
               ))
+    py.plot(fig, filename='NoiseCorruptions'+lalal)
     fig.show()
 
 def plotNoiseCorruptionsVariance():
@@ -116,6 +128,7 @@ def plotPermutationImportance(df, n_repeats, modelName):
               ),
               title=title,
               xaxis_title="Decrease in accuracy score")
+    py.plot(fig, filename='PermutationImportance')
     fig.show()
 
 def plotMeanAccuracyDecrease(df, result, permutations, modelName):
@@ -141,4 +154,5 @@ def plotMeanAccuracyDecrease(df, result, permutations, modelName):
               ),     
             title=title,
             yaxis_title="Mean accuracy decrease")
+    py.plot(fig, filename='MeanAccuracyDecrease')
     fig.show()
