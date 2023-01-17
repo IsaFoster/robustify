@@ -20,11 +20,15 @@ def corruptModel(modelName, df_train, X_test, y_test, random_state, corruptions)
     noiseCorruptions(df_train, X_test, y_test, model, random_state, corruptions)
 
 
-corruptModel('RF_reduced_set', df_train, X_test, y_test, 50, 100)
-corruptModel('SVC_reduced_set', df_train, X_test, y_test, 50, 100)
-corruptModel('LDA_reduced_set', df_train, X_test, y_test, 50, 100)
+#corruptModel('RF_reduced_set', df_train, X_test, y_test, 50, 100)
+#corruptModel('SVC_reduced_set', df_train, X_test, y_test, 50, 100)
+#corruptModel('LDA_reduced_set', df_train, X_test, y_test, 50, 100)
+corruptModel('SK_reduced_set', df_train, X_test, y_test, 50, 100)
 
 
 #corruptModel('SVC_reduced_set', df_train, X_test, y_test, 50, 50)
 
 # TODO: should not use pretrained model?
+
+
+#TODO INSTALL SHARP

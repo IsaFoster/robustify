@@ -4,6 +4,8 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 import pandas as pd
 from tqdm import tqdm
+from keras.utils import to_categorical 
+from tensorflow import keras
 
 def addNoiseDf(X, factor, random_state):
     df_temp = X.copy()
@@ -25,6 +27,11 @@ def sort_df(df):
     df_temp = df_temp.sort_values(by=['feature_name'])
     return df_temp
 
+def SHARP_feature_importance():
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X)
+
+
 '***********************************************'
 
 def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=10, levels=np.linspace(0, 1, 11), plot=True):
@@ -44,7 +51,16 @@ def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=1
 
             # corrupt
             corrupted_noise = addNoiseDf(X, level, random_state)
-            model.fit(corrupted_noise, y.values.ravel())
+            if hasattr(model, 'compile'):
+                model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.001), 
+                loss="binary_crossentropy", 
+                metrics=['accuracy'])
+                model.fit(corrupted_noise, to_categorical(y.values.ravel()), 
+                epochs=500, 
+                batch_size=1000,
+                verbose=0)
+            else:
+                model.fit(corrupted_noise, y.values.ravel())
             if hasattr(model, 'feature_importances_'):
                 measured = 'feature importance'
                 parameter_values.append(model.feature_importances_)
@@ -55,6 +71,7 @@ def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=1
                 measured = 'coefficients MLP'
                 parameter_values.append(model.coefs_)
             else:
+
                 print("cound not calculate coefficients or feature importance")
                 return 
             accuracy_values.append(accuracy_score(model.predict(X_test), y_test))
