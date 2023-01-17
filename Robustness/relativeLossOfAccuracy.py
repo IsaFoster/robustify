@@ -6,7 +6,6 @@ import random
 import numpy as np
 import plotly.express as px
 import pandas as pd
-import chart_studio
 import chart_studio.plotly as py
 import chart_studio.tools as tls
 import os
