@@ -5,13 +5,11 @@ import numpy as np
 
 def permutationImportance(model, X_test, y_test, n_repeats, random_state, scoring):
     result = permutation_importance(model, X_test, y_test, n_repeats=n_repeats, random_state=random_state, n_jobs=-1, scoring=scoring)
-    print("result:", result)
     sorted_importances_idx = result.importances_mean.argsort()
     importances = pd.DataFrame(
         result.importances[sorted_importances_idx].T,
         columns=np.array(X_test.columns.values)[sorted_importances_idx],
     )
-    print("importances:", importances)
     plotPermutationImportance(importances, str(n_repeats), str(model))
 
 def meanAccuracyDecrease(model, X_test, y_test, n_repeats, random_state, scoring):

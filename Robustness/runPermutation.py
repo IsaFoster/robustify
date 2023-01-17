@@ -22,7 +22,7 @@ def accuracy_keras(estimator, X, y):
 
 def accuacy_keras_2(y_true, y_pred):
     pred = np.argmax(y_pred, axis = 1)
-    return accuracy_score(y_true, pred)
+    return accuracy_score(y_true.values, pred)
 
 def permuteModel(modelName, X_test, y_test, n_repeats, random_state, scoring):
     model = pickle.load(open('../Models/' + modelName, 'rb'))
@@ -33,5 +33,5 @@ def permuteModel(modelName, X_test, y_test, n_repeats, random_state, scoring):
 #permuteModel('RF_full_set', X_test, y_test, n_repeats, random_state)
 #permuteModel('SVC_full_set', X_test, y_test, n_repeats, random_state)
 #permuteModel('LDA_full_set', X_test, y_test, n_repeats, random_state)
-permuteModel('SK_reduced_set', X_test, y_test, n_repeats, random_state, scoring='r2')
-#permuteModel('SK_reduced_set', X_test, y_test, n_repeats, random_state, scoring=make_scorer(accuacy_keras_2, greater_is_better=True))
+#permuteModel('SK_reduced_set', X_test, y_test, n_repeats, random_state, scoring='r2')
+permuteModel('SK_reduced_set', X_test, y_test, n_repeats, random_state, scoring=make_scorer(accuacy_keras_2))
