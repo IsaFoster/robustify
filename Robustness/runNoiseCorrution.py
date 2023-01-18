@@ -1,6 +1,6 @@
 from Setup._readData import getDataFramesFromFile, getDataFramesShortFromFile, getXandYFromFile, getXandYShortFromFile
 from noiseCorruptions import noiseCorruptions
-from noiseCorruptions_2 import noiseCorruptions_2
+from noiseCorruptions_2 import corruptData, plotData, all
 from noiseCorruptions_3 import noiseCorruptions_3
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
@@ -58,11 +58,12 @@ my_dict = {
     'addOrSubtract': [['jet_n', 'alljet_n'], [1, 2]],
 }
 
-
 def corruptModel(modelName, df_train, X_test, y_test, corruption_dict, corruptions, random_state):
     model = pickle.load(open('../Models/' + modelName, 'rb'))
     
-    noiseCorruptions_3(df_train, X_test, y_test, model, corruption_dict, corruptions, random_state)
+    all(df_train, X_test, y_test, model, corruption_dict, corruptions, random_state)
+
+    #noiseCorruptions_3(df_train, X_test, y_test, model, corruption_dict, corruptions, random_state)
 
 
 corruptModel('RF_reduced_set', df_train, X_test, y_test, my_dict, 10, 50)
