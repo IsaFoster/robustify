@@ -13,7 +13,8 @@ setup(
                       'plotly==5.11.0', 
                       'tqdm==4.64.1',
                       'chart_studio==1.1.0', 
-                      'python-dotenv==0.21.0'], # list of packages that are absolutely needed, not standard library
+                      'python-dotenv==0.21.0',
+                      'keras==2.11.0'], # list of packages that are absolutely needed, not standard library
     setup_requires=['pytest-runner'], # only installed when required to run tests
     tests_require=['pytest==7.1.2'],
     test_suite='tests',
