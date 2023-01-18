@@ -27,11 +27,6 @@ def sort_df(df):
     df_temp = df_temp.sort_values(by=['feature_name'])
     return df_temp
 
-def SHARP_feature_importance():
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X)
-
-
 '***********************************************'
 
 def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=10, levels=np.linspace(0, 1, 11), plot=True):
