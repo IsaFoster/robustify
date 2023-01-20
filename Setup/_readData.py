@@ -60,7 +60,6 @@ def getAndPrepareData():
 	signal = shuffle(signal, random_state = 42)
 
 	background = [diboson, DYee, DYmumu, DYtautau, ttbar_lep, Wenu, Wmunu, Wtaunu, Zee, ttbar_had, Ztautau]
-	backgroundLabel = ['diboson', 'DYee', 'DYmumu', 'DYtautau', 'ttbar_lep', 'Wenu', 'Wmunu', 'Wtaunu', 'Zee', 'ttbar_had', 'Ztautau']
 
 	del Zee
 	del ttbar_lep
@@ -71,14 +70,11 @@ def getAndPrepareData():
 	del Ztautau
 	gc.collect()
 
-	features_from_feature_importance = [
-										"met_et",
-										"lep_1_E",
+	features_from_feature_importance = ["lep_1_E",
 										"lep_2_E",
 										"lep_3_E",
 										"lep_1_eta",
 										"lep_2_eta",
-										"jet_n",
 										"lep_1_pt",
 										"lep_2_pt",
 										"lep_3_pt",
@@ -86,8 +82,21 @@ def getAndPrepareData():
 										"lep_5_pt",
 										"lep_1_phi",
 										"lep_2_phi",
+										'lep_1_type',
+										'lep_2_type',
+										"lep_1_etcone20",
+										"jet_1_MV1",
+										"jet_2_MV1",
+										"jet_1_m",
+										"jet_2_jvf",
+										"jet_1_SV0",
 										"jet_2_trueflav",
+										'jet_1_eta',
+										'jet_2_eta',
+										"jet_1_phi",
+										'jet_2_phi',
 										"jet_1_E",
+										"jet_2_E",
 										"jet_3_E",
 										"jet_1_pt",
 										"jet_2_pt",
@@ -98,39 +107,13 @@ def getAndPrepareData():
 										"jet_7_pt",
 										"jet_8_pt",
 										"jet_9_pt",
-										"alljet_n",
-										"lep_1_etcone20",
-										"jet_2_MV1",
-										"jet_1_MV1",
-										"jet_1_phi",
-										"jet_1_m",
-										"jet_2_E",
-										"jet_2_jvf",
-										"jet_1_SV0",
-										]
+										'lep_1_charge',
+										'lep_2_charge',
+										"jet_n",
+										"alljet_n"
+										"met_et"]
 
-	invariant_features = [ 'lep_1_pt',
-						'lep_1_eta',
-						'lep_1_phi',
-						'lep_1_type',
-						'lep_1_charge',
-						'lep_1_E',
-						'lep_2_pt',
-						'lep_2_eta',
-						'lep_2_phi',
-						'lep_2_type',
-						'lep_2_charge',
-						'lep_2_E',
-						'jet_1_pt',
-						'jet_1_eta',
-						'jet_1_phi',
-						'jet_2_pt',
-						'jet_2_eta',
-						'jet_2_phi',
-			
-	]
-
-	features_and_weights = list(set(features_from_feature_importance + invariant_features))
+	features_and_weights = list(set(features_from_feature_importance))
 	features = features_and_weights
 
 	for i in range(0,11):
@@ -190,6 +173,7 @@ def getAndPrepareData():
 	[df_train_valid[col].update((df_train_valid[col] - df_train_valid[col].min()) / (df_train_valid[col].max() - df_train_valid[col].min())) for col in df_train_valid[features].columns]
 	#Normalizing the test dataset
 	[df_test[col].update((df_test[col] - df_test[col].min()) / (df_test[col].max() - df_test[col].min())) for col in df_test[features].columns]
+	# TODO: should not normalize before adding noise
 
 	df_train_valid = df_train_valid.sample(frac=1, random_state=fixed_seed).reset_index(drop=True)
 	df_train_valid["data_type"] = df_train_valid["data_type"].astype("category")
