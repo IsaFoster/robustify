@@ -2,12 +2,10 @@
 
 [![codecov](https://codecov.io/gh/IsaFoster/MasterThesis/branch/main/graph/badge.svg?token=9CWBWHNZML)](https://app.codecov.io/gh/IsaFoster/MasterThesis/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![CodeQL](https://github.com/isafoster/MasterThesis/workflows/CodeQL/badge.svg)
+[![CodeQL](https://github.com/IsaFoster/MasterThesis/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/IsaFoster/MasterThesis/actions/workflows/github-code-scanning/codeql)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/django)](https://test.pypi.org/project/Robustness/)
 [![PyPI](https://badge.fury.io/py/robustness.svg)](https://badge.fury.io/py/adversarial-robustness-toolbox)
-
-![Continuous Integration](https://github.com/IsaFoster/MasterThesis/workflows/Continuous%20Integration/badge.svg)
-
+[![Build](https://github.com/IsaFoster/MasterThesis/actions/workflows/python-package.yml/badge.svg)](https://github.com/IsaFoster/MasterThesis/actions/workflows/python-package.yml)
 
 # Uploat to testPypi:
 https://packaging.python.org/en/latest/tutorials/packaging-projects/
