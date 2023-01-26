@@ -1,8 +1,9 @@
 # About:
 Just testing... 
 
-Riktig: 
+Codecov public repo:
 [![codecov](https://codecov.io/gh/IsaFoster/MasterThesis/branch/main/graph/badge.svg)](https://app.codecov.io/gh/IsaFoster/MasterThesis/)
+Codecov private repo:
 <a href="https://codecov.io/gh/IsaFoster/MasterThesis" > 
  <img src="https://codecov.io/gh/IsaFoster/MasterThesis/branch/main/graph/badge.svg?token=9CWBWHNZML"/> 
 </a>
