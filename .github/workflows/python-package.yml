@@ -37,3 +37,6 @@ jobs:
     - name: Test with pytest
       run: |
         pytest tests/test_sampling.py
+    - name: Upload coverage reports to Codecov with GitHub Action
+      uses: codecov/codecov-action@v3
+      
