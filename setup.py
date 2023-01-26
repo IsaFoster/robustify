@@ -6,6 +6,13 @@ setup(
     description='no description',
     author='Isabel Foster',
     license='MIT',
+    classifiers=[
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
+        "Programming Language :: Python :: 3.11",
+    ],
     install_requires=['numpy==1.23.4', 
                       'sklearn==0.0', 
                       'matplotlib==3.6.2', 
@@ -19,3 +26,4 @@ setup(
     tests_require=['pytest==7.1.2'],
     test_suite='tests',
 )
+    

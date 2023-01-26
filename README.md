@@ -10,7 +10,7 @@ Codecov private repo:--->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Må tilpasses:
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/adversarial-robustness-toolbox)](https://pypi.org/project/adversarial-robustness-toolbox/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/adversarial-robustness-toolbox)](https://test.pypi.org/project/Robustness/)
 [![PyPI](https://badge.fury.io/py/adversarial-robustness-toolbox.svg)](https://badge.fury.io/py/adversarial-robustness-toolbox)
 ![Continuous Integration](https://github.com/Trusted-AI/adversarial-robustness-toolbox/workflows/Continuous%20Integration/badge.svg)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5090/badge)](https://bestpractices.coreinfrastructure.org/projects/5090)
@@ -22,35 +22,16 @@ IDK:
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 
-# Running:
-
-## Install requirements
-python setup.py install
-
-## Run tests:
-python setup.py pytest
+# Uploat to testPypi:
+https://packaging.python.org/en/latest/tutorials/packaging-projects/
+api token i password manager
 
 
 
-# Build 
-
-python setup.py bdist_wheel
-
-pip install /path/to/wheelfile.whl
-
-alternativly publish to PyPI and pip install directly
-
-# Usage
-import mypythonlib
-from mypythonlib import myfunctions
-
-
-# Questions
-Language: python
-
-Purpose:
-
-Users:
-
-Requirements:
-
+# TODO:
+- cleanup .gitignore
+- cleanup testing 
+- write tests for calculation
+- check python compatibility
+- .....?
+- profit
