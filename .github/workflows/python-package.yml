@@ -37,9 +37,14 @@ jobs:
     - name: Test with pytest
       run: |
         pytest tests/test_sampling.py
+    - name: Generate Report
+      run: |
+        pip install codecov
+        pip install pytest-cov
+        pytest --cov=./ --cov-report=xml
+        codecov
     - name: Upload coverage reports to Codecov with GitHub Action
       uses: codecov/codecov-action@v3
       with:
-        token: ${{ secret.CODECOV_TOKEN }}
-        path_to_write_report: ./coverage/codecov_report.txt
+        token: ${{ env.CODECOV_TOKEN }}
         fail_ci_if_error: true
