@@ -26,7 +26,13 @@ IDK:
 https://packaging.python.org/en/latest/tutorials/packaging-projects/
 api token i password manager
 
+Publish to pypi test: 
+update version number
 
+py -m pip install --upgrade build
+py -m build
+py -m pip install --upgrade twine
+py -m twine upload --repository testpypi dist/*
 
 # TODO:
 - cleanup .gitignore
