@@ -3,6 +3,9 @@ Just testing...
 
 Riktig: 
 [![codecov](https://codecov.io/gh/IsaFoster/MasterThesis/branch/main/graph/badge.svg)](https://app.codecov.io/gh/IsaFoster/MasterThesis/)
+<a href="https://codecov.io/gh/IsaFoster/MasterThesis" > 
+ <img src="https://codecov.io/gh/IsaFoster/MasterThesis/branch/main/graph/badge.svg?token=9CWBWHNZML"/> 
+</a>
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Må tilpasses:
