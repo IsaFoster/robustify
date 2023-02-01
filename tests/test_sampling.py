@@ -8,5 +8,5 @@ test_data = {'numbers': [1, 2, 3, 4, 5, 6, 6, 8, 9, 10],
 df = pd.DataFrame(data=test_data)
 sampled_data, sampled_labels = _sampling.sampleData(df, 'labels', 0.5, 10)
 
-def test_sample_length():
+def test_sample_length(sampled_data):
     assert sampled_data.shape[0]  == 5
