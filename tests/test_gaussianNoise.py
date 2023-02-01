@@ -9,4 +9,4 @@ noisy_data = gaussianNoise.Gaussian_Noise(test_data, percentage)
 
 def test_sample_length():
     average_percentagee = np.average(np.abs(np.divide((noisy_data - test_data), test_data) * 100))
-    assert 115 <= average_percentagee  <= 25
+    assert (115 <= average_percentagee  <= 25)
