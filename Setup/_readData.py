@@ -60,7 +60,6 @@ def getAndPrepareData():
 	signal = shuffle(signal, random_state = 42)
 
 	background = [diboson, DYee, DYmumu, DYtautau, ttbar_lep, Wenu, Wmunu, Wtaunu, Zee, ttbar_had, Ztautau]
-	backgroundLabel = ['diboson', 'DYee', 'DYmumu', 'DYtautau', 'ttbar_lep', 'Wenu', 'Wmunu', 'Wtaunu', 'Zee', 'ttbar_had', 'Ztautau']
 
 	del Zee
 	del ttbar_lep
