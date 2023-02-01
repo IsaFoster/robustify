@@ -7,6 +7,7 @@ df = pd.DataFrame(data=test_data)
 percentage = 0.2
 noisy_data = gaussianNoise.Gaussian_Noise(test_data, percentage)
 
-def test_sample_length():
+def test_gaussian_average_value():
     average_percentagee = np.average(np.abs(np.divide((noisy_data - test_data), test_data) * 100))
+    print(average_percentagee)
     assert (115 <= average_percentagee  <= 25)

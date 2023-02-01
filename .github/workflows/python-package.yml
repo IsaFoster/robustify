@@ -37,6 +37,7 @@ jobs:
     - name: Test with pytest
       run: |
         pytest tests/test_sampling.py
+        pytest tests/test_gaussianNoise.py
     - name: Generate Report
       run: |
         pip install codecov
