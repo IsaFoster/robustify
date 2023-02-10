@@ -1,13 +1,2 @@
-venv/
-ReducedFiles/
-.eggs/
-.pytest_cache/
 Robustness/__pycache__/
-Setup/__pycache__/
 tests/__pycache__/
-Robustness.egg-info/
-Models/
-build/
-dist/
-.env
-Models/
