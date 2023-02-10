@@ -7,8 +7,3 @@ def Gaussian_Noise(clean_cata, percentage, random_state=None):
     corrupted_data = clean_cata + (noise * (1 + percentage))
     return corrupted_data
 
-def Binary():
-    pass
-
-def Poisson():
-    pass
