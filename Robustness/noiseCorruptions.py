@@ -5,7 +5,6 @@ from sklearn.metrics import accuracy_score
 import pandas as pd
 from tqdm import tqdm
 import random
-import os
 
 def addNoiseDf(X, factor, random_state):
     df_temp = X.copy()
@@ -92,7 +91,6 @@ def initialize_progress_bar(corruption_dict, corruptions):
 def set_random_seed(random_state):
     np.random.seed(random_state)
     random.seed(random_state)
-    os.environ['PYTHONHASHSEED']=str(random_state)
     #import tensorflow as tf
     #tf.set_random_seed(seed_value)    
 
