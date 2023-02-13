@@ -4,8 +4,8 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 import pandas as pd
 from tqdm import tqdm
-from keras.utils import to_categorical 
-from tensorflow import keras
+#from keras.utils import to_categorical 
+#from tensorflow import keras
 
 def addNoiseDf(X, factor, random_state):
     df_temp = X.copy()
@@ -47,13 +47,13 @@ def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=1
             # corrupt
             corrupted_noise = addNoiseDf(X, level, random_state)
             if hasattr(model, 'compile'):
-                model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.001), 
+                '''model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.001), 
                 loss="binary_crossentropy", 
                 metrics=['accuracy'])
                 model.fit(corrupted_noise, to_categorical(y.values.ravel()), 
                 epochs=500, 
                 batch_size=1000,
-                verbose=0)
+                verbose=0)'''
             else:
                 model.fit(corrupted_noise, y.values.ravel())
             if hasattr(model, 'feature_importances_'):
