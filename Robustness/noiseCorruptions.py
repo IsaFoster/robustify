@@ -1,11 +1,10 @@
 from _sampling import sampleData
-from _plot import plotNoiseCorruptionsAverageFeatureValue, plotNoiseCorruptionsVariance
+from _plot import plotNoiseCorruptionValues
 import numpy as np
 from sklearn.metrics import accuracy_score
 import pandas as pd
 from tqdm import tqdm
-from keras.utils import to_categorical 
-from tensorflow import keras
+import random
 
 def addNoiseDf(X, factor, random_state):
     df_temp = X.copy()
@@ -14,7 +13,7 @@ def addNoiseDf(X, factor, random_state):
         df_temp[name] = new_feature
     return df_temp
 
-def addNoiseColumn(feature, factor, random_state):
+def addNoiseColumn(feature, factor, random_state=None):
     np.random.seed(random_state)
     sd = np.std(feature)
     q = factor * sd 
@@ -22,69 +21,127 @@ def addNoiseColumn(feature, factor, random_state):
     a = feature + noise
     return a
 
-def sort_df(df):
-    df_temp = df.copy()
-    df_temp = df_temp.sort_values(by=['feature_name'])
-    return df_temp
 
-'***********************************************'
+def percentage_shift(df, feature_name, percentage):
+    add = (1+(percentage*0.1))
+    return df[feature_name] * add
 
-def noiseCorruptions(df, X_test, y_test, model, random_state=None, corruptions=10, levels=np.linspace(0, 1, 11), plot=True):
-    pbar_outer = tqdm(levels, desc="Total progress: ", position=0)
-    df_plot_average_value = pd.DataFrame(columns=['feature_name', 'feature_value', 'level'])
-    df_plot_feature_variance = pd.DataFrame(columns=['feature_name', 'feature_variance', 'level'])
+def flip_sign(df, feature_name):
+    return df[feature_name] * (-1) #TODO: makes no sense to plot this 
 
-    average_accuracy_all = []
+def gaussian_noise(df, feature_name, level, random_state):
+    return addNoiseColumn(df[feature_name], level, random_state=random_state)
 
-    for level in pbar_outer:
-        parameter_values = []
-        accuracy_values = []
-        feature_variance = []
-        pbar = tqdm(range (corruptions), desc="Level: {}".format(level), position=1, leave=False)
-        for _ in pbar:
-            X, y = sampleData(df, 'data_type', 0.2, random_state)
+def add_or_subtract(df, feature_name, level):
+    # TODO: should be based of probability and value of other feature
+    return df[feature_name] + level
 
-            # corrupt
-            corrupted_noise = addNoiseDf(X, level, random_state)
-            if hasattr(model, 'compile'):
-                model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.001), 
-                loss="binary_crossentropy", 
-                metrics=['accuracy'])
-                model.fit(corrupted_noise, to_categorical(y.values.ravel()), 
-                epochs=500, 
-                batch_size=1000,
-                verbose=0)
-            else:
-                model.fit(corrupted_noise, y.values.ravel())
-            if hasattr(model, 'feature_importances_'):
-                measured = 'feature importance'
-                parameter_values.append(model.feature_importances_)
-            elif hasattr(model, 'coef_'):
-                measured = 'coefficients'
-                parameter_values.append(model.coef_)
-            elif hasattr(model, 'coefs_'):  # TODO: see if this can be used 
-                measured = 'coefficients MLP'
-                parameter_values.append(model.coefs_)
-            else:
 
-                print("cound not calculate coefficients or feature importance")
-                return 
-            accuracy_values.append(accuracy_score(model.predict(X_test), y_test))
-            feature_variance.append(corrupted_noise.var().tolist())
-        average_accuracy_all.append(np.average(accuracy_values))
 
-        parameter_values_np = np.array(parameter_values)
-        average_level_value = np.average(parameter_values_np, axis=0)
-        average_feature_variance = np.average(feature_variance, axis=0)
-        feature_names = X.columns
-        df_temp_average = pd.DataFrame({'feature_name': feature_names, 'feature_value': average_level_value.flatten(), 'level': np.array([level]*len(feature_names))})
-        df_temp_variance = pd.DataFrame({'feature_name': feature_names, 'feature_variance': average_feature_variance.flatten(), 'level': np.array([level]*len(feature_names))})
-        df_plot_average_value = pd.concat([df_plot_average_value, df_temp_average], axis=0)
-        df_plot_feature_variance = pd.concat([df_plot_feature_variance, df_temp_variance], axis=0)
-    if plot:
-        plotNoiseCorruptionsAverageFeatureValue(df_plot_average_value, str(model), measured, corruptions, 'feature_value')
-        plotNoiseCorruptionsAverageFeatureValue(df_plot_feature_variance, str(model), measured, corruptions, 'feature_variance')
-    return average_accuracy_all
-'************************************************'
+'********************************************************************************************************************************'
+ 
 
-# TODO: sort df before plotting NOOPE
+def filter_on_method(df, method, feature_name, level=None, random_state=None):
+    switcher = {
+        'percentageShift': lambda: percentage_shift(df, feature_name, level),
+        'flipSign': lambda: flip_sign(df, feature_name),
+        'gaussianNoise': lambda: gaussian_noise(df, feature_name, level, random_state),
+        'addOrSubtract': lambda: add_or_subtract(df, feature_name, level)
+    }
+    return switcher.get(method, lambda: print("Invalid corruption method for feature {}".format(feature_name)))()
+
+def train_model(model, X, y):
+    model.fit(X, y.values.ravel())
+    return model
+
+def get_results(model, index):
+    if hasattr(model, 'feature_importances_'):
+        measured_property = 'feature importance'
+        return model.feature_importances_[index], measured_property
+    elif hasattr(model, 'coef_'):
+        measured_property = 'coefficients'
+        return model.coef_, measured_property
+    elif hasattr(model, 'coefs_'): 
+        measured_property = 'coefficients MLP'
+        return model.coefs_[index], measured_property
+    else:
+        print("cound not calculate coefficients or feature importance")
+        return None
+
+
+def getLevels(methodSpecification):
+    if (isinstance(methodSpecification, dict)):
+        return list(methodSpecification.keys())[0], list(methodSpecification.values())[0]
+    elif (isinstance(methodSpecification, list) and len(methodSpecification) == 1):
+        return methodSpecification[0], [-1]
+    elif (isinstance(methodSpecification, list)):
+        return methodSpecification[0], methodSpecification[1]
+    else:
+        print('Error getting values')
+        print(type(methodSpecification))
+
+
+def initialize_progress_bar(corruption_dict, corruptions):
+    total = 0 
+    for item in list(corruption_dict.items()):
+        feature_names, levels = getLevels(item[1])
+        total += ((len(feature_names) * len(levels)) * corruptions)
+    return tqdm(total=total, desc="Total progress: ", position=0)
+
+def set_random_seed(random_state):
+    np.random.seed(random_state)
+    random.seed(random_state)
+    #import tensorflow as tf
+    #tf.set_random_seed(seed_value)    
+
+def all(df_train, X_test, y_test, model, corruption_dict, corruptions, random_state=None, plot=True):
+    if (random_state):
+        set_random_seed(random_state)
+    randomlist = random.sample(range(1, 1000), corruptions)
+    progress_bar = initialize_progress_bar(corruption_dict, corruptions)
+    for method in list(corruption_dict.items()):
+        method_name = method[0]
+        corruption_result, measured_property = corruptData(df_train, X_test, y_test, model, method, randomlist, random_state, progress_bar)
+        if (plot):
+            plotData(corruption_result, str(model), corruptions, measured_property, method_name)
+    progress_bar.close()
+
+def corruptData(df_train, X_test, y_test, model, method, randomlist, random_state, progress_bar):
+    corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'accuracy'])
+    feature_names, levels = getLevels(method[1])
+    for level in levels: 
+        for feature_name in feature_names:
+            average_value = []
+            average_accuracy = []
+            average_variance = []
+            for random in randomlist:
+                X, y = sampleData(df_train, 'data_type', 0.4, random_state=random)
+                X[feature_name] = filter_on_method(X, method[0], feature_name, level, random_state)
+                average_variance.append(np.var(X[feature_name]))
+                model = train_model(model, X, y)
+                index = df_train.columns.get_loc(feature_name)
+                measured_value, measured_property = get_results(model, index)
+                average_value.append(measured_value)
+                average_accuracy.append(accuracy_score(y_test, model.predict(X_test)))
+                progress_bar.update(1)
+            average_variance = np.average(average_variance)
+            average_value = np.average(average_value)
+            average_accuracy = np.average(average_accuracy)
+            corruption_result.loc[len(corruption_result.index)] = [feature_name, level, average_value, average_variance, average_accuracy]
+    return corruption_result, measured_property
+
+def plotData(corruption_result, model_name, corruptions, measured_property, method_name):
+    plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'value')
+    plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
+    plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name,'accuracy')
+
+
+
+# TODO: use another type of plot when theres only one value? 
+# TODO: check if coefs_ can be used 
+# TODO: finn ut av random state (burde være fixed men ikke den samme for hver iterasjon) 
+# TODO: hardcoded y value. Need this as input when usinf DataFrames (or deafult last col)
+# TODO: models that dont have fit?
+# TODO: write test for randomness for sample + noisecorruption
+# TODO: 
+
