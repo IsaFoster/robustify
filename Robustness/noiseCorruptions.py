@@ -35,7 +35,11 @@ def gaussian_noise(df, feature_name, level):
 def add_or_subtract(df, feature_name, level):
     # TODO: should be based of probability and value of other feature
     return df[feature_name] + level
-    
+
+
+
+'********************************************************************************************************************************'
+ 
 
 def filter_on_method(df, method, feature_name, level=None):
     switcher = {
@@ -46,12 +50,7 @@ def filter_on_method(df, method, feature_name, level=None):
     }
     return switcher.get(method, lambda: print("Invalid corruption method for feature {}".format(feature_name)))()
 
-
-'********************************************************************************************************************************'
-
-
 def train_model(model, X, y):
-    # TODO: models that dont have fit?
     model.fit(X, y.values.ravel())
     return model
 
@@ -62,7 +61,7 @@ def get_results(model, index):
     elif hasattr(model, 'coef_'):
         measured_property = 'coefficients'
         return model.coef_, measured_property
-    elif hasattr(model, 'coefs_'):  # TODO: see if this can be used 
+    elif hasattr(model, 'coefs_'): 
         measured_property = 'coefficients MLP'
         return model.coefs_[index], measured_property
     else:
@@ -80,7 +79,7 @@ def getLevels(methodSpecification):
     else:
         print('Error getting values')
         print(type(methodSpecification))
-# TODO: check for other usages/iputs
+
 
 def initialize_progress_bar(corruption_dict, corruptions):
     total = 0 
@@ -109,7 +108,7 @@ def corruptData(df_train, X_test, y_test, model, method, randomlist, random_stat
             average_accuracy = []
             average_variance = []
             for random in randomlist:
-                X, y = sampleData(df_train, 'data_type', 0.4, random_state=random) #TODO: finn ut av random state (burde være fixed men ikke den samme for hver iterasjon)
+                X, y = sampleData(df_train, 'data_type', 0.4, random_state=random)
                 X[feature_name] = filter_on_method(X, method[0], feature_name, level)
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y)
@@ -128,6 +127,11 @@ def plotData(corruption_result, model_name, corruptions, measured_property, meth
     plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'value')
     plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
     plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name,'accuracy')
-    # TODO: plot variance
-    
-'************************************************************************************************************************************************'
+
+
+
+# TODO: use another type of plot when theres only one value? 
+# TODO: check if coefs_ can be used 
+# TODO: finn ut av random state (burde være fixed men ikke den samme for hver iterasjon) 
+# TODO: hardcoded y value. Need this as input when usinf DataFrames (or deafult last col)
+# TODO: models that dont have fit?
