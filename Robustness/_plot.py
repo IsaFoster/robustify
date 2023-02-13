@@ -142,3 +142,34 @@ def plotMeanAccuracyDecrease(df, result, permutations, modelName):
             title=title,
             yaxis_title="Mean accuracy decrease")
     fig.show()
+
+
+def plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
+    title = "Average {} of {} over {} {} corruptions at increasing noise levels for {}".format(measured_name.replace("_", " "), measured_property, corruptions, method_name, model_name)
+    fig = px.line(corruption_result, x="level", y=measured_name, title=title, color='feature_name')
+    fig.update_layout(dict(updatemenus=[
+                        dict(
+                            type = "buttons",
+                            direction = "left",
+                            buttons=list([
+                                dict(
+                                    args=["visible", "legendonly"],
+                                    label="Deselect All",
+                                    method="restyle"
+                                ),
+                                dict(
+                                    args=["visible", True],
+                                    label="Select All",
+                                    method="restyle"
+                                )
+                            ]),
+                            pad={"r": 10, "t": 10},
+                            showactive=False,
+                            x=1,
+                            xanchor="right",
+                            y=1.1,
+                            yanchor="top"
+                        ),
+                    ]
+              ))
+    fig.show()
