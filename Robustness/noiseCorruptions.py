@@ -5,6 +5,7 @@ from sklearn.metrics import accuracy_score
 import pandas as pd
 from tqdm import tqdm
 import random
+import os
 
 def addNoiseDf(X, factor, random_state):
     df_temp = X.copy()
@@ -29,8 +30,8 @@ def percentage_shift(df, feature_name, percentage):
 def flip_sign(df, feature_name):
     return df[feature_name] * (-1) #TODO: makes no sense to plot this 
 
-def gaussian_noise(df, feature_name, level):
-    return addNoiseColumn(df[feature_name], level)
+def gaussian_noise(df, feature_name, level, random_state):
+    return addNoiseColumn(df[feature_name], level, random_state=random_state)
 
 def add_or_subtract(df, feature_name, level):
     # TODO: should be based of probability and value of other feature
@@ -41,11 +42,11 @@ def add_or_subtract(df, feature_name, level):
 '********************************************************************************************************************************'
  
 
-def filter_on_method(df, method, feature_name, level=None):
+def filter_on_method(df, method, feature_name, level=None, random_state=None):
     switcher = {
         'percentageShift': lambda: percentage_shift(df, feature_name, level),
         'flipSign': lambda: flip_sign(df, feature_name),
-        'gaussianNoise': lambda: gaussian_noise(df, feature_name, level),
+        'gaussianNoise': lambda: gaussian_noise(df, feature_name, level, random_state),
         'addOrSubtract': lambda: add_or_subtract(df, feature_name, level)
     }
     return switcher.get(method, lambda: print("Invalid corruption method for feature {}".format(feature_name)))()
@@ -88,15 +89,23 @@ def initialize_progress_bar(corruption_dict, corruptions):
         total += ((len(feature_names) * len(levels)) * corruptions)
     return tqdm(total=total, desc="Total progress: ", position=0)
 
-def all(df_train, X_test, y_test, model, corruption_dict, corruptions, random_state):
+def set_random_seed(random_state):
+    np.random.seed(random_state)
+    random.seed(random_state)
+    os.environ['PYTHONHASHSEED']=str(random_state)
+    #import tensorflow as tf
+    #tf.set_random_seed(seed_value)    
+
+def all(df_train, X_test, y_test, model, corruption_dict, corruptions, random_state=None, plot=True):
     if (random_state):
-        random.seed(random_state)
-        randomlist = random.sample(range(1, 1000), corruptions)
+        set_random_seed(random_state)
+    randomlist = random.sample(range(1, 1000), corruptions)
     progress_bar = initialize_progress_bar(corruption_dict, corruptions)
     for method in list(corruption_dict.items()):
         method_name = method[0]
         corruption_result, measured_property = corruptData(df_train, X_test, y_test, model, method, randomlist, random_state, progress_bar)
-        plotData(corruption_result, str(model), corruptions, measured_property, method_name)
+        if (plot):
+            plotData(corruption_result, str(model), corruptions, measured_property, method_name)
     progress_bar.close()
 
 def corruptData(df_train, X_test, y_test, model, method, randomlist, random_state, progress_bar):
@@ -109,7 +118,7 @@ def corruptData(df_train, X_test, y_test, model, method, randomlist, random_stat
             average_variance = []
             for random in randomlist:
                 X, y = sampleData(df_train, 'data_type', 0.4, random_state=random)
-                X[feature_name] = filter_on_method(X, method[0], feature_name, level)
+                X[feature_name] = filter_on_method(X, method[0], feature_name, level, random_state)
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y)
                 index = df_train.columns.get_loc(feature_name)
@@ -135,3 +144,6 @@ def plotData(corruption_result, model_name, corruptions, measured_property, meth
 # TODO: finn ut av random state (burde være fixed men ikke den samme for hver iterasjon) 
 # TODO: hardcoded y value. Need this as input when usinf DataFrames (or deafult last col)
 # TODO: models that dont have fit?
+# TODO: write test for randomness for sample + noisecorruption
+# TODO: 
+
