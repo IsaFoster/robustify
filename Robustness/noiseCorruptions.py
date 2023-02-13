@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 import pandas as pd
 from tqdm import tqdm
+import random
 
 def addNoiseDf(X, factor, random_state):
     df_temp = X.copy()
@@ -89,15 +90,17 @@ def initialize_progress_bar(corruption_dict, corruptions):
     return tqdm(total=total, desc="Total progress: ", position=0)
 
 def all(df_train, X_test, y_test, model, corruption_dict, corruptions, random_state):
-    print("...Initializing progress bar")
+    if (random_state):
+        random.seed(random_state)
+        randomlist = random.sample(range(1, 1000), corruptions)
     progress_bar = initialize_progress_bar(corruption_dict, corruptions)
     for method in list(corruption_dict.items()):
         method_name = method[0]
-        corruption_result, measured_property, corruptions = corruptData(df_train, X_test, y_test, model, method, corruptions, random_state, progress_bar)
+        corruption_result, measured_property = corruptData(df_train, X_test, y_test, model, method, randomlist, random_state, progress_bar)
         plotData(corruption_result, str(model), corruptions, measured_property, method_name)
     progress_bar.close()
 
-def corruptData(df_train, X_test, y_test, model, method, corruptions, random_state, progress_bar):
+def corruptData(df_train, X_test, y_test, model, method, randomlist, random_state, progress_bar):
     corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'accuracy'])
     feature_names, levels = getLevels(method[1])
     for level in levels: 
@@ -105,8 +108,8 @@ def corruptData(df_train, X_test, y_test, model, method, corruptions, random_sta
             average_value = []
             average_accuracy = []
             average_variance = []
-            for _ in range (corruptions):
-                X, y = sampleData(df_train, 'data_type', 0.4, random_state) #TODO: finn ut av random state (burde være fixed men ikke den samme for hver iterasjon)
+            for random in randomlist:
+                X, y = sampleData(df_train, 'data_type', 0.4, random_state=random) #TODO: finn ut av random state (burde være fixed men ikke den samme for hver iterasjon)
                 X[feature_name] = filter_on_method(X, method[0], feature_name, level)
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y)
@@ -119,7 +122,7 @@ def corruptData(df_train, X_test, y_test, model, method, corruptions, random_sta
             average_value = np.average(average_value)
             average_accuracy = np.average(average_accuracy)
             corruption_result.loc[len(corruption_result.index)] = [feature_name, level, average_value, average_variance, average_accuracy]
-    return corruption_result, measured_property, corruptions
+    return corruption_result, measured_property
 
 def plotData(corruption_result, model_name, corruptions, measured_property, method_name):
     plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'value')
