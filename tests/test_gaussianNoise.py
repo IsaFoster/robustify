@@ -2,7 +2,7 @@ from Noise.continuous import Gaussian_Noise
 import numpy as np
 import pandas as pd
 
-df = pd.read_csv('/home/runner/work/MasterThesis/MasterThesis/tests/test_column.csv', index_col=0)
+df = pd.read_csv('tests/test_column.csv', index_col=0)
 test_data = df['jet_1_pt'].values
 
 def test_gaussian_average_value_0():
@@ -33,7 +33,7 @@ def test_gaussian_average_value_50():
     percentage = 0.5
     noisy_data = Gaussian_Noise(test_data, percentage)
     average_percentagee = np.average(np.abs(np.divide((noisy_data - test_data), test_data) * 100))
-    assert ((percentage - (percentage * 0.20)) * 100  <= (percentage + (percentage * 0.20)) * 100 )
+    assert (35  <= average_percentagee <= 65)
 
 def test_gaussian_random_state_is_set():
     percentage = 0.2
