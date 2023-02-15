@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 
 def topFromDfGrouped(df, group, groupValue, value, feature, num):
     df_grouped = df.groupby(group)
-    df_group = df_grouped.get_group(groupValue)
+    df_group = df_grouped.get_group(int(groupValue))
     sorted = df_group.sort_values(value, ascending=False)
     return sorted[feature].tolist()[:num]
 
@@ -59,8 +59,8 @@ def plotButtons(visibleFeaturesList, featureNames):
         ),
     ]
 
-def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruptions, lalal):
-    visible_features = topFromDfGrouped(df, 'level', 0.0, lalal, 'feature_name', 5)
+def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruptions, lalal, level_start):
+    visible_features = topFromDfGrouped(df, 'level', level_start, lalal, 'feature_name', 5)
     different_features = mostDiff(df, lalal)
     title = "Average {} of {} over {} replacement noise corruptions at increasing noise levels for {}".format(lalal, measured, corruptions, model_name)
     fig = px.line(df, x="level", y=lalal, title=title, color='feature_name').update_traces(visible="legendonly", selector=lambda t: not t.name in visible_features) 
@@ -141,4 +141,35 @@ def plotMeanAccuracyDecrease(df, result, permutations, modelName):
               ),     
             title=title,
             yaxis_title="Mean accuracy decrease")
+    fig.show()
+
+
+def plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
+    title = "Average {} of {} over {} {} corruptions at increasing noise levels for {}".format(measured_name.replace("_", " "), measured_property, corruptions, method_name, model_name)
+    fig = px.line(corruption_result, x="level", y=measured_name, title=title, color='feature_name')
+    fig.update_layout(dict(updatemenus=[
+                        dict(
+                            type = "buttons",
+                            direction = "left",
+                            buttons=list([
+                                dict(
+                                    args=["visible", "legendonly"],
+                                    label="Deselect All",
+                                    method="restyle"
+                                ),
+                                dict(
+                                    args=["visible", True],
+                                    label="Select All",
+                                    method="restyle"
+                                )
+                            ]),
+                            pad={"r": 10, "t": 10},
+                            showactive=False,
+                            x=1,
+                            xanchor="right",
+                            y=1.1,
+                            yanchor="top"
+                        ),
+                    ]
+              ))
     fig.show()
