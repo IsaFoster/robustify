@@ -11,7 +11,7 @@ setup(
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
-        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.10",
     ],
     install_requires=['numpy==1.23.4', 
                       'sklearn==0.0', 
@@ -20,7 +20,8 @@ setup(
                       'plotly==5.11.0', 
                       'tqdm==4.64.1',
                       'chart_studio==1.1.0', 
-                      'python-dotenv==0.21.0'], # list of packages that are absolutely needed, not standard library
+                      'python-dotenv==0.21.0',
+                      'tensorflow=2.11.0'], # list of packages that are absolutely needed, not standard library
     setup_requires=['pytest-runner'], # only installed when required to run tests
     tests_require=['pytest==7.1.2'],
     test_suite='tests',
