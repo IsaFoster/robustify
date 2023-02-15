@@ -5,48 +5,25 @@ from sklearn.metrics import accuracy_score
 import pandas as pd
 from tqdm import tqdm
 import random
+from Noise.continuous import Gaussian_Noise
+from Noise.discrete import Poisson_noise
 
-def addNoiseDf(X, factor, random_state):
-    df_temp = X.copy()
-    for (name, feature) in X.items():
-        new_feature = addNoiseColumn(feature, factor, random_state)
-        df_temp[name] = new_feature
-    return df_temp
-
-def addNoiseColumn(feature, factor, random_state=None):
-    np.random.seed(random_state)
-    sd = np.std(feature)
-    q = factor * sd 
-    noise = np.random.normal(0, q, len(feature))
-    a = feature + noise
-    return a
-
-
-def percentage_shift(df, feature_name, percentage):
-    add = (1+(percentage*0.1))
-    return df[feature_name] * add
-
-def flip_sign(df, feature_name):
+def other(df, feature_name):
     return df[feature_name] * (-1) #TODO: makes no sense to plot this 
 
-def gaussian_noise(df, feature_name, level, random_state):
-    return addNoiseColumn(df[feature_name], level, random_state=random_state)
-
-def add_or_subtract(df, feature_name, level):
+def another(df, feature_name, level):
     # TODO: should be based of probability and value of other feature
     return df[feature_name] + level
-
-
 
 '********************************************************************************************************************************'
  
 
 def filter_on_method(df, method, feature_name, level=None, random_state=None):
     switcher = {
-        'percentageShift': lambda: percentage_shift(df, feature_name, level),
-        'flipSign': lambda: flip_sign(df, feature_name),
-        'gaussianNoise': lambda: gaussian_noise(df, feature_name, level, random_state),
-        'addOrSubtract': lambda: add_or_subtract(df, feature_name, level)
+        'other': lambda: other(df, feature_name, level),
+        'another': lambda: another(df, feature_name),
+        'Gaussian': lambda: Gaussian_Noise(df, feature_name, level, random_state),
+        'Poisson': lambda: Poisson_noise(df, feature_name, random_state)
     }
     return switcher.get(method, lambda: print("Invalid corruption method for feature {}".format(feature_name)))()
 
