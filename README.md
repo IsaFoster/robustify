@@ -26,3 +26,11 @@ py -m twine upload --repository testpypi dist/*
 - check python compatibility
 - .....?
 - profit
+
+
+# Install dependencies
+pip install -e .
+
+# Run tests
+from root folder:
+pytest test_....py
