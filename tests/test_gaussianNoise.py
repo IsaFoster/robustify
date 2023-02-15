@@ -1,10 +1,8 @@
 from Noise.continuous import Gaussian_Noise
 import numpy as np
 import pandas as pd
-import sys
-sys.path.insert(0, '.') 
 
-df = pd.read_csv('test_column.csv', index_col=0)
+df = pd.read_csv('./test_column.csv', index_col=0)
 test_data = df['jet_1_pt'].values
 
 def test_gaussian_average_value_0():
