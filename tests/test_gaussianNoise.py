@@ -46,3 +46,15 @@ def test_gaussian_random_state_not_set():
     noisy_data_1 = Gaussian_Noise(test_data, percentage, random_state=10)
     noisy_data_2 = Gaussian_Noise(test_data, percentage, random_state=11)
     assert (noisy_data_1[0] != noisy_data_2[0])
+
+def test_guassian_noise_DataFrame_input_returns_DataFrame():
+    percentage = 0.1
+    noisy_DataFrame = Gaussian_Noise(df, percentage, 'jet_1_pt', random_state=10)
+    assert (isinstance(noisy_DataFrame, pd.DataFrame))
+
+def test_guassian_noise_DataFrame_average_value_20():
+    percentage = 0.2
+    noisy_DataFrame = Gaussian_Noise(df, percentage, 'jet_1_pt', random_state=10)
+    noisy_data = noisy_DataFrame['jet_1_pt'].values
+    average_percentagee = np.average(np.abs(np.divide((noisy_data - test_data), test_data) * 100))
+    assert (15 <= average_percentagee  <= 25)

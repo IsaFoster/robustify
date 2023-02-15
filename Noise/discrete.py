@@ -5,9 +5,13 @@ import plotly.graph_objects as go
 def Binary_noise():
     pass
 
-def Poisson_noise(clean_data, random_state=None):
+def Poisson_noise(clean_data, feature_name=None, random_state=None):
     np.random.seed(random_state)
-    noise = np.random.poisson(np.mean(clean_data), len(clean_data))
-    #noise = np.random.poisson(clean_data, size=None)
-    noisy_data = clean_data + noise 
-    return noisy_data
+    if (isinstance(clean_data, pd.DataFrame)):
+        data_col = clean_data[feature_name]
+        noise = np.random.poisson(np.mean(data_col), len(data_col))
+        clean_data[feature_name] = data_col + noise
+        return clean_data
+    if (isinstance(clean_data, (np.ndarray, np.generic))):
+        noise = np.random.poisson(np.mean(clean_data), len(clean_data))
+        return clean_data + noise 
