@@ -173,3 +173,7 @@ def plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measur
                     ]
               ))
     fig.show()
+
+
+def plotNoiseCorruptionValuesHistogram(corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
+    print("plotting histpgram")

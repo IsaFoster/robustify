@@ -1,5 +1,5 @@
 from _sampling import sampleData
-from _plot import plotNoiseCorruptionValues
+from _plot import plotNoiseCorruptionValues, plotNoiseCorruptionValuesHistogram
 import numpy as np
 from sklearn.metrics import accuracy_score
 import pandas as pd
@@ -22,7 +22,7 @@ def filter_on_method(df, method, feature_name, level=None, random_state=None):
     switcher = {
         'other': lambda: other(df, feature_name, level),
         'another': lambda: another(df, feature_name),
-        'Gaussian': lambda: Gaussian_Noise(df, feature_name, level, random_state),
+        'Gaussian': lambda: Gaussian_Noise(df, level, feature_name, random_state),
         'Poisson': lambda: Poisson_noise(df, feature_name, random_state)
     }
     return switcher.get(method, lambda: print("Invalid corruption method for feature {}".format(feature_name)))()
@@ -50,7 +50,7 @@ def getLevels(methodSpecification):
     if (isinstance(methodSpecification, dict)):
         return list(methodSpecification.keys())[0], list(methodSpecification.values())[0]
     elif (isinstance(methodSpecification, list) and len(methodSpecification) == 1):
-        return methodSpecification[0], [-1]
+        return [methodSpecification[0]], [-1]
     elif (isinstance(methodSpecification, list)):
         return methodSpecification[0], methodSpecification[1]
     else:
@@ -93,7 +93,7 @@ def corruptData(df_train, X_test, y_test, model, method, randomlist, random_stat
             average_variance = []
             for random in randomlist:
                 X, y = sampleData(df_train, 'data_type', 0.4, random_state=random)
-                X[feature_name] = filter_on_method(X, method[0], feature_name, level, random_state)
+                X = filter_on_method(X, method[0], feature_name, level, random_state)  # TODO: no point in passing the whole DF to change one column
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y)
                 index = df_train.columns.get_loc(feature_name)
@@ -108,9 +108,13 @@ def corruptData(df_train, X_test, y_test, model, method, randomlist, random_stat
     return corruption_result, measured_property
 
 def plotData(corruption_result, model_name, corruptions, measured_property, method_name):
-    plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'value')
-    plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
-    plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name,'accuracy')
+    if (len(np.unique(corruption_result['level'].values)) < 3):
+        plotNoiseCorruptionValuesHistogram(corruption_result, model_name, corruptions, measured_property, method_name, 'value')
+        print(corruption_result)
+    else:
+        plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'value')
+        plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
+        plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name,'accuracy')
 
 
 
