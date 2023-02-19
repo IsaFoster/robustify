@@ -108,7 +108,7 @@ def plotNoiseCorruptionsVariance():
 def plotPermutationImportance(df, n_repeats, modelName):
     visible_features = topFromSeries(df, 5)
     title = "Permutation Importances using n={} for {}".format(n_repeats, modelName)
-    fig = go.Figure()
+    fig = go.Figure(layout={"xaxis_title":"Feature", "yaxis_title":"Permutation importance", "font":dict(size=18)})
     for (columnName, columnData) in df.items():
         fig.add_trace(go.Box(x=columnData, boxmean=True, name=columnName))
 
@@ -145,7 +145,7 @@ def plotMeanAccuracyDecrease(df, result, permutations, modelName):
     fig.show()
 
 
-def plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
+def plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
     title = "Average {} of {} over {} {} corruptions at increasing noise levels for {}".format(measured_name.replace("_", " "), measured_property, corruptions, method_name, model_name)
     fig = px.line(corruption_result, x="level", y=measured_name, title=title, color='feature_name')
     fig.update_layout(dict(updatemenus=[
@@ -172,7 +172,8 @@ def plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measur
                             yanchor="top"
                         ),
                     ]
-              ))
+              ), xaxis_title="Feature", yaxis_title=measured_property, font=dict(size=18)
+              )
     fig.show()
 
 
@@ -180,19 +181,15 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, mode
     title = "Average {} of {} for features for {} over {} {} noise corruptions".format(measured_name.replace("_", " "), measured_property, model_name, corruptions, method_name)
     features = np.unique(baseline_results['feature_name'].values.ravel())
 
-    fig = go.Figure(layout={"title": title})
+    fig = go.Figure(layout={"title": title, "xaxis_title":"Feature", "yaxis_title":measured_property, "font":dict(size=18)})
     fig.update_layout()
     fig.add_trace(go.Bar(x=features, y=baseline_results[measured_name], name='baseline', marker_color='steelblue'))
     fig.add_trace(go.Bar(x=features, y=corruption_result[measured_name], name='noisy', marker_color='indianred'))
     fig.show()
 
 def plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
-    
-    print(np.unique(baseline_results['accuracy'].values.ravel()))
-    print(corruption_result)
-    print(np.unique(corruption_result['accuracy'].values.ravel()))
+    features = np.unique(baseline_results['feature_name'].values.ravel())
     fig = go.Figure()
     fig.add_trace(go.Bar(y=np.unique(baseline_results['accuracy'].values.ravel()), name='baseline', marker_color='seagreen'))
-    for row in corruption_result.iterreos():
-        fig.add_trace(go.Bar(x=row[0], y=row[4]), name='noisy', marker_color='maroon')
+    fig.add_trace(go.Bar(x=features, y=corruption_result['accuracy'], name='noisy', marker_color='maroon'))
     fig.show()
