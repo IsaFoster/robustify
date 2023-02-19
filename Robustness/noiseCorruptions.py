@@ -1,5 +1,5 @@
 from _sampling import sampleData
-from _plot import plotNoiseCorruptionValues, plotNoiseCorruptionValuesHistogram
+from _plot import plotNoiseCorruptionValues, plotNoiseCorruptionValuesHistogram, plotNoiseCorruptionBarScore
 import numpy as np
 from sklearn.metrics import accuracy_score
 import pandas as pd
@@ -47,21 +47,19 @@ def get_results(model, index):
 
 
 def getLevels(methodSpecification):
-    if (isinstance(methodSpecification, dict)):
-        return list(methodSpecification.keys())[0], list(methodSpecification.values())[0]
-    elif (isinstance(methodSpecification, list) and len(methodSpecification) == 1):
-        return [methodSpecification[0]], [-1]
-    elif (isinstance(methodSpecification, list)):
-        return methodSpecification[0], methodSpecification[1]
+    method = methodSpecification[0]
+    if (method == "Gaussian"):
+        return methodSpecification[1][0], methodSpecification[1][1]
+    elif (method == "Poisson"):
+        return methodSpecification[1], [-1]
     else:
         print('Error getting values')
         print(type(methodSpecification))
 
-
 def initialize_progress_bar(corruption_dict, corruptions):
     total = 0 
     for item in list(corruption_dict.items()):
-        feature_names, levels = getLevels(item[1])
+        feature_names, levels = getLevels(item)
         total += ((len(feature_names) * len(levels)) * corruptions)
     return tqdm(total=total, desc="Total progress: ", position=0)
 
@@ -71,28 +69,42 @@ def set_random_seed(random_state):
     #import tensorflow as tf
     #tf.set_random_seed(seed_value)    
 
-def all(df_train, X_test, y_test, model, corruption_dict, corruptions, random_state=None, plot=True):
+def baseline(df_train, X_test, y_test, model, labelColumn=None, random_state=None):
+    baseline_results = pd.DataFrame(columns=['feature_name', 'value', 'variance', 'accuracy'])
+    y = df_train[labelColumn]
+    X = df_train.drop([labelColumn], axis=1)
+    model = train_model(model, X, y)
+    for feature_name in X.columns:
+        index = df_train.columns.get_loc(feature_name)
+        value, _ = get_results(model, index)
+        variance = np.var(X[feature_name])
+        accuracy = accuracy_score(y_test, model.predict(X_test))
+        baseline_results.loc[len(baseline_results.index)] = [feature_name, value, variance, accuracy]
+    return baseline_results
+
+def all(df_train, X_test, y_test, model, corruption_dict, corruptions, labelColumn=None, random_state=None, plot=True):
     if (random_state):
         set_random_seed(random_state)
+    baseline_results = baseline(df_train, X_test, y_test, model, labelColumn)
     randomlist = random.sample(range(1, 1000), corruptions)
     progress_bar = initialize_progress_bar(corruption_dict, corruptions)
     for method in list(corruption_dict.items()):
         method_name = method[0]
-        corruption_result, measured_property = corruptData(df_train, X_test, y_test, model, method, randomlist, random_state, progress_bar)
+        corruption_result, measured_property = corruptData(df_train, X_test, y_test, model, method, randomlist, labelColumn, random_state, progress_bar)
         if (plot):
-            plotData(corruption_result, str(model), corruptions, measured_property, method_name)
+            plotData(baseline_results, corruption_result, str(model), corruptions, measured_property, method_name)
     progress_bar.close()
 
-def corruptData(df_train, X_test, y_test, model, method, randomlist, random_state, progress_bar):
+def corruptData(df_train, X_test, y_test, model, method, randomlist, labelColumn, random_state, progress_bar):
     corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'accuracy'])
-    feature_names, levels = getLevels(method[1])
+    feature_names, levels = getLevels(method)
     for level in levels: 
         for feature_name in feature_names:
             average_value = []
             average_accuracy = []
             average_variance = []
             for random in randomlist:
-                X, y = sampleData(df_train, 'data_type', 0.4, random_state=random)
+                X, y = sampleData(df_train, labelColumn, 0.4, random_state=random)
                 X = filter_on_method(X, method[0], feature_name, level, random_state)  # TODO: no point in passing the whole DF to change one column
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y)
@@ -107,14 +119,17 @@ def corruptData(df_train, X_test, y_test, model, method, randomlist, random_stat
             corruption_result.loc[len(corruption_result.index)] = [feature_name, level, average_value, average_variance, average_accuracy]
     return corruption_result, measured_property
 
-def plotData(corruption_result, model_name, corruptions, measured_property, method_name):
+def plotData(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name):
+    features = corruption_result['feature_name'].values
+    baseline_results = baseline_results.loc[baseline_results['feature_name'].isin(features)]
     if (len(np.unique(corruption_result['level'].values)) < 3):
-        plotNoiseCorruptionValuesHistogram(corruption_result, model_name, corruptions, measured_property, method_name, 'value')
-        print(corruption_result)
+        plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'value')
+        plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
+        plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'accuracy')
     else:
-        plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'value')
-        plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
-        plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measured_property, method_name,'accuracy')
+        plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'value')
+        plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
+        plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name,'accuracy')
 
 
 

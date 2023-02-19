@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -175,5 +176,23 @@ def plotNoiseCorruptionValues(corruption_result, model_name, corruptions, measur
     fig.show()
 
 
-def plotNoiseCorruptionValuesHistogram(corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
-    print("plotting histpgram")
+def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
+    title = "Average {} of {} for features for {} over {} {} noise corruptions".format(measured_name.replace("_", " "), measured_property, model_name, corruptions, method_name)
+    features = np.unique(baseline_results['feature_name'].values.ravel())
+
+    fig = go.Figure(layout={"title": title})
+    fig.update_layout()
+    fig.add_trace(go.Bar(x=features, y=baseline_results[measured_name], name='baseline', marker_color='steelblue'))
+    fig.add_trace(go.Bar(x=features, y=corruption_result[measured_name], name='noisy', marker_color='indianred'))
+    fig.show()
+
+def plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
+    
+    print(np.unique(baseline_results['accuracy'].values.ravel()))
+    print(corruption_result)
+    print(np.unique(corruption_result['accuracy'].values.ravel()))
+    fig = go.Figure()
+    fig.add_trace(go.Bar(y=np.unique(baseline_results['accuracy'].values.ravel()), name='baseline', marker_color='seagreen'))
+    for row in corruption_result.iterreos():
+        fig.add_trace(go.Bar(x=row[0], y=row[4]), name='noisy', marker_color='maroon')
+    fig.show()
