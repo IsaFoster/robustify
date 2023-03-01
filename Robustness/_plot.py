@@ -174,7 +174,7 @@ def plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, c
                     ]
               ), xaxis_title="Feature", yaxis_title=measured_property, font=dict(size=18)
               )
-    fig.show()
+    return fig
 
 
 def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
@@ -185,11 +185,11 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, mode
     fig.update_layout()
     fig.add_trace(go.Bar(x=features, y=baseline_results[measured_name], name='baseline', marker_color='steelblue'))
     fig.add_trace(go.Bar(x=features, y=corruption_result[measured_name], name='noisy', marker_color='indianred'))
-    fig.show()
+    return fig
 
 def plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
     features = np.unique(baseline_results['feature_name'].values.ravel())
     fig = go.Figure()
     fig.add_trace(go.Bar(y=np.unique(baseline_results['accuracy'].values.ravel()), name='baseline', marker_color='seagreen'))
     fig.add_trace(go.Bar(x=features, y=corruption_result['accuracy'], name='noisy', marker_color='maroon'))
-    fig.show()
+    return fig

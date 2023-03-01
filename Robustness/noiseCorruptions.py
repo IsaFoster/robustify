@@ -99,11 +99,14 @@ def all(df_train, X_test, y_test, model, corruption_dict, corruptions, labelColu
         method_corrupt_df, corruption_result, measured_property = corruptData(df_train, X_test, y_test, model, method, randomlist, labelColumn, random_state, progress_bar)
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values
-        if (plot):
-            plotData(baseline_results, corruption_result, str(model), corruptions, measured_property, method_name)
+        fig_1, fig_2, fig_3 = plotData(baseline_results, corruption_result, str(model), corruptions, measured_property, method_name)
+    if (plot):
+        fig_1.show()
+        #fig_2.show()
+        #fig_3.show()
     corrupted_df = fill_in_missing_columns(corrupted_df, df_train)
     progress_bar.close()
-    return corrupted_df, corruption_result
+    return corrupted_df, corruption_result, fig_1
 
 def corruptData(df_train, X_test, y_test, model, method, randomlist, labelColumn, random_state, progress_bar):
     corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'accuracy'])
@@ -138,13 +141,14 @@ def plotData(baseline_results, corruption_result, model_name, corruptions, measu
     features = corruption_result['feature_name'].values
     baseline_results = baseline_results.loc[baseline_results['feature_name'].isin(features)]
     if (len(np.unique(corruption_result['level'].values)) < 3):
-        plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'value')
-        plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
-        plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'accuracy')
+        fig_1 = plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'value')
+        fig_2 = plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
+        fig_3 = plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'accuracy')
     else:
-        plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'value')
-        plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
-        plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name,'accuracy')
+        fig_1 = plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'value')
+        fig_2 = plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
+        fig_3 = plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name,'accuracy')
+    return fig_1, fig_2, fig_3
 
 
 
@@ -154,4 +158,3 @@ def plotData(baseline_results, corruption_result, model_name, corruptions, measu
 # TODO: hardcoded y value. Need this as input when usinf DataFrames (or deafult last col)
 # TODO: models that dont have fit?
 # TODO: write test for randomness for sample + noisecorruption
-# TODO: 
