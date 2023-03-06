@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+from pandas.api.types import CategoricalDtype
 
 def topFromDfGrouped(df, group, groupValue, value, feature, num):
     df_grouped = df.groupby(group)
@@ -124,7 +125,6 @@ def get_colors_from_fig(fig):
     colors = []
     f = fig.full_figure_for_development(warn=False)
     f.for_each_trace(lambda t: colors.append(t.marker.color))
-    #print(f.for_each_trace(lambda t: t.))
     return colors
 
 def hex_to_rgba(hex, alpha, factor=1):
@@ -224,12 +224,44 @@ def plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, c
 
 def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
     title = "Average {} of {} for features for {} over {} {} noise corruptions".format(measured_name.replace("_", " "), measured_property, model_name, corruptions, method_name)
-    features = np.unique(baseline_results['feature_name'].values.ravel())
-
-    fig = go.Figure(layout={"title": title, "xaxis_title":"Feature", "yaxis_title":measured_property, "font":dict(size=18)})
-    fig.update_layout()
-    fig.add_trace(go.Bar(x=features, y=baseline_results[measured_name], name='baseline', marker_color='steelblue'))
-    fig.add_trace(go.Bar(x=features, y=corruption_result[measured_name], name='noisy', marker_color='indianred'))
+    results = pd.DataFrame(columns=['feature_name', measured_name, measured_name+'_noisy'])
+    baseline_results = baseline_results.sort_values("feature_name")
+    corruption_result = corruption_result.sort_values("feature_name")
+    results['feature_name'] = baseline_results["feature_name"].values.tolist()
+    results['feature_name'] = results['feature_name'].astype(str)
+    results["value"] = baseline_results[measured_name].values.tolist()
+    results["value_noisy"] = corruption_result[measured_name].values.tolist()
+    results = results.sort_values("value", ascending=False)
+    results = results.reset_index()
+    visible_features = topFromDf(results, 'value', 'feature_name', 5)
+    #fig = go.Figure(layout={"title": title, "xaxis_title":"Feature", "yaxis_title":measured_property, "font":dict(size=18)})
+    fig = go.Figure()
+    for (index, rowData) in results.iterrows():
+        fig.add_trace(
+            go.Bar(x=[rowData["feature_name"]], 
+                   y=[rowData[measured_name]], 
+                   name=rowData['feature_name'], 
+                   legendgroup=index)
+                )
+    colors = get_colors_from_fig(fig)
+    for (index, rowData) in results.iterrows():
+        fig.add_trace(
+            go.Bar(x=[rowData["feature_name"]], 
+                   y=[rowData[measured_name+'_noisy']], 
+                   name=rowData['feature_name'],  
+                   marker_color = 'rgba' + str(hex_to_rgba(colors[index][1:], 0.5, 1.2)), 
+                   showlegend=False,
+                   legendgroup=index)
+                )
+    fig.update_traces(width=0.4)
+    fig.update_layout(dict(updatemenus=plotButtons(visible_features, results.index.values.tolist()),
+              ),    
+              title=title, 
+              xaxis_title="Feature", 
+              yaxis_title=measured_property,
+              font=dict(size=18),
+              bargroupgap=0,  
+              barmode='group')
     return fig
 
 def plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
