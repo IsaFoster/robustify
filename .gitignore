@@ -1,7 +1,3 @@
-venv/
-ReducedFiles/
-.eggs/
-.pytest_cache/
 Robustness/__pycache__/
 Noise/__pycache__/
 tests/__pycache__/
