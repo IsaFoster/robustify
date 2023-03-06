@@ -1,2 +1,10 @@
 Robustness/__pycache__/
+Noise/__pycache__/
 tests/__pycache__/
+Robustness.egg-info/
+Models/
+build/
+dist/
+.env
+Models/
+Robustness/MasterThesisWorkspace.code-workspace
