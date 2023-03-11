@@ -46,7 +46,7 @@ def plotButtons(corruption_list, featureNames):
                 method="restyle"
             )
         ]),
-        active=len(corruption_list)-1, 
+        active=len(corruption_list)+1,
         pad={"r": 10, "t": 10},
         showactive=True,
         x=1,
@@ -64,14 +64,14 @@ def plotButtons(corruption_list, featureNames):
                     label=str(list(noise_method.keys())[0]) + ' ' + str(levels).replace('[', ''),
                     method="restyle"))
             button_layout[0].update({'buttons': button_values})
-    return button_layout, [{"visible": [i in visible_features for i in featureNames]}]
+    return button_layout, visible_features
 
 ## ???????????
 def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruptions, lalal, level_start):
     visible_features = [] # TODO: see if used
     different_features = [] # TODO: see if used
     title = "Average {} of {} over {} replacement noise corruptions at increasing noise levels for {}".format(lalal, measured, corruptions, model_name)
-    fig = px.line(df, x="level", y=lalal, title=title, color='feature_name').update_traces(visible="legendonly", selector=lambda t: not t.name in visible_features) 
+    fig = px.line(df, x="level", y=lalal, title=title, color='feature_name').update_traces(visible=True, selector=lambda t: not t.name in visible_features) 
     fig.update_layout(dict(updatemenus=[
                         dict(
                             type = "buttons",
@@ -179,7 +179,9 @@ def plotNoiseCorruptionValues(baseline_results, corruption_result_list, model_na
             all_features.append(feature)
             df = corruption_result.loc[corruption_result['feature_name'] == feature]
             fig.add_trace(go.Scatter(x=df["level"], y=df[measured_name], mode='lines', line=dict(width=4), name=feature, legendgroup=feature))
-    fig.update_layout(dict(updatemenus=plotButtons(corruptions_list, all_features)), xaxis_title="Feature", yaxis_title=measured_property, title=title, font=dict(size=18))
+    buttons, visible_features = plotButtons(corruptions_list, all_features)
+    fig.update_layout(dict(updatemenus=buttons), xaxis_title="Feature", yaxis_title=measured_property, title=title, font=dict(size=18))
+    fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
     return fig
 
 def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list, model_name, corruptions, measured_property, method_name, measured_name, corruptions_list):
@@ -216,8 +218,8 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list,
                    showlegend=False,
                    legendgroup=index)
                 )
-    fig.update_traces(width=0.4)
-    fig.update_layout(dict(updatemenus=plotButtons(corruptions_list, results['feature_name'].values.tolist()),
+    buttons, visible_features = plotButtons(corruptions_list, results['feature_name'].values.tolist())
+    fig.update_layout(dict(updatemenus=buttons,
               ),   
               title=title, 
               xaxis_title="Feature", 
@@ -225,6 +227,7 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list,
               font=dict(size=18),
               bargroupgap=0,  
               barmode='group')
+    fig.update_traces(width=0.4, visible=False, selector=lambda t: not t.name in visible_features)
     return fig
 
 ## ???????????
