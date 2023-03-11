@@ -66,48 +66,6 @@ def plotButtons(corruption_list, featureNames):
             button_layout[0].update({'buttons': button_values})
     return button_layout, visible_features
 
-## ???????????
-def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruptions, lalal, level_start):
-    visible_features = [] # TODO: see if used
-    different_features = [] # TODO: see if used
-    title = "Average {} of {} over {} replacement noise corruptions at increasing noise levels for {}".format(lalal, measured, corruptions, model_name)
-    fig = px.line(df, x="level", y=lalal, title=title, color='feature_name').update_traces(visible=True, selector=lambda t: not t.name in visible_features) 
-    fig.update_layout(dict(updatemenus=[
-                        dict(
-                            type = "buttons",
-                            direction = "left",
-                            buttons=list([
-                                dict(
-                                    args=["visible", "legendonly"],
-                                    label="Deselect All",
-                                    method="restyle"
-                                ),
-                                dict(
-                                    args=["visible", True],
-                                    label="Select All",
-                                    method="restyle"
-                                ),
-                                dict(
-                                    args=[{"visible": [i in visible_features for i in df['feature_name'].unique()]}],
-                                    label="Top 5",
-                                    method="restyle"
-                                ),
-                                dict(
-                                    args=[{"visible": [i in different_features for i in df['feature_name'].unique()]}],
-                                    label="Most diff",
-                                    method="restyle"
-                                )
-                            ]),
-                            pad={"r": 10, "t": 10},
-                            showactive=False,
-                            x=1,
-                            xanchor="right",
-                            y=1.1,
-                            yanchor="top"
-                        )
-                    ]
-              ))
-    fig.show()
 
 ## ???????????
 def plotPermutationImportance(df_baseline, df_noisy, n_repeats, modelName):
@@ -136,7 +94,6 @@ def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corr
     df_temp = df_temp.sort_values('value', ascending=False)
     df_temp = df_temp.reset_index()
     visible_features = corruption_list
-    print("visible features", visible_features)
     fig = go.Figure()
     for (index, rowData) in df_temp.iterrows():
         fig.add_trace(
@@ -198,8 +155,6 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list,
         results_temp = results_temp.sort_values(measured_name, ascending=False)
         results = pd.concat([results, results_temp], axis=0)
     results = results.reset_index()
-    print("result:", results)
-    #fig = go.Figure(layout={"title": title, "xaxis_title":"Feature", "yaxis_title":measured_property, "font":dict(size=18)})
     fig = go.Figure()
     for (index, rowData) in results.iterrows():
         fig.add_trace(
