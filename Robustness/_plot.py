@@ -206,42 +206,22 @@ def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corr
     return fig
 
 
-def plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name, corruption_list):
-    # TODO: add buttinf for features 
+def plotNoiseCorruptionValues(baseline_results, corruption_result_list, model_name, corruptions, measured_property, method_name, measured_name, corruptions_list):
+    all_features = []
+    fig = go.Figure()
     title = "Average {} of {} over {} {} corruptions at increasing noise levels for {}".format(measured_name.replace("_", " "), measured_property, corruptions, method_name, model_name)
-    fig = px.line(corruption_result, x="level", y=measured_name, title=title, color='feature_name')
-    fig.update_layout(dict(updatemenus=[
-                        dict(
-                            type = "buttons",
-                            direction = "left",
-                            buttons=list([
-                                dict(
-                                    args=["visible", "legendonly"],
-                                    label="Deselect All",
-                                    method="restyle"
-                                ),
-                                dict(
-                                    args=["visible", True],
-                                    label="Select All",
-                                    method="restyle"
-                                )
-                            ]),
-                            pad={"r": 10, "t": 10},
-                            showactive=False,
-                            x=1,
-                            xanchor="right",
-                            y=1.1,
-                            yanchor="top"
-                        ),
-                    ]
-              ), xaxis_title="Feature", yaxis_title=measured_property, font=dict(size=18)
-              )
+    for corruption_result in corruption_result_list:
+        for feature in corruption_result['feature_name'].unique().tolist():
+            all_features.append(feature)
+            df = corruption_result.loc[corruption_result['feature_name'] == feature]
+            fig.add_trace(go.Scatter(x=df["level"], y=df[measured_name], mode='lines', line=dict(width=4), name=feature, legendgroup=feature))
+    fig.update_layout(dict(updatemenus=plotButtons(corruptions_list, all_features)), xaxis_title="Feature", yaxis_title=measured_property, title=title, font=dict(size=18))
     return fig
 
 
 def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list, model_name, corruptions, measured_property, method_name, measured_name, corruptions_list):
     title = "Average {} of {} for features for {} over {} {} noise corruptions".format(measured_name.replace("_", " "), measured_property, model_name, corruptions, method_name)
-    results = pd.DataFrame(columns=['feature_name', measured_name, measured_name+'_noisy'])
+    results = pd.DataFrame(columns=['feature_name', measured_name, measured_name +'_noisy'])
     baseline_results = baseline_results.sort_values("feature_name")
     for corruption_result in corruption_result_list:
         results_temp = pd.DataFrame(columns=['feature_name', measured_name, measured_name+'_noisy'])

@@ -97,10 +97,9 @@ def all(df_train, X_test, y_test, model, corruption_list, corruptions, labelColu
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values  
     if (plot):
-        fig_1, fig_2= plotData(baseline_results, corruption_result_list, str(model), corruptions, measured_property, method_name, corruption_list)
+        fig_1, fig_2 = plotData(baseline_results, corruption_result_list, str(model), corruptions, measured_property, method_name, corruption_list)
         fig_1.show()
         fig_2.show()
-        #fig_3.show()
     corrupted_df = fill_in_missing_columns(corrupted_df, df_train)
     progress_bar.close()
     return corrupted_df, corruption_result
@@ -135,7 +134,6 @@ def corruptData(df_train, X_test, y_test, model, method, randomlist, labelColumn
     return method_corrupt_df, corruption_result, measured_property
 
 def plotData(baseline_results, corruption_result_list, model_name, corruptions, measured_property, method_name, corruption_list):
-    #baseline_results = baseline_results.loc[baseline_results['feature_name'].isin(features)]
     histogram_plot = []
     histogram_list = []
     line_plot = []
@@ -147,29 +145,21 @@ def plotData(baseline_results, corruption_result_list, model_name, corruptions, 
         else:
             line_plot.append(corruption_result)
             line_list.append(corruption_type)
-    #print("histogram plot:", histogram_plot)
-    #print("histogram list:", histogram_list)
     if (len(histogram_plot) > 0):
         fig_1_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'value', histogram_list)
         fig_2_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'variance', histogram_list)
         #fig_3_1 = plotNoiseCorruptionBarScore(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'accuracy', histogram_list)
-        print(type(fig_1_1))
-        print(type(fig_2_1))
-        #print(type(fig_3_1))
+        #fig_3_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'accuracy', histogram_list)
+        return fig_1_1, fig_2_1
     if (len(line_plot) > 0):
         fig_1_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name, 'value', line_list)
         fig_2_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name, 'variance', line_list)
-        fig_3_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name,'accuracy', line_list)
-        print(type(fig_1_2))
-        print(type(fig_2_2))
-        print(type(fig_3_2))       
-    return fig_1_1, fig_2_1
+        #fig_3_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name,'accuracy', line_list)      
+        return fig_1_2, fig_2_2
 
 
 
-# TODO: use another type of plot when theres only one value? 
 # TODO: check if coefs_ can be used 
-# TODO: finn ut av random state (burde være fixed men ikke den samme for hver iterasjon) 
 # TODO: hardcoded y value. Need this as input when usinf DataFrames (or deafult last col)
 # TODO: models that dont have fit?
 # TODO: write test for randomness for sample + noisecorruption
