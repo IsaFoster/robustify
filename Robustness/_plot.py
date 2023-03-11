@@ -4,6 +4,18 @@ import plotly.express as px
 import plotly.graph_objects as go
 from pandas.api.types import CategoricalDtype
 
+## TODO: move helper functions to wherever
+def getLevels(methodSpecification):
+    print("method spesification:", methodSpecification)
+    method = list(methodSpecification.keys())[0]
+    if (method == "Gaussian" or method == "Binomial"):
+        return list(methodSpecification.values())[0][0], list(methodSpecification.values())[0][1]
+    elif (method == "Poisson"):
+        return list(methodSpecification.values())[0], [-1]
+    else:
+        print('Error getting values')
+        print(type(methodSpecification))
+
 def topFromDfGrouped(df, group, groupValue, value, feature, num):
     df_grouped = df.groupby(group)
     df_group = df_grouped.get_group(int(groupValue))
@@ -32,7 +44,7 @@ def mostDiff(df, groupValue):
     return sorted['feature_name'].tolist()[:5]
 
 def plotButtons(visibleFeaturesList, featureNames):
-    return [dict(
+    button_layout = [dict(
         type = "buttons",
         direction = "left",
         buttons=list([
@@ -45,11 +57,6 @@ def plotButtons(visibleFeaturesList, featureNames):
                 args=["visible", True],
                 label="Select All",
                 method="restyle"
-            ),
-            dict(
-                args=[{"visible": [i in visibleFeaturesList for i in featureNames]}],
-                label="Top 5",
-                method="restyle"
             )
         ]),
         pad={"r": 10, "t": 10},
@@ -60,6 +67,17 @@ def plotButtons(visibleFeaturesList, featureNames):
         yanchor="top"
         ),
     ]
+    if visibleFeaturesList != None:
+        for noise_method in visibleFeaturesList:
+            print("noise method", noise_method)
+            visible_features, levels = getLevels(noise_method)
+            button_values = button_layout[0]['buttons']
+            button_values.append(dict(
+                    args=[{"visible": [i in visible_features for i in featureNames]}],
+                    label=str(list(noise_method.keys())[0]) + ' ' + str(levels),
+                    method="restyle"))
+            button_layout[0].update({'buttons': button_values})
+    return button_layout
 
 def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruptions, lalal, level_start):
     visible_features = topFromDfGrouped(df, 'level', level_start, lalal, 'feature_name', 5)
@@ -144,7 +162,7 @@ def get_plotly_xcoordinates(index, width=0.8):
     return x_location - width/2, x_location + width/2
 
 
-def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName):
+def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corrupted_dict=None):
     title = "Feature importances using n={} permutation on {}".format(permutations, modelName)
     df_temp = pd.DataFrame(columns=['feature_name', 'value', 'value_noisy', 'error'])
     df_temp['feature_name'] = df.index.values.tolist()
@@ -153,8 +171,7 @@ def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName):
     df_temp['error'] = result.importances_std
     df_temp = df_temp.sort_values('value', ascending=False)
     df_temp = df_temp.reset_index()
-    visible_features = topFromDf(df_temp, 'value', 'feature_name', 5)
-
+    visible_features = corrupted_dict
     fig = go.Figure()
     for (index, rowData) in df_temp.iterrows():
         fig.add_trace(
@@ -177,12 +194,11 @@ def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName):
                 y=[rowData['value_noisy']],
                 name=rowData['feature_name'],
                 marker_color= color,
-                #marker_pattern=dict(shape="x", fgcolor='rgba' + str(hex_to_rgba(colors[index][1:], 0.5, 0.5)), size=20),
                 opacity=0.8,
                 legendgroup=index,
                 showlegend=False)
             )
-    fig.update_layout(dict(updatemenus=plotButtons(visible_features, df.index.values.tolist()),
+    fig.update_layout(dict(updatemenus=plotButtons(visible_features, df_temp['feature_name'].values.tolist()),
               ),     
             title=title,
             yaxis_title="Mean accuracy decrease",
@@ -229,11 +245,11 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, mode
     corruption_result = corruption_result.sort_values("feature_name")
     results['feature_name'] = baseline_results["feature_name"].values.tolist()
     results['feature_name'] = results['feature_name'].astype(str)
-    results["value"] = baseline_results[measured_name].values.tolist()
-    results["value_noisy"] = corruption_result[measured_name].values.tolist()
-    results = results.sort_values("value", ascending=False)
+    results[measured_name] = baseline_results[measured_name].values.tolist()
+    results[measured_name+'_noisy'] = corruption_result[measured_name].values.tolist()
+    results = results.sort_values(measured_name, ascending=False)
     results = results.reset_index()
-    visible_features = topFromDf(results, 'value', 'feature_name', 5)
+    visible_features = topFromDf(results, measured_name, 'feature_name', 5)
     #fig = go.Figure(layout={"title": title, "xaxis_title":"Feature", "yaxis_title":measured_property, "font":dict(size=18)})
     fig = go.Figure()
     for (index, rowData) in results.iterrows():

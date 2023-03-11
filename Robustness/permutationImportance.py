@@ -21,13 +21,13 @@ def permutationImportance(baseline_model, noisy_model, X_test, y_test, n_repeats
     fig.show()
     return None # df with importances
 
-def meanAccuracyDecrease(baseline_model, noisy_model, X_test, y_test, n_repeats, random_state, scoring):
+def meanAccuracyDecrease(baseline_model, noisy_model, X_test, y_test, n_repeats, random_state, scoring, corrupted_dict=None):
     result = permutation_importance(baseline_model, X_test, y_test, n_repeats=n_repeats, random_state=random_state, n_jobs=-1, scoring=scoring)
     result_noise = permutation_importance(noisy_model, X_test, y_test, n_repeats=n_repeats, random_state=random_state, n_jobs=-1, scoring=scoring)
     feature_names = np.array(X_test.columns.values)
     baseline_importances = pd.Series(result.importances_mean, index=feature_names.tolist())
     noisy_importances = pd.Series(result_noise.importances_mean, index=feature_names.tolist())
-    fig = plotMeanAccuracyDecrease(baseline_importances, noisy_importances, result, str(n_repeats), str(baseline_model))
+    fig = plotMeanAccuracyDecrease(baseline_importances, noisy_importances, result, str(n_repeats), str(baseline_model), corrupted_dict)
     return fig
 
 # TODO: take in whole df for test

@@ -5,6 +5,7 @@ def Gaussian_Noise(clean_data, percentage, feature_name=None, random_state=None)
     np.random.seed(random_state)
     if (isinstance(clean_data, pd.DataFrame)):
         data_col = clean_data[feature_name]
+        #noise = np.random.normal(0, (np.std(data_col) * percentage)**2, len(data_col))
         noise = (data_col * percentage) * np.random.normal(0, 1, len(data_col))
         clean_data[feature_name] = data_col + noise
         return clean_data

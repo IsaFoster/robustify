@@ -32,9 +32,9 @@ def get_results(model, index):
         return model.feature_importances_[index], measured_property
     elif hasattr(model, 'coef_'):
         measured_property = 'coefficients'
-        return model.coef_, measured_property
+        return model.coef_[0][index], measured_property
     elif hasattr(model, 'coefs_'): 
-        measured_property = 'coefficients MLP'
+        measured_property = 'coefficients MLP'  # TODO: fix
         return model.coefs_[index], measured_property
     else:
         print("cound not calculate coefficients or feature importance")
@@ -96,12 +96,12 @@ def all(df_train, X_test, y_test, model, corruption_list, corruptions, labelColu
             corrupted_df[column_name] = method_corrupt_df[column_name].values  
         if (plot):
             fig_1, fig_2, fig_3 = plotData(baseline_results, corruption_result, str(model), corruptions, measured_property, method_name)
-            fig_1.show()
+            #fig_1.show()
             #fig_2.show()
             #fig_3.show()
     corrupted_df = fill_in_missing_columns(corrupted_df, df_train)
     progress_bar.close()
-    return corrupted_df, corruption_result
+    return corrupted_df, corruption_result, fig_1, fig_2, fig_3
 
 def corruptData(df_train, X_test, y_test, model, method, randomlist, labelColumn, random_state, progress_bar):
     corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'accuracy'])
