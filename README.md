@@ -34,3 +34,7 @@ pip install -e .
 # Run tests
 from root folder:
 pytest test_....py
+
+# Force recompile
+python setup.py install
+python -m compileall .

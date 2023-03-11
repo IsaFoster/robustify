@@ -5,6 +5,8 @@ Robustness.egg-info/
 Models/
 build/
 dist/
+.eggs/
 .env
 Models/
+__pycache__/
 Robustness/MasterThesisWorkspace.code-workspace
