@@ -2,11 +2,9 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from pandas.api.types import CategoricalDtype
 
 ## TODO: move helper functions to wherever
 def getLevels(methodSpecification):
-    print("method spesification:", methodSpecification)
     method = list(methodSpecification.keys())[0]
     if (method == "Gaussian" or method == "Binomial"):
         return list(methodSpecification.values())[0][0], list(methodSpecification.values())[0][1]
@@ -43,7 +41,7 @@ def mostDiff(df, groupValue):
     sorted = df_temp.sort_values('most_diff', ascending=False)
     return sorted['feature_name'].tolist()[:5]
 
-def plotButtons(visibleFeaturesList, featureNames):
+def plotButtons(corruption_list, featureNames):
     button_layout = [dict(
         type = "buttons",
         direction = "left",
@@ -67,16 +65,20 @@ def plotButtons(visibleFeaturesList, featureNames):
         yanchor="top"
         ),
     ]
-    if visibleFeaturesList != None:
-        for noise_method in visibleFeaturesList:
-            print("noise method", noise_method)
+    if corruption_list != None:
+        for noise_method in corruption_list:
             visible_features, levels = getLevels(noise_method)
+            print("visible_features:", visible_features)
+            print("feature names:", featureNames)
+            print("show values:", [{"visible": [i in visible_features for i in featureNames]}])
             button_values = button_layout[0]['buttons']
             button_values.append(dict(
                     args=[{"visible": [i in visible_features for i in featureNames]}],
-                    label=str(list(noise_method.keys())[0]) + ' ' + str(levels),
+                    label=str(list(noise_method.keys())[0]) + ' ' + str(levels).replace('[', ''),
                     method="restyle"))
             button_layout[0].update({'buttons': button_values})
+
+
     return button_layout
 
 def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruptions, lalal, level_start):
@@ -121,9 +123,6 @@ def plotNoiseCorruptionsAverageFeatureValue(df, model_name, measured, corruption
               ))
     fig.show()
 
-def plotNoiseCorruptionsVariance():
-    pass
-
 def plotPermutationImportance(df_baseline, df_noisy, n_repeats, modelName):
     visible_features = topFromSeries(df_baseline, 5)
     title = "Permutation Importances using n={} for {}".format(n_repeats, modelName)
@@ -162,7 +161,7 @@ def get_plotly_xcoordinates(index, width=0.8):
     return x_location - width/2, x_location + width/2
 
 
-def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corrupted_dict=None):
+def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corruption_list):
     title = "Feature importances using n={} permutation on {}".format(permutations, modelName)
     df_temp = pd.DataFrame(columns=['feature_name', 'value', 'value_noisy', 'error'])
     df_temp['feature_name'] = df.index.values.tolist()
@@ -171,7 +170,8 @@ def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corr
     df_temp['error'] = result.importances_std
     df_temp = df_temp.sort_values('value', ascending=False)
     df_temp = df_temp.reset_index()
-    visible_features = corrupted_dict
+    visible_features = corruption_list
+    print("visible features", visible_features)
     fig = go.Figure()
     for (index, rowData) in df_temp.iterrows():
         fig.add_trace(
@@ -206,7 +206,8 @@ def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corr
     return fig
 
 
-def plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
+def plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name, corruption_list):
+    # TODO: add buttinf for features 
     title = "Average {} of {} over {} {} corruptions at increasing noise levels for {}".format(measured_name.replace("_", " "), measured_property, corruptions, method_name, model_name)
     fig = px.line(corruption_result, x="level", y=measured_name, title=title, color='feature_name')
     fig.update_layout(dict(updatemenus=[
@@ -238,18 +239,21 @@ def plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, c
     return fig
 
 
-def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
+def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list, model_name, corruptions, measured_property, method_name, measured_name, corruptions_list):
     title = "Average {} of {} for features for {} over {} {} noise corruptions".format(measured_name.replace("_", " "), measured_property, model_name, corruptions, method_name)
     results = pd.DataFrame(columns=['feature_name', measured_name, measured_name+'_noisy'])
     baseline_results = baseline_results.sort_values("feature_name")
-    corruption_result = corruption_result.sort_values("feature_name")
-    results['feature_name'] = baseline_results["feature_name"].values.tolist()
-    results['feature_name'] = results['feature_name'].astype(str)
-    results[measured_name] = baseline_results[measured_name].values.tolist()
-    results[measured_name+'_noisy'] = corruption_result[measured_name].values.tolist()
-    results = results.sort_values(measured_name, ascending=False)
+    for corruption_result in corruption_result_list:
+        results_temp = pd.DataFrame(columns=['feature_name', measured_name, measured_name+'_noisy'])
+        corruption_result = corruption_result.sort_values("feature_name")
+        results_temp['feature_name'] = corruption_result['feature_name'].unique().tolist()
+        results_temp['feature_name'] = results_temp['feature_name'].astype(str)
+        results_temp[measured_name] = baseline_results[baseline_results['feature_name'].isin(results_temp['feature_name'].values.tolist())][measured_name].values.tolist()
+        results_temp[measured_name+'_noisy'] = corruption_result[measured_name].values.tolist()
+        results_temp = results_temp.sort_values(measured_name, ascending=False)
+        results = pd.concat([results, results_temp], axis=0)
     results = results.reset_index()
-    visible_features = topFromDf(results, measured_name, 'feature_name', 5)
+    print("result:", results)
     #fig = go.Figure(layout={"title": title, "xaxis_title":"Feature", "yaxis_title":measured_property, "font":dict(size=18)})
     fig = go.Figure()
     for (index, rowData) in results.iterrows():
@@ -270,7 +274,7 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, mode
                    legendgroup=index)
                 )
     fig.update_traces(width=0.4)
-    fig.update_layout(dict(updatemenus=plotButtons(visible_features, results.index.values.tolist()),
+    fig.update_layout(dict(updatemenus=plotButtons(corruptions_list, results['feature_name'].values.tolist()),
               ),    
               title=title, 
               xaxis_title="Feature", 
@@ -280,7 +284,7 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, mode
               barmode='group')
     return fig
 
-def plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name):
+def plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name, corruption_list):
     features = np.unique(baseline_results['feature_name'].values.ravel())
     fig = go.Figure()
     fig.add_trace(go.Bar(y=np.unique(baseline_results['accuracy'].values.ravel()), name='baseline', marker_color='seagreen'))

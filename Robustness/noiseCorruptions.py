@@ -89,19 +89,21 @@ def all(df_train, X_test, y_test, model, corruption_list, corruptions, labelColu
     baseline_results = baseline(df_train, X_test, y_test, model, labelColumn)
     randomlist = random.sample(range(1, 1000), corruptions)
     progress_bar = initialize_progress_bar(corruption_list, corruptions)
+    corruption_result_list = []
     for method in list(corruption_list):
         method_name = list(method.keys())[0]
         method_corrupt_df, corruption_result, measured_property = corruptData(df_train, X_test, y_test, model, method, randomlist, labelColumn, random_state, progress_bar)
+        corruption_result_list.append(corruption_result)
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values  
-        if (plot):
-            fig_1, fig_2, fig_3 = plotData(baseline_results, corruption_result, str(model), corruptions, measured_property, method_name)
-            #fig_1.show()
-            #fig_2.show()
-            #fig_3.show()
+    if (plot):
+        fig_1, fig_2= plotData(baseline_results, corruption_result_list, str(model), corruptions, measured_property, method_name, corruption_list)
+        fig_1.show()
+        fig_2.show()
+        #fig_3.show()
     corrupted_df = fill_in_missing_columns(corrupted_df, df_train)
     progress_bar.close()
-    return corrupted_df, corruption_result, fig_1, fig_2, fig_3
+    return corrupted_df, corruption_result
 
 def corruptData(df_train, X_test, y_test, model, method, randomlist, labelColumn, random_state, progress_bar):
     corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'accuracy'])
@@ -132,18 +134,36 @@ def corruptData(df_train, X_test, y_test, model, method, randomlist, labelColumn
             corruption_result.loc[len(corruption_result.index)] = [feature_name, level, average_value, average_variance, average_accuracy]
     return method_corrupt_df, corruption_result, measured_property
 
-def plotData(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name):
-    features = corruption_result['feature_name'].values
-    baseline_results = baseline_results.loc[baseline_results['feature_name'].isin(features)]
-    if (len(np.unique(corruption_result['level'].values)) < 3):
-        fig_1 = plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'value')
-        fig_2 = plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
-        fig_3 = plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'accuracy')
-    else:
-        fig_1 = plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'value')
-        fig_2 = plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, 'variance')
-        fig_3 = plotNoiseCorruptionValues(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name,'accuracy')
-    return fig_1, fig_2, fig_3
+def plotData(baseline_results, corruption_result_list, model_name, corruptions, measured_property, method_name, corruption_list):
+    #baseline_results = baseline_results.loc[baseline_results['feature_name'].isin(features)]
+    histogram_plot = []
+    histogram_list = []
+    line_plot = []
+    line_list = []
+    for corruption_result, corruption_type in zip(corruption_result_list, corruption_list):
+        if (len(np.unique(corruption_result['level'].values)) < 3):
+            histogram_plot.append(corruption_result)
+            histogram_list.append(corruption_type)
+        else:
+            line_plot.append(corruption_result)
+            line_list.append(corruption_type)
+    #print("histogram plot:", histogram_plot)
+    #print("histogram list:", histogram_list)
+    if (len(histogram_plot) > 0):
+        fig_1_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'value', histogram_list)
+        fig_2_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'variance', histogram_list)
+        #fig_3_1 = plotNoiseCorruptionBarScore(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'accuracy', histogram_list)
+        print(type(fig_1_1))
+        print(type(fig_2_1))
+        #print(type(fig_3_1))
+    if (len(line_plot) > 0):
+        fig_1_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name, 'value', line_list)
+        fig_2_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name, 'variance', line_list)
+        fig_3_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name,'accuracy', line_list)
+        print(type(fig_1_2))
+        print(type(fig_2_2))
+        print(type(fig_3_2))       
+    return fig_1_1, fig_2_1
 
 
 
