@@ -49,5 +49,4 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
-        gcov_ignore: Setup.py ./tests
-        gcov_include: Robustness Noise
+        gcov_ignore: ["Setup.py", "tests"]
