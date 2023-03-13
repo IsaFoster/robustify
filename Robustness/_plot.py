@@ -6,12 +6,17 @@ import plotly.graph_objects as go
 def getLevels(methodSpecification):
     method = list(methodSpecification.keys())[0]
     if (method == "Gaussian" or method == "Binomial"):
-        return list(methodSpecification.values())[0][0], list(methodSpecification.values())[0][1]
+        feature_names, levels = list(methodSpecification.values())[0][0], list(methodSpecification.values())[0][1]
+        return feature_names, levels
     elif (method == "Poisson"):
-        return list(methodSpecification.values())[0], [-1]
+        feature_names, levels = list(methodSpecification.values())[0][0], [-1]
+        return feature_names, levels
     else:
         print('Error getting values')
         print(type(methodSpecification))
+
+def get_feature_name_from_index(feature_names, df):
+    return [list(df)[i] for i in feature_names]
 
 def get_colors_from_fig(fig):
     colors = []
@@ -161,7 +166,8 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list,
             go.Bar(x=[rowData["feature_name"]], 
                    y=[rowData[measured_name]], 
                    name=rowData['feature_name'], 
-                   legendgroup=index)
+                   legendgroup=index,
+                   width=0.4)
                 )
     colors = get_colors_from_fig(fig)
     for (index, rowData) in results.iterrows():
@@ -171,7 +177,8 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list,
                    name=rowData['feature_name'],  
                    marker_color = 'rgba' + str(hex_to_rgba(colors[index][1:], 0.5, 1.2)), 
                    showlegend=False,
-                   legendgroup=index)
+                   legendgroup=index,
+                   width=0.4)
                 )
     buttons, visible_features = plotButtons(corruptions_list, results['feature_name'].values.tolist())
     fig.update_layout(dict(updatemenus=buttons,
@@ -182,7 +189,7 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list,
               font=dict(size=18),
               bargroupgap=0,  
               barmode='group')
-    fig.update_traces(width=0.4, visible=False, selector=lambda t: not t.name in visible_features)
+    fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
     return fig
 
 ## ???????????
