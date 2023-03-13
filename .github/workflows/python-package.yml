@@ -39,17 +39,17 @@ jobs:
         pytest tests/test_sampling.py
         pytest tests/test_gaussianNoise.py
     - name: Generate Report if master is pulled
-      if: github.event_name == 'pull' 
+      if: github.event_name == 'pull_request' 
       run: |
         pip install codecov
         pip install pytest-cov
         pytest --cov=./ --cov-report=xml
         codecov
     - name: Upload coverage reports to Codecov with GitHub Action
-      if: github.event_name == 'pull' 
+      if: github.event_name == 'pull_request' 
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
         gcov_ignore: setup.py
-
+        
