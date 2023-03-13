@@ -72,7 +72,7 @@ def set_random_seed(random_state):
 def baseline(df_train, X_test, y_test, model, label_name=None, random_state=None):
     baseline_results = pd.DataFrame(columns=['feature_name', 'value', 'variance', 'accuracy'])
     if (label_name is None):
-        label_name = list(df_train)[-1]
+        label_name = str(list(df_train)[-1])
     y = df_train[label_name]
     X = df_train.drop([label_name], axis=1)
     model = train_model(model, X, y)
@@ -94,9 +94,10 @@ def return_df_from_array_with_indexes_as_columns(X, column_names, y=None, label_
     if (isinstance(X, (np.ndarray, np.generic, list))):
         df = pd.DataFrame(X, columns = column_names)
         if (label_name == None):
-            label_name = str(len(column_names))
+            label_name = str(len(df.columns))
         if (y is not None) and (label_name not in df):
             df[label_name] = y
+        df.columns = df.columns.astype(str)
         return df
     return X
 
