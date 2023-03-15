@@ -22,7 +22,8 @@ setup(
                       'chart_studio==1.1.0', 
                       'python-dotenv==0.21.0',
                       'tensorflow==2.11.0',
-                      'kaleido==0.2.1'], # list of packages that are absolutely needed, not standard library
+                      'kaleido==0.2.1',
+                      'tensorflow==2.11.0'], # list of packages that are absolutely needed, not standard library
     setup_requires=['pytest-runner'], # only installed when required to run tests
     tests_require=['pytest==7.2.2'],
     test_suite='tests',
