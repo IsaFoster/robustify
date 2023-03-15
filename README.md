@@ -33,7 +33,7 @@ pip install -e .
 
 # Run tests
 from root folder:
-pytest test_....py
+pytest -W ignore test_....py
 
 # Force recompile
 python setup.py install
