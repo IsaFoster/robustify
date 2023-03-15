@@ -1,11 +1,14 @@
 from Robustness.noiseCorruptions import corruptData
 import pandas as pd
 import numpy as np
-from sklearn import datasets
 from sklearn.model_selection import train_test_split
-from sklearn import linear_model
-from sklearn import svm
-from sklearn import neighbors
+from sklearn import datasets, linear_model, svm, neighbors, gaussian_process, tree, neural_network
+import warnings
+from sklearn.exceptions import ConvergenceWarning
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", category=ConvergenceWarning)
+    
 
 # features ['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']
 diabetes = datasets.load_diabetes()
@@ -93,5 +96,48 @@ def test_KNN_model_classification():
     assert (corrupted_df is not None)
     assert (corruption_result is not None)
     assert (corruption_result.isnull().values.any() == False)
+
+def test_GP_model_regression():
+    model = gaussian_process.GaussianProcessRegressor()
+    corrupted_df, corruption_result = run_corruption_regression(model)
+    assert (corrupted_df is not None)
+    assert (corruption_result is not None)
+    assert (corruption_result.isnull().values.any() == False)
+
+def test_GP_model_classification():
+    model = gaussian_process.GaussianProcessClassifier()
+    corrupted_df, corruption_result = run_corruption_classification(model)
+    assert (corrupted_df is not None)
+    assert (corruption_result is not None)
+    assert (corruption_result.isnull().values.any() == False)
+
+def test_DT_model_regression():
+    model = tree.DecisionTreeRegressor()
+    corrupted_df, corruption_result = run_corruption_regression(model)
+    assert (corrupted_df is not None)
+    assert (corruption_result is not None)
+    assert (corruption_result.isnull().values.any() == False)
+
+def test_DT_model_classification():
+    model = tree.DecisionTreeClassifier()
+    corrupted_df, corruption_result = run_corruption_classification(model)
+    assert (corrupted_df is not None)
+    assert (corruption_result is not None)
+    assert (corruption_result.isnull().values.any() == False)
+
+def test_NN_model_regression():
+    model = neural_network.MLPRegressor()
+    corrupted_df, corruption_result = run_corruption_regression(model)
+    assert (corrupted_df is not None)
+    assert (corruption_result is not None)
+    assert (corruption_result.isnull().values.any() == False)
+
+def test_NN_model_classification():
+    model = neural_network.MLPClassifier()
+    corrupted_df, corruption_result = run_corruption_classification(model)
+    assert (corrupted_df is not None)
+    assert (corruption_result is not None)
+    assert (corruption_result.isnull().values.any() == False)
+
 
 
