@@ -45,9 +45,6 @@ def get_results(model, index, X, y, random_state, scoring):
             return model.coef_[0][index], measured_property
         else: 
             return model.coef_[index], measured_property       
-    elif hasattr(model, 'coefs_'): 
-        measured_property = 'coefficients MLP'  # TODO: fix
-        return model.coefs_[index], measured_property
     else:
         try:
             measured_property = 'permutation importance'
