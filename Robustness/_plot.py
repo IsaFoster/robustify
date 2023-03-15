@@ -85,7 +85,7 @@ def plotPermutationImportance(df_baseline, df_noisy, n_repeats, modelName):
                     legend={'traceorder': 'reversed'}
               ),
               title=title,
-              xaxis_title="Decrease in accuracy score")
+              xaxis_title="Decrease in score")
     return fig
  
 ## ???????????
@@ -128,7 +128,7 @@ def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corr
     fig.update_layout(dict(updatemenus=plotButtons(visible_features, df_temp['feature_name'].values.tolist()),
               ),     
             title=title,
-            yaxis_title="Mean accuracy decrease",
+            yaxis_title="Mean score decrease",
             barmode = 'overlay')
     return fig
 
@@ -196,6 +196,6 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list,
 def plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name, corruption_list):
     features = np.unique(baseline_results['feature_name'].values.ravel())
     fig = go.Figure()
-    fig.add_trace(go.Bar(y=np.unique(baseline_results['accuracy'].values.ravel()), name='baseline', marker_color='seagreen'))
-    fig.add_trace(go.Bar(x=features, y=corruption_result['accuracy'], name='noisy', marker_color='maroon'))
+    fig.add_trace(go.Bar(y=np.unique(baseline_results['score'].values.ravel()), name='baseline', marker_color='seagreen'))
+    fig.add_trace(go.Bar(x=features, y=corruption_result['score'], name='noisy', marker_color='maroon'))
     return fig

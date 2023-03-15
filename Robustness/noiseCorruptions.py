@@ -7,6 +7,7 @@ import random
 from Noise.continuous import Gaussian_Noise
 from Noise.discrete import Poisson_noise, Binomial_noise
 from sklearn import metrics
+from sklearn.inspection import permutation_importance
 
 def other(df, feature_name):
     return df[feature_name] * (-1) #TODO: makes no sense to plot this 
@@ -34,7 +35,7 @@ def train_model(model, X, y):
     model.fit(X, y.values.ravel())
     return model
 
-def get_results(model, index):
+def get_results(model, index, X, y, random_state, scoring):
     if hasattr(model, 'feature_importances_'):
         measured_property = 'feature importance'
         return model.feature_importances_[index], measured_property
@@ -43,32 +44,31 @@ def get_results(model, index):
         if (isinstance(model.coef_[0], (np.ndarray, list))):
             return model.coef_[0][index], measured_property
         else: 
-            return model.coef_[index], measured_property        
+            return model.coef_[index], measured_property       
     elif hasattr(model, 'coefs_'): 
         measured_property = 'coefficients MLP'  # TODO: fix
         return model.coefs_[index], measured_property
     else:
-        print("cound not calculate coefficients or feature importance")
-        return None
+        try:
+            measured_property = 'permutation importance'
+            importances = permutation_importance(model, X, y, n_repeats=1, random_state=random_state, n_jobs=-1, scoring=scoring)
+            return importances.importances_mean[index], measured_property
+        except:
+            raise Exception("cound not calculate coefficients or feature importance") 
 
 def getLevels(methodSpecification, df):
     method = list(methodSpecification.keys())[0]
     if (method == "Gaussian" or method == "Binomial"):
         feature_names, levels = list(methodSpecification.values())[0][0], list(methodSpecification.values())[0][1]
-        if all([isinstance(item, int) for item in feature_names]):
-            feature_names = get_feature_name_from_index(feature_names, df)
-        return feature_names, levels
     elif (method == "Poisson"):
-        if isinstance(list(methodSpecification.values())[0][0], str):
+        if isinstance(list(methodSpecification.values())[0][0], (str, int)):
             feature_names, levels = list(methodSpecification.values())[0], [-1]
         else:
             feature_names, levels = list(methodSpecification.values())[0][0], [-1]
-        if all([isinstance(item, int) for item in feature_names]):
-            feature_names = get_feature_name_from_index(feature_names, df)
-        return feature_names, levels
-    else:
-        print('Error getting values')
-        print(type(methodSpecification))
+    if all([isinstance(item, int) for item in feature_names]):
+        feature_names = get_feature_name_from_index(feature_names, df)
+    return feature_names, levels
+    
 
 def initialize_progress_bar(corruption_list, corruptions, df):
     total = 0 
@@ -92,7 +92,7 @@ def baseline(df_train, X_test, y_test, model, metric, label_name=None, random_st
     model = train_model(model, X, y)
     for feature_name in X.columns:
         index = df_train.columns.get_loc(feature_name)
-        value, _ = get_results(model, index)
+        value, _ = get_results(model, index, X, y, random_state, metric)
         variance = np.var(X[feature_name])
         scorer = get_scorer_sckit_learn(metric)
         score = scorer._score_func(y_test, model.predict(X_test))
@@ -169,7 +169,7 @@ def corruptDataMethod(df_train, X_test, y_test, model, metric, method, randomlis
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y)
                 index = df_train.columns.get_loc(feature_name)
-                measured_value, measured_property = get_results(model, index)
+                measured_value, measured_property = get_results(model, index, X, y, random_state=random, scoring=metric)
                 average_value.append(measured_value)
                 scorer = get_scorer_sckit_learn(metric)
                 average_score.append(scorer._score_func(y_test, model.predict(X_test)))
