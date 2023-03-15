@@ -4,6 +4,7 @@ import numpy as np
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
+from sklearn import svm
 
 # features ['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']
 diabetes = datasets.load_diabetes()
@@ -42,6 +43,39 @@ def test_linear_model_regression():
 
 def test_linear_model_classification():
     model = linear_model.RidgeClassifier()
+    corrupted_df, corruption_result = corruptData(X_train_classification, 
+                                                  X_test_classification, 
+                                                  y_test_classification, 
+                                                  model, 
+                                                  'accuracy',
+                                                  corruption_list_classification, 
+                                                  corruptions=10,
+                                                  y_train=y_train_classification, 
+                                                  label_name='species', 
+                                                  column_names=['sepal_length', 'sepal_width', 'petal_length', 'petal_width'], 
+                                                  random_state=10, 
+                                                  plot=False)
+    assert (corrupted_df is not None)
+    assert (corruption_result is not None)
+    assert (corruption_result.isnull().values.any() == False)
+
+def test_SVM_model_regression():
+    model = svm.SVR()
+    corrupted_df, corruption_result = corruptData(X_train_regression, 
+                                          X_test_regression, y_test_regression, 
+                                          model, 
+                                          "r2",
+                                          corruption_list_regression, 
+                                          10, 
+                                          y_train=y_train_regression,
+                                          random_state=10,
+                                          plot=False)
+    assert (corrupted_df is not None)
+    assert (corruption_result is not None)
+    assert (corruption_result.isnull().values.any() == False)
+
+def test_SVM_model_classification():
+    model = svm.SVC(decision_function_shape='ovo')
     corrupted_df, corruption_result = corruptData(X_train_classification, 
                                                   X_test_classification, 
                                                   y_test_classification, 
