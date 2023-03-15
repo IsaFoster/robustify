@@ -3,15 +3,6 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import datasets, linear_model, svm, neighbors, gaussian_process, tree, neural_network
-import warnings
-from sklearn.exceptions import ConvergenceWarning
-
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", category=ConvergenceWarning)
-from warnings import simplefilter
-simplefilter(action='ignore', category=ConvergenceWarning)
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
 
 # features ['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']
 diabetes = datasets.load_diabetes()

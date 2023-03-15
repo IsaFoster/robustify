@@ -36,9 +36,9 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest tests/test_sampling.py
-        pytest tests/test_gaussianNoise.py
-        pytest tests/test_scikt-learn_compatibility.py
+        pytest -W ignore tests/test_sampling.py
+        pytest -W ignore tests/test_gaussianNoise.py
+        pytest -W ignore tests/test_scikt-learn_compatibility.py
     - name: Generate Report if master is pulled
       if: github.event_name == 'pull_request' 
       run: |
