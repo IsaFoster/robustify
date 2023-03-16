@@ -88,7 +88,6 @@ def plotPermutationImportance(df_baseline, df_noisy, n_repeats, modelName):
               xaxis_title="Decrease in score")
     return fig
  
-## ???????????
 def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corruption_list):
     title = "Feature importances using n={} permutation on {}".format(permutations, modelName)
     df_temp = pd.DataFrame(columns=['feature_name', 'value', 'value_noisy', 'error'])
@@ -125,10 +124,11 @@ def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corr
                 legendgroup=index,
                 showlegend=False)
             )
-    fig.update_layout(dict(updatemenus=plotButtons(visible_features, df_temp['feature_name'].values.tolist()),
-              ),     
+    buttons, _ = plotButtons(corruption_list, df_temp['feature_name'].values.tolist())
+    fig.update_layout(dict(updatemenus=buttons),     
             title=title,
             yaxis_title="Mean score decrease",
+            font=dict(size=30),
             barmode = 'overlay')
     return fig
 
