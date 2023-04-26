@@ -8,17 +8,8 @@ from Noise.continuous import Gaussian_Noise
 from Noise.discrete import Poisson_noise, Binomial_noise
 from sklearn import metrics
 from sklearn.inspection import permutation_importance
-import warnings
-import os
-import shap
 import numpy as np
-from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
-import eli5
-from eli5.sklearn import PermutationImportance
 import logging
-logging.getLogger('shap').setLevel(logging.WARNING) # turns off the "shap INFO" logs
-logging.getLogger('matplotlib').setLevel(logging.WARNING) # turns off the progress bar
-
 
 def other(df, feature_name):
     return df[feature_name] * (-1) #TODO: makes no sense to plot this 
