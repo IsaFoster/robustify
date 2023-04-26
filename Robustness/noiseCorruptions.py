@@ -8,6 +8,8 @@ from Noise.continuous import Gaussian_Noise
 from Noise.discrete import Poisson_noise, Binomial_noise
 from sklearn import metrics
 from sklearn.inspection import permutation_importance
+import numpy as np
+import logging
 
 def other(df, feature_name):
     return df[feature_name] * (-1) #TODO: makes no sense to plot this 
@@ -44,7 +46,7 @@ def get_results(model, index, X, y, random_state, scoring):
         if (isinstance(model.coef_[0], (np.ndarray, list))):
             return model.coef_[0][index], measured_property
         else: 
-            return model.coef_[index], measured_property       
+            return model.coef_[index], measured_property  
     else:
         try:
             measured_property = 'permutation importance'
@@ -169,7 +171,9 @@ def corruptDataMethod(df_train, X_test, y_test, model, metric, method, randomlis
                 measured_value, measured_property = get_results(model, index, X, y, random_state=random, scoring=metric)
                 average_value.append(measured_value)
                 scorer = get_scorer_sckit_learn(metric)
-                average_score.append(scorer._score_func(y_test, model.predict(X_test)))
+                a = scorer._score_func(y_test, model.predict(X_test))
+                print(a)
+                average_score.append(a)
                 progress_bar.update(1)
             method_corrupt_df[feature_name] = X[feature_name].values
             average_variance = np.average(average_variance)
@@ -183,6 +187,8 @@ def plotData(baseline_results, corruption_result_list, model_name, corruptions, 
     histogram_list = []
     line_plot = []
     line_list = []
+    print("corruption_result_list", corruption_result_list)
+    print("corruption_list:", corruption_list)
     for corruption_result, corruption_type in zip(corruption_result_list, corruption_list):
         if (len(np.unique(corruption_result['level'].values)) < 3):
             histogram_plot.append(corruption_result)
