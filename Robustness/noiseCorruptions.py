@@ -47,11 +47,6 @@ def get_results(model, index, X, y, random_state, scoring):
             return model.coef_[0][index], measured_property
         else: 
             return model.coef_[index], measured_property  
-    elif False:    
-        measured_property = "SHAP estimation" 
-        explainer = shap.KernelExplainer(model, X)
-        shap_values = explainer.shap_values(shap.sample(X, 50), nsamples=10)
-        return shap_values, measured_property
     else:
         try:
             measured_property = 'permutation importance'
