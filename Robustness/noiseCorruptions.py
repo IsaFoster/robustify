@@ -21,7 +21,7 @@ def get_scorer_sckit_learn(metric):
     try: 
         return metrics.get_scorer(metric)
     except:
-        print("not reqkognices")
+        print("not recognized")
         
 
 def filter_on_method(df, method, feature_name, level=None, random_state=None):
@@ -143,9 +143,10 @@ def corruptData(df_train, X_test, y_test, model, metric, corruption_list, corrup
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values  
     if (plot):
-        fig_1, fig_2 = plotData(baseline_results, corruption_result_list, str(model), corruptions, measured_property, method_name, corruption_list)
+        fig_1, fig_2, fig_3_2 = plotData(baseline_results, corruption_result_list, str(model), corruptions, measured_property, method_name, corruption_list)
         fig_1.show()
         fig_2.show()
+        fig_3_2.show()
     corrupted_df = fill_in_missing_columns(corrupted_df, df_train)
     progress_bar.close()
     return corrupted_df, corruption_result
@@ -172,7 +173,6 @@ def corruptDataMethod(df_train, X_test, y_test, model, metric, method, randomlis
                 average_value.append(measured_value)
                 scorer = get_scorer_sckit_learn(metric)
                 a = scorer._score_func(y_test, model.predict(X_test))
-                print(a)
                 average_score.append(a)
                 progress_bar.update(1)
             method_corrupt_df[feature_name] = X[feature_name].values
@@ -187,8 +187,6 @@ def plotData(baseline_results, corruption_result_list, model_name, corruptions, 
     histogram_list = []
     line_plot = []
     line_list = []
-    print("corruption_result_list", corruption_result_list)
-    print("corruption_list:", corruption_list)
     for corruption_result, corruption_type in zip(corruption_result_list, corruption_list):
         if (len(np.unique(corruption_result['level'].values)) < 3):
             histogram_plot.append(corruption_result)
@@ -197,20 +195,18 @@ def plotData(baseline_results, corruption_result_list, model_name, corruptions, 
             line_plot.append(corruption_result)
             line_list.append(corruption_type)
     if (len(histogram_plot) > 0):
-        fig_1_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'value', histogram_list)
-        fig_2_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'variance', histogram_list)
-        #fig_3_1 = plotNoiseCorruptionBarScore(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'score', histogram_list)
-        #fig_3_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'score', histogram_list)
-        return fig_1_1, fig_2_1
+        fig_1_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'value', histogram_list)
+        fig_2_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'variance', histogram_list)
+        fig_3_1_1 = plotNoiseCorruptionBarScore(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'score', histogram_list)
+        fig_3_1_2 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'score', histogram_list)
+        return fig_1_1, fig_2_1, fig_3_1_2
     if (len(line_plot) > 0):
-        fig_1_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name, 'value', line_list)
-        fig_2_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name, 'variance', line_list)
+        fig_1_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'value', line_list)
+        fig_2_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'variance', line_list)
         #fig_3_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name,'score', line_list)      
         return fig_1_2, fig_2_2
 
 
 
 # TODO: check if coefs_ can be used 
-# TODO: hardcoded y value. Need this as input when usinf DataFrames (or deafult last col)
 # TODO: models that dont have fit?
-# TODO: write test for randomness for sample + noisecorruption
