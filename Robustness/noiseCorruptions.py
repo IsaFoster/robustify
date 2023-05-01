@@ -202,6 +202,6 @@ def plotData(baseline_results, corruption_result_list, model_name, corruptions, 
     if (len(line_plot) > 0):
         fig_1_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'value', line_list)
         fig_2_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'variance', line_list)
-        #fig_3_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name,'score', line_list)      
-        return fig_1_2, fig_2_2
+        fig_3_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property,'score', line_list)      
+        return fig_1_2, fig_2_2, fig_3_2
     

@@ -132,10 +132,10 @@ def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corr
             barmode = 'overlay')
     return fig
 
-def plotNoiseCorruptionValues(baseline_results, corruption_result_list, model_name, corruptions, measured_property, method_name, measured_name, corruptions_list):
+def plotNoiseCorruptionValues(baseline_results, corruption_result_list, model_name, corruptions, measured_property, measured_name, corruptions_list):
     all_features = []
     fig = go.Figure()
-    title = "Average {} of {} over {} {} corruptions at increasing noise levels for {}".format(measured_name.replace("_", " "), measured_property, corruptions, method_name, model_name)
+    title = "Average {} of {} over {} {} corruptions at increasing noise levels".format(measured_name.replace("_", " "), measured_property, corruptions, model_name)
     for corruption_result in corruption_result_list:
         for feature in corruption_result['feature_name'].unique().tolist():
             all_features.append(feature)
@@ -143,7 +143,10 @@ def plotNoiseCorruptionValues(baseline_results, corruption_result_list, model_na
             fig.add_trace(go.Scatter(x=df["level"], y=df[measured_name], mode='lines', line=dict(width=4), name=feature, legendgroup=feature))
     buttons, visible_features = plotButtons(corruptions_list, all_features)
     fig.update_layout(dict(updatemenus=buttons), xaxis_title="Feature", yaxis_title=measured_property, title=title, font=dict(size=18))
-    fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
+    if (measured_name == "score"):
+        fig.add_hline(y=baseline_results[measured_name].iloc[0], line_dash="dash", line_width=4)
+    else:
+        fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
     return fig
 
 def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list, model_name, corruptions, measured_property, measured_name, corruptions_list):
