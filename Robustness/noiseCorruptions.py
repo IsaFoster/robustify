@@ -9,8 +9,6 @@ from Noise.discrete import Poisson_noise, Binomial_noise
 from sklearn import metrics
 from sklearn.inspection import permutation_importance
 import numpy as np
-import logging
-import eli5
 from eli5.sklearn import PermutationImportance
 from eli5.permutation_importance import get_score_importances
 
@@ -58,8 +56,15 @@ def get_results(model, index, X, y, random_state, scoring, feature_importance_me
                 return importances.importances_mean[index], measured_property
             except:
                 raise Exception("cound not calculate coefficients or feature importance") 
-    else:
-        # for sklearn: 
+    elif feature_importance_measure == "eli5" and not isinstance(scoring, str):
+        try:
+            measured_property = "eli5_custom_score_function"
+            _, score_decreases = get_score_importances(scoring, y, np.array(X), n_iter=1, random_state=random_state)
+            feature_importances = np.mean(score_decreases, axis=0)
+            return feature_importances[index], measured_property
+        except:
+                raise Exception("SOMETHING IS WRONG... IT IS YOUR CODE") 
+    elif feature_importance_measure == "eli5":
         try: 
             importances = PermutationImportance(model, scoring=scoring, random_state=random_state, n_iter=1, cv="prefit", refit=False).fit(X, y)
             #perm.feature_importances_std_
@@ -67,19 +72,8 @@ def get_results(model, index, X, y, random_state, scoring, feature_importance_me
             return importances.feature_importances_[index], measured_property
         except:
             raise Exception("WELL THAT DIDN'T WORK") 
-    
-        # for non-sklearn:
-        def score(X, y):
-            y_pred = predict(X)
-            4736
 
-            return accuracy(y, y_pred)
-        base_score, score_decreases = get_score_importances(score, X, y)
-        feature_importances = np.mean(score_decreases, axis=0)
-        print("base_score:", base_score)
-        print("feature_importances:", feature_importances)
-    
-        #eli5 permutaiton importance
+
 
 def getLevels(methodSpecification, df):
     method = list(methodSpecification.keys())[0]

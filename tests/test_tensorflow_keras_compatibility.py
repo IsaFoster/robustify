@@ -51,6 +51,7 @@ def run_corruption_regression(model):
                         y_train=y_train_regression,
                         random_state=10, 
                         column_names=['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6'],
+                        feature_importance_measure="eli5",
                         label_name='diabetes',
                         plot=False)
 
