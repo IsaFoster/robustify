@@ -10,6 +10,9 @@ from sklearn import metrics
 from sklearn.inspection import permutation_importance
 import numpy as np
 import logging
+import eli5
+from eli5.sklearn import PermutationImportance
+from eli5.permutation_importance import get_score_importances
 
 def other(df, feature_name):
     return df[feature_name] * (-1) #TODO: makes no sense to plot this 
@@ -37,23 +40,46 @@ def train_model(model, X, y):
     model.fit(X, y.values.ravel())
     return model
 
-def get_results(model, index, X, y, random_state, scoring):
-    if hasattr(model, 'feature_importances_'):
-        measured_property = 'feature importance'
-        return model.feature_importances_[index], measured_property
-    elif hasattr(model, 'coef_'):
-        measured_property = 'coefficients'
-        if (isinstance(model.coef_[0], (np.ndarray, list))):
-            return model.coef_[0][index], measured_property
-        else: 
-            return model.coef_[index], measured_property  
+def get_results(model, index, X, y, random_state, scoring, feature_importance_measure):
+    if feature_importance_measure == None:
+        if hasattr(model, 'feature_importances_'):
+            measured_property = 'feature importance'
+            return model.feature_importances_[index], measured_property
+        elif hasattr(model, 'coef_'):
+            measured_property = 'coefficients'
+            if (isinstance(model.coef_[0], (np.ndarray, list))):
+                return model.coef_[0][index], measured_property
+            else: 
+                return model.coef_[index], measured_property  
+        else:
+            try:
+                measured_property = 'permutation importance'
+                importances = permutation_importance(model, X, y, n_repeats=1, random_state=random_state, n_jobs=-1, scoring=scoring)
+                return importances.importances_mean[index], measured_property
+            except:
+                raise Exception("cound not calculate coefficients or feature importance") 
     else:
-        try:
-            measured_property = 'permutation importance'
-            importances = permutation_importance(model, X, y, n_repeats=1, random_state=random_state, n_jobs=-1, scoring=scoring)
-            return importances.importances_mean[index], measured_property
+        # for sklearn: 
+        try: 
+            importances = PermutationImportance(model, scoring=scoring, random_state=random_state, n_iter=1, cv="prefit", refit=False).fit(X, y)
+            #perm.feature_importances_std_
+            measured_property = "eli5 PI"
+            return importances.feature_importances_[index], measured_property
         except:
-            raise Exception("cound not calculate coefficients or feature importance") 
+            raise Exception("WELL THAT DIDN'T WORK") 
+    
+        # for non-sklearn:
+        def score(X, y):
+            y_pred = predict(X)
+            4736
+
+            return accuracy(y, y_pred)
+        base_score, score_decreases = get_score_importances(score, X, y)
+        feature_importances = np.mean(score_decreases, axis=0)
+        print("base_score:", base_score)
+        print("feature_importances:", feature_importances)
+    
+        #eli5 permutaiton importance
 
 def getLevels(methodSpecification, df):
     method = list(methodSpecification.keys())[0]
@@ -82,7 +108,7 @@ def set_random_seed(random_state):
     #import tensorflow as tf
     #tf.set_random_seed(seed_value)    
 
-def baseline(df_train, X_test, y_test, model, metric, label_name=None, random_state=None):
+def baseline(df_train, X_test, y_test, model, metric, feature_importance_measure, label_name=None, random_state=None):
     baseline_results = pd.DataFrame(columns=['feature_name', 'value', 'variance', 'score'])
     if (label_name is None):
         label_name = str(list(df_train)[-1])
@@ -91,7 +117,7 @@ def baseline(df_train, X_test, y_test, model, metric, label_name=None, random_st
     model = train_model(model, X, y)
     for feature_name in X.columns:
         index = df_train.columns.get_loc(feature_name)
-        value, _ = get_results(model, index, X, y, random_state, metric)
+        value, _ = get_results(model, index, X, y, random_state, metric, feature_importance_measure)
         variance = np.var(X[feature_name])
         scorer = get_scorer_sckit_learn(metric)
         score = scorer._score_func(y_test, model.predict(X_test))
@@ -126,19 +152,19 @@ def fill_in_column_names_for_indexes(df, corruption_list):
             method[key] = value
     return corruption_list
 
-def corruptData(df_train, X_test, y_test, model, metric, corruption_list, corruptions, column_names=None,  y_train=None, label_name=None, random_state=None, plot=True):
+def corruptData(df_train, X_test, y_test, model, metric, corruption_list, corruptions, column_names=None, y_train=None, label_name=None, feature_importance_measure=None, random_state=None, plot=True):
     set_random_seed(random_state)
     df_train = return_df_from_array_with_indexes_as_columns(df_train, column_names, y_train, label_name)
     X_test = return_df_from_array_with_indexes_as_columns(X_test, column_names)
     corruption_list = fill_in_column_names_for_indexes(df_train, corruption_list)
     corrupted_df = pd.DataFrame(columns=list(df_train))
-    baseline_results, label_name = baseline(df_train, X_test, y_test, model, metric, label_name)
+    baseline_results, label_name = baseline(df_train, X_test, y_test, model, metric, feature_importance_measure, label_name)
     randomlist = random.sample(range(1, 1000), corruptions)
     progress_bar = initialize_progress_bar(corruption_list, corruptions, df_train)
     corruption_result_list = []
     for method in list(corruption_list):
         method_name = list(method.keys())[0]
-        method_corrupt_df, corruption_result, measured_property = corruptDataMethod(df_train, X_test, y_test, model, metric, method, randomlist, label_name, random_state, progress_bar)
+        method_corrupt_df, corruption_result, measured_property = corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importance_measure, method, randomlist, label_name, random_state, progress_bar)
         corruption_result_list.append(corruption_result)
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values  
@@ -151,7 +177,7 @@ def corruptData(df_train, X_test, y_test, model, metric, corruption_list, corrup
     progress_bar.close()
     return corrupted_df, corruption_result
 
-def corruptDataMethod(df_train, X_test, y_test, model, metric, method, randomlist, label_name, random_state, progress_bar):
+def corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importance_measure, method, randomlist, label_name, random_state, progress_bar):
     corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'score'])
     feature_names, levels = getLevels(method, df_train)
     method_corrupt_df = pd.DataFrame(columns=feature_names)
@@ -169,7 +195,7 @@ def corruptDataMethod(df_train, X_test, y_test, model, metric, method, randomlis
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y)
                 index = df_train.columns.get_loc(feature_name)
-                measured_value, measured_property = get_results(model, index, X, y, random_state=random, scoring=metric)
+                measured_value, measured_property = get_results(model, index, X, y, random_state=random, scoring=metric, feature_importance_measure=feature_importance_measure)
                 average_value.append(measured_value)
                 scorer = get_scorer_sckit_learn(metric)
                 a = scorer._score_func(y_test, model.predict(X_test))
