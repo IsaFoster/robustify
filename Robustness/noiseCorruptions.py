@@ -1,5 +1,5 @@
 from Robustness._sampling import sampleData
-from Robustness._plot import plotNoiseCorruptionValues, plotNoiseCorruptionValuesHistogram, plotNoiseCorruptionBarScore
+from Robustness._plot import plotNoiseCorruptionValues, plotNoiseCorruptionValuesHistogram, plotNoiseCorruptionScoresHistogram
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -197,16 +197,11 @@ def plotData(baseline_results, corruption_result_list, model_name, corruptions, 
     if (len(histogram_plot) > 0):
         fig_1_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'value', histogram_list)
         fig_2_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'variance', histogram_list)
-        fig_3_1_1 = plotNoiseCorruptionBarScore(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'score', histogram_list)
-        fig_3_1_2 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, method_name, 'score', histogram_list)
-        return fig_1_1, fig_2_1, fig_3_1_2
+        fig_3_1 = plotNoiseCorruptionScoresHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'score', histogram_list)
+        return fig_1_1, fig_2_1, fig_3_1
     if (len(line_plot) > 0):
         fig_1_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'value', line_list)
         fig_2_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'variance', line_list)
         #fig_3_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, method_name,'score', line_list)      
         return fig_1_2, fig_2_2
-
-
-
-# TODO: check if coefs_ can be used 
-# TODO: models that dont have fit?
+    

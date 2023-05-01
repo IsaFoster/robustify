@@ -192,59 +192,58 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list,
     fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
     return fig
 
-## ???????????
-'''def plotNoiseCorruptionBarScore(baseline_results, corruption_result, model_name, corruptions, measured_property, method_name, measured_name, corruption_list):
-    features = np.unique(baseline_results['feature_name'].values.ravel())
-    print(type(corruption_result))
-    fig = go.Figure()
-    fig.add_trace(go.Bar(y=np.unique(baseline_results['score'].values.ravel()), name='baseline', marker_color='seagreen'))
-    fig.add_trace(go.Bar(x=features, y=corruption_result['score'], name='noisy', marker_color='maroon'))
-    return fig'''
-
-def plotNoiseCorruptionBarScore(baseline_results, corruption_result_list, model_name, corruptions, measured_property, measured_name, corruptions_list):
-    title = "Average {} of {} for features for {} over {} {} noise corruptions".format(measured_name.replace("_", " "), measured_property, model_name, corruptions)
-    results = pd.DataFrame(columns=['feature_name', measured_name, measured_name +'_noisy'])
+def plotNoiseCorruptionScoresHistogram(baseline_results, corruption_result_list, model_name, corruptions, measured_property, measured_name, corruptions_list):
+    title = "Average {} for {} over {} noise corruptions".format(measured_name.replace("_", " "), model_name, corruptions)
+    results = pd.DataFrame(columns=['feature_name', measured_name])
     baseline_results = baseline_results.sort_values("feature_name")
-    print("baseline results:", baseline_results)
-    print("corruption result list:", corruption_result_list)
     for corruption_result in corruption_result_list:
-        results_temp = pd.DataFrame(columns=['feature_name', measured_name, measured_name+'_noisy'])
+        results_temp = pd.DataFrame(columns=['feature_name', measured_name])
         corruption_result = corruption_result.sort_values("feature_name")
         results_temp['feature_name'] = corruption_result['feature_name'].unique().tolist()
         results_temp['feature_name'] = results_temp['feature_name'].astype(str)
-        results_temp[measured_name] = baseline_results[baseline_results['feature_name'].isin(results_temp['feature_name'].values.tolist())][measured_name].values.tolist()
-        results_temp[measured_name+'_noisy'] = corruption_result[measured_name].values.tolist()
+        results_temp[measured_name] = corruption_result[measured_name].values.tolist()
         results_temp = results_temp.sort_values(measured_name, ascending=False)
         results = pd.concat([results, results_temp], axis=0)
-    results = results.reset_index()
+    results = results.reset_index(drop=True)
+    data = []
+    data.insert(0, {"feature_name": "baseline", measured_name: baseline_results[measured_name].iloc[0]})
+    results = pd.concat([pd.DataFrame(data), results], ignore_index=True)
     fig = go.Figure()
     for (index, rowData) in results.iterrows():
         fig.add_trace(
             go.Bar(x=[rowData["feature_name"]], 
                    y=[rowData[measured_name]], 
                    name=rowData['feature_name'], 
-                   legendgroup=index,
-                   width=0.4)
+                   legendgroup=index)
                 )
-    colors = get_colors_from_fig(fig)
-    for (index, rowData) in results.iterrows():
-        fig.add_trace(
-            go.Bar(x=[rowData["feature_name"]], 
-                   y=[rowData[measured_name+'_noisy']], 
-                   name=rowData['feature_name'],  
-                   marker_color = 'rgba' + str(hex_to_rgba(colors[index][1:], 0.5, 1.2)), 
-                   showlegend=False,
-                   legendgroup=index,
-                   width=0.4)
+    fig.add_hline(y=baseline_results[measured_name].iloc[0], line_dash="dash", line_width=4)
+    score_diff = results[measured_name].max() - results[measured_name].min()
+    fig.update_layout(dict(updatemenus=[dict(
+            type = "buttons",
+            direction = "left",
+            buttons=list([
+                dict(
+                    args=["visible", "legendonly"],
+                    label="Deselect All",
+                    method="restyle"
+                ),
+                dict(
+                    args=["visible", True],
+                    label="Select All",
+                    method="restyle"
                 )
-    buttons, visible_features = plotButtons(corruptions_list, results['feature_name'].values.tolist())
-    fig.update_layout(dict(updatemenus=buttons,
-              ),   
-              title=title, 
-              xaxis_title="Feature", 
-              yaxis_title=measured_property,
-              font=dict(size=18),
-              bargroupgap=0,  
-              barmode='group')
-    fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
+            ]),
+            pad={"r": 10, "t": 10},
+            showactive=True,
+            x=1,
+            xanchor="right",
+            y=1.1,
+            yanchor="top"),
+            ],
+            ),   
+            title=title, 
+            xaxis_title="Feature", 
+            yaxis_title=measured_name,
+            font=dict(size=18),
+            yaxis_range=[results[measured_name].min() - score_diff, results[measured_name].max() + score_diff])
     return fig
