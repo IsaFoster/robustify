@@ -2,8 +2,32 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+from Noise._filter import getLevels
 
-def getLevels(methodSpecification):
+def plotData(baseline_results, corruption_result_list, model_name, corruptions, measured_property, method_name, corruption_list):
+    histogram_plot = []
+    histogram_list = []
+    line_plot = []
+    line_list = []
+    for corruption_result, corruption_type in zip(corruption_result_list, corruption_list):
+        if (len(np.unique(corruption_result['level'].values)) < 3):
+            histogram_plot.append(corruption_result)
+            histogram_list.append(corruption_type)
+        else:
+            line_plot.append(corruption_result)
+            line_list.append(corruption_type)
+    if (len(histogram_plot) > 0):
+        fig_1_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'value', histogram_list)
+        fig_2_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'variance', histogram_list)
+        fig_3_1 = plotNoiseCorruptionScoresHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'score', histogram_list)
+        return fig_1_1, fig_2_1, fig_3_1
+    if (len(line_plot) > 0):
+        fig_1_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'value', line_list)
+        fig_2_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'variance', line_list)
+        fig_3_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property,'score', line_list)      
+        return fig_1_2, fig_2_2, fig_3_2
+
+'''def getLevels(methodSpecification):
     method = list(methodSpecification.keys())[0]
     if (method == "Gaussian" or method == "Binomial"):
         feature_names, levels = list(methodSpecification.values())[0][0], list(methodSpecification.values())[0][1]
@@ -16,7 +40,7 @@ def getLevels(methodSpecification):
         print(type(methodSpecification))
 
 def get_feature_name_from_index(feature_names, df):
-    return [list(df)[i] for i in feature_names]
+    return [list(df)[i] for i in feature_names]'''
 
 def get_colors_from_fig(fig):
     colors = []
