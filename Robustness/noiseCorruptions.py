@@ -11,6 +11,8 @@ from sklearn.inspection import permutation_importance
 import numpy as np
 from eli5.sklearn import PermutationImportance
 from eli5.permutation_importance import get_score_importances
+import lime
+from lime import lime_tabular
 
 def other(df, feature_name):
     return df[feature_name] * (-1) #TODO: makes no sense to plot this 
@@ -71,9 +73,26 @@ def get_results(model, index, X, y, random_state, scoring, feature_importance_me
             measured_property = "eli5 PI"
             return importances.feature_importances_[index], measured_property
         except:
-            raise Exception("WELL THAT DIDN'T WORK") 
-
-
+            raise Exception("Could not compute eli5 importances") 
+    elif feature_importance_measure == "lime":
+        try:
+            measured_property = "lime explainer"
+            explainer = lime_tabular.LimeTabularExplainer(
+                training_data=X.to_numpy(),
+                feature_names=X.columns.tolist(),
+                class_names=['data_type'],
+                mode='classification',
+                verbose=False)
+            values = []
+            for i in range(int((X.shape[0]/10))):
+                predict_fn_rf = lambda x: model.predict_proba(x).astype(float)
+                exp = explainer.explain_instance(X.to_numpy()[i], predict_fn_rf, num_features=len(X.columns.tolist()))
+                dic = dict(list(exp.as_map().values())[0])
+                values.append(dic.get(index))
+            average_value = np.mean(values, axis=0)
+            return average_value, measured_property
+        except:
+            raise Exception("Could not compute lime importances") 
 
 def getLevels(methodSpecification, df):
     method = list(methodSpecification.keys())[0]

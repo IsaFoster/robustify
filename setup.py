@@ -24,7 +24,8 @@ setup(
                       'tensorflow==2.11.1',
                       'kaleido==0.2.1',
                       'ipython==8.11.0',
-                      'eli5==0.13.0'], # list of packages that are absolutely needed, not standard library
+                      'eli5==0.13.0',
+                      'lime==0.2.0.1'], # list of packages that are absolutely needed, not standard library
     setup_requires=['pytest-runner'], # only installed when required to run tests
     tests_require=['pytest==7.2.2'],
     test_suite='tests',
