@@ -20,12 +20,16 @@ def plotData(baseline_results, corruption_result_list, model_name, corruptions, 
         fig_1_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'value', histogram_list)
         fig_2_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'variance', histogram_list)
         fig_3_1 = plotNoiseCorruptionScoresHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'score', histogram_list)
-        return fig_1_1, fig_2_1, fig_3_1
+        fig_1_1.show()
+        fig_2_1.show()
+        fig_3_1.show()
     if (len(line_plot) > 0):
         fig_1_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'value', line_list)
         fig_2_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'variance', line_list)
         fig_3_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property,'score', line_list)      
-        return fig_1_2, fig_2_2, fig_3_2
+        fig_1_2.show()
+        fig_2_2.show()
+        fig_3_2.show()
 
 '''def getLevels(methodSpecification):
     method = list(methodSpecification.keys())[0]

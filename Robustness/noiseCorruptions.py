@@ -83,10 +83,7 @@ def corruptData(df_train, X_test, y_test, model, metric, corruption_list, corrup
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values  
     if (plot):
-        fig_1, fig_2, fig_3_2 = plotData(baseline_results, corruption_result_list, str(model), corruptions, measured_property, method_name, corruption_list)
-        fig_1.show()
-        fig_2.show()
-        fig_3_2.show()
+        plotData(baseline_results, corruption_result_list, str(model), corruptions, measured_property, method_name, corruption_list)
     corrupted_df = fill_in_missing_columns(corrupted_df, df_train)
     progress_bar.close()
     return corrupted_df, corruption_result
