@@ -17,35 +17,13 @@ def plotData(baseline_results, corruption_result_list, model_name, corruptions, 
             line_plot.append(corruption_result)
             line_list.append(corruption_type)
     if (len(histogram_plot) > 0):
-        fig_1_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'value', histogram_list)
-        fig_2_1 = plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'variance', histogram_list)
-        fig_3_1 = plotNoiseCorruptionScoresHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'score', histogram_list)
-        fig_1_1.show()
-        fig_2_1.show()
-        fig_3_1.show()
+        plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'value', histogram_list)
+        plotNoiseCorruptionValuesHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'variance', histogram_list)
+        plotNoiseCorruptionScoresHistogram(baseline_results, histogram_plot, model_name, corruptions, measured_property, 'score', histogram_list)
     if (len(line_plot) > 0):
-        fig_1_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'value', line_list)
-        fig_2_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'variance', line_list)
-        fig_3_2 = plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property,'score', line_list)      
-        fig_1_2.show()
-        fig_2_2.show()
-        fig_3_2.show()
-
-'''def getLevels(methodSpecification):
-    method = list(methodSpecification.keys())[0]
-    if (method == "Gaussian" or method == "Binomial"):
-        feature_names, levels = list(methodSpecification.values())[0][0], list(methodSpecification.values())[0][1]
-        return feature_names, levels
-    elif (method == "Poisson"):
-        feature_names, levels = list(methodSpecification.values())[0][0], [-1]
-        return feature_names, levels
-    else:
-        print('Error getting values')
-        print(type(methodSpecification))
-
-def get_feature_name_from_index(feature_names, df):
-    return [list(df)[i] for i in feature_names]'''
-
+        plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'value', line_list)
+        plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property, 'variance', line_list)
+        plotNoiseCorruptionValues(baseline_results, line_plot, model_name, corruptions, measured_property,'score', line_list)      
 def get_colors_from_fig(fig):
     colors = []
     f = fig.full_figure_for_development(warn=False)
@@ -115,7 +93,8 @@ def plotPermutationImportance(df_baseline, df_noisy, n_repeats, modelName):
               title=title,
               xaxis_title="Decrease in score")
     return fig
- 
+
+## ????? 
 def plotMeanAccuracyDecrease(df, noisy_df, result, permutations, modelName, corruption_list):
     title = "Feature importances using n={} permutation on {}".format(permutations, modelName)
     df_temp = pd.DataFrame(columns=['feature_name', 'value', 'value_noisy', 'error'])
@@ -175,7 +154,7 @@ def plotNoiseCorruptionValues(baseline_results, corruption_result_list, model_na
         fig.add_hline(y=baseline_results[measured_name].iloc[0], line_dash="dash", line_width=4)
     else:
         fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
-    return fig
+    fig.show()
 
 def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list, model_name, corruptions, measured_property, measured_name, corruptions_list):
     title = "Average {} of {} for features for {} over {} noise corruptions".format(measured_name.replace("_", " "), measured_property, model_name, corruptions)
@@ -221,7 +200,7 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_result_list,
               bargroupgap=0,  
               barmode='group')
     fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
-    return fig
+    fig.show()
 
 def plotNoiseCorruptionScoresHistogram(baseline_results, corruption_result_list, model_name, corruptions, measured_property, measured_name, corruptions_list):
     title = "Average {} for {} over {} noise corruptions".format(measured_name.replace("_", " "), model_name, corruptions)
@@ -277,4 +256,4 @@ def plotNoiseCorruptionScoresHistogram(baseline_results, corruption_result_list,
             yaxis_title=measured_name,
             font=dict(size=18),
             yaxis_range=[results[measured_name].min() - score_diff, results[measured_name].max() + score_diff])
-    return fig
+    fig.show()

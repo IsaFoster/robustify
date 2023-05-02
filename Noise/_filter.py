@@ -21,7 +21,7 @@ def getLevels(methodSpecification, df=None):
             feature_names, levels = list(methodSpecification.values())[0], [-1]
         else:
             feature_names, levels = list(methodSpecification.values())[0][0], [-1]
-    if all([isinstance(item, int) for item in feature_names] and df != None):
+    if all([isinstance(item, int) for item in feature_names]):
         feature_names = get_feature_name_from_index(feature_names, df)
     return feature_names, levels
     
