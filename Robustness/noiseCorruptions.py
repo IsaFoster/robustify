@@ -34,7 +34,7 @@ def baseline(df_train, X_test, y_test, model, metric, feature_importance_measure
     model = train_model(model, X, y)
     for feature_name in X.columns:
         index = df_train.columns.get_loc(feature_name)
-        value, _ = filter_on_importance_method(model, index, X, y, random_state, metric, feature_importance_measure)
+        value, _ = filter_on_importance_method(model, index, X, y, random_state=random_state, scoring=metric, feature_importance_measure=feature_importance_measure)
         variance = np.var(X[feature_name])
         scorer = get_scorer_sckit_learn(metric)
         score = scorer._score_func(y_test, model.predict(X_test))

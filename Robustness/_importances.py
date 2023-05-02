@@ -11,7 +11,8 @@ def filter_on_importance_method(model, index, X, y, random_state, scoring, featu
         None: lambda: check_for_deafult_properties(model, index, X, y, random_state, scoring),
         'eli5': lambda: calculate_eli5_importances(model, index, X, y, random_state, scoring),
         'lime': lambda: calculate_lime_importances(model, index, X, y, random_state, scoring),
-        'shap': lambda: calculate_shap_importances(model, index, X, y, random_state, scoring)
+        'shap': lambda: calculate_shap_importances(model, index, X, y, random_state, scoring),
+        'deeplift': lambda: calculate_deeplift_importances(model, index, X, y, random_state, scoring)
     }
     return switcher.get(feature_importance_measure, lambda: print("Invalid importance measure for {}".format(str(model))))()
 
@@ -26,7 +27,7 @@ def check_for_deafult_properties(model, index, X, y, random_state, scoring):
         else: 
             return model.coef_[index], measured_property  
     else:
-        calculate_permuation_importances(model, index, X, y, random_state, scoring)
+        return calculate_permuation_importances(model, index, X, y, random_state, scoring)
 
 def calculate_permuation_importances(model, index, X, y, random_state, scoring):
     try:
@@ -75,4 +76,8 @@ def calculate_lime_importances(model, index, X, y, random_state, scoring):
         raise Exception("Could not compute lime importances") 
 
 def calculate_shap_importances(model, index, X, y, random_state, scoring):
+    pass
+
+
+def calculate_deeplift_importances(model, index, X, y, random_state, scoring):
     pass
