@@ -5,14 +5,14 @@ from eli5.sklearn import PermutationImportance
 from eli5.permutation_importance import get_score_importances
 import lime
 from lime import lime_tabular
+import shap
 
 def filter_on_importance_method(model, index, X, y, random_state, scoring, feature_importance_measure):
     switcher = {
         None: lambda: check_for_deafult_properties(model, index, X, y, random_state, scoring),
         'eli5': lambda: calculate_eli5_importances(model, index, X, y, random_state, scoring),
         'lime': lambda: calculate_lime_importances(model, index, X, y, random_state, scoring),
-        'shap': lambda: calculate_shap_importances(model, index, X, y, random_state, scoring),
-        'deeplift': lambda: calculate_deeplift_importances(model, index, X, y, random_state, scoring)
+        'shap': lambda: calculate_shap_importances(model, index, X, y, random_state, scoring)
     }
     return switcher.get(feature_importance_measure, lambda: print("Invalid importance measure for {}".format(str(model))))()
 
@@ -76,8 +76,11 @@ def calculate_lime_importances(model, index, X, y, random_state, scoring):
         raise Exception("Could not compute lime importances") 
 
 def calculate_shap_importances(model, index, X, y, random_state, scoring):
-    pass
-
-
-def calculate_deeplift_importances(model, index, X, y, random_state, scoring):
-    pass
+    try:
+        measured_property = "shap"
+        explainer = shap.Explainer(model)
+        shap_values = explainer(X)
+        average_values = [sum(sub_list) / len(sub_list) for sub_list in zip(*shap_values.data)]
+        return average_values[index], measured_property
+    except: 
+        raise Exception("Could not compute shap importances")
