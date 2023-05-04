@@ -51,8 +51,29 @@ def run_corruption_regression(model):
                         y_train=y_train_regression,
                         random_state=10, 
                         column_names=['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6'],
+                        feature_importance_measure="eli5",
                         label_name='diabetes',
                         plot=False)
+
+def test_tensorflow_is_reproducible():
+    model_1 = tf.keras.Sequential([
+    layers.Dense(units=1)
+    ])
+    model_1.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.1),
+    loss='mean_absolute_error')
+    corrupted_df_1, corruption_result_1 = run_corruption_regression(model_1)
+
+    model_2 = tf.keras.Sequential([
+    layers.Dense(units=1)
+    ])
+    model_2.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.1),
+    loss='mean_absolute_error')
+    corrupted_df_2, corruption_result_2 = run_corruption_regression(model_2)
+    
+    assert (corrupted_df_1.equals(corrupted_df_2))
+    assert (corruption_result_1.equals(corruption_result_2))
 
 def test_linear_model_regression():
     model = tf.keras.Sequential([
