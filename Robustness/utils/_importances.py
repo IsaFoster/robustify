@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.inspection import permutation_importance
-import numpy as np
 from eli5.sklearn import PermutationImportance
 from eli5.permutation_importance import get_score_importances
 from lime import lime_tabular
