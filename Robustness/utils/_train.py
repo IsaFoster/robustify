@@ -24,3 +24,5 @@ def reset_model(model):
         torch.nn.init.xavier_uniform(model.weight.data)
     return model
 
+
+#TODO: Exceptions
