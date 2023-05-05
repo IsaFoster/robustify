@@ -2,6 +2,7 @@ from sklearn import metrics
 import pandas as pd
 import tensorflow as tf
 import numpy as np
+from inspect import signature
 
 def get_scorer(metric, model, X_test, y_test, custom_predict):
     if isinstance(metric, str):
@@ -25,8 +26,12 @@ def get_custom_scorer(metric, model, X_test, y_test, custom_predict):
         y_test = convert_to_numpy(y_test)
         y_pred = custom_predict(model, X_test)
         y_pred = convert_to_numpy(y_pred)
-        print("y?pred before", y_pred[0:10])
-        return metric(y_pred, y_test)
+
+        sig = signature(metric)
+        if len(sig.parameters) ==3:
+            return metric(model, y_pred, y_test)
+        else:
+            return metric(y_pred, y_test)
     except: raise Exception ("soemthing went wrong")  
 
 def convert_to_numpy(col):

@@ -2,6 +2,7 @@ from Robustness._sampling import sampleData
 from Robustness._plot import plotData
 from Robustness._importances import filter_on_importance_method
 from Robustness._scorers import get_scorer_sckit_learn, get_scorer
+from Robustness._train import reset_model, train_model
 from Noise._filter import filter_on_method, getLevels
 import numpy as np
 import pandas as pd
@@ -26,42 +27,6 @@ def initialize_progress_bar(corruption_list, corruptions, df):
         total += ((len(feature_names) * len(levels)) * corruptions)
     return tqdm(total=total, desc="Total progress: ", position=0)
 
-'''custom train should tak in the model, x and y. SHould return trained model. Custom train likely also need custom scoring function'''
-def custom_train_model(model, X, y, custom_train):
-    if not hasattr(custom_train, '__call__'):
-        raise Exception("Custom training must be a callable function")
-    try:
-        X = convert_to_numpy(X)
-        y = convert_to_numpy(y)
-        return custom_train(model, X, y)
-    except:
-        raise Exception("Could not train the model")
-
-def train_model(model, X, y, custom_train):
-    if custom_train != None:
-        return custom_train_model(model, X, y, custom_train)  
-    model.fit(X, y.values.ravel())
-    return model
-
-def convert_to_numpy(col):
-    if isinstance(col, pd.DataFrame):
-        return col.to_numpy()
-    elif isinstance(col, pd.Series):
-        return col.to_numpy()
-    elif tf.is_tensor(col):
-        return col.numpy()
-    elif isinstance(col, np.ndarray):
-        return col
-    else:
-        raise Exception("could not convert {} to numpy".format(type(col)))
-
-def reset_model(model):
-    if isinstance(model, nn.Conv2d):
-        torch.nn.init.xavier_uniform(model.weight.data)
-
-    return model
-
-
 def baseline(df_train, X_test, y_test, model, metric, feature_importance_measure, label_name, random_state, custom_train, custom_predict):
     baseline_results = pd.DataFrame(columns=['feature_name', 'value', 'variance', 'score'])
     if (label_name is None):
@@ -70,14 +35,12 @@ def baseline(df_train, X_test, y_test, model, metric, feature_importance_measure
     X = df_train.drop([label_name], axis=1)
     model = train_model(model, X, y, custom_train)
     score = get_scorer(metric, model, X_test, y_test, custom_predict)
-    print("score", score)
     for feature_name in X.columns:
         index = df_train.columns.get_loc(feature_name)
-        value, _ = filter_on_importance_method(model, index, X, y, random_state=random_state, scoring=metric, feature_importance_measure=feature_importance_measure)
+        value, _ = filter_on_importance_method(model, index, X, y, random_state=random_state, scoring=metric, feature_importance_measure=feature_importance_measure, custom_predict=custom_predict)
         variance = np.var(X[feature_name])
         baseline_results.loc[len(baseline_results.index)] = [feature_name, value, variance, score]
         model = reset_model(model)
-    print("baseline results", baseline_results)
     return baseline_results, label_name
 
 def fill_in_missing_columns(corrupted_df, df_train):
@@ -145,14 +108,11 @@ def corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importanc
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y, custom_train)
                 index = df_train.columns.get_loc(feature_name)
-                measured_value, measured_property = filter_on_importance_method(model, index, X, y, random_state=random, scoring=metric, feature_importance_measure=feature_importance_measure)
+                measured_value, measured_property = filter_on_importance_method(model, index, X, y, random_state=random, scoring=metric, feature_importance_measure=feature_importance_measure, custom_predict=custom_predict)
                 average_value.append(measured_value)
-
-                #corer = get_scorer_sckit_learn(metric)
-                #a = scorer._score_func(y_test, model.predict(X_test))
                 score = get_scorer(metric, model, X_test, y_test, custom_predict)
-
                 average_score.append(score)
+                model = reset_model(model)
                 progress_bar.update(1)
             method_corrupt_df[feature_name] = X[feature_name].values
             average_variance = np.average(average_variance)

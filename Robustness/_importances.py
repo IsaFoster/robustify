@@ -7,11 +7,11 @@ import lime
 from lime import lime_tabular
 import shap
 
-def filter_on_importance_method(model, index, X, y, random_state, scoring, feature_importance_measure):
+def filter_on_importance_method(model, index, X, y, random_state, scoring, feature_importance_measure, custom_predict):
     switcher = {
         None: lambda: check_for_deafult_properties(model, index, X, y, random_state, scoring),
         'eli5': lambda: calculate_eli5_importances(model, index, X, y, random_state, scoring),
-        'lime': lambda: calculate_lime_importances(model, index, X, y, random_state, scoring),
+        'lime': lambda: calculate_lime_importances(model, index, X, y, random_state, scoring, custom_predict),
         'shap': lambda: calculate_shap_importances(model, index, X, y, random_state, scoring)
     }
     return switcher.get(feature_importance_measure, lambda: print("Invalid importance measure for {}".format(str(model))))()
@@ -54,7 +54,7 @@ def calculate_eli5_importances(model, index, X, y, random_state, scoring):
         except:
             raise Exception("Could not compute eli5 importances") 
         
-def calculate_lime_importances(model, index, X, y, random_state, scoring):
+def calculate_lime_importances(model, index, X, y, random_state, scoring, custom_predict):
     try:
         measured_property = "lime explainer"
         explainer = lime_tabular.LimeTabularExplainer(
@@ -65,7 +65,10 @@ def calculate_lime_importances(model, index, X, y, random_state, scoring):
             verbose=False)
         values = []
         for i in range(int((X.shape[0]/10))):
-            predict_fn_rf = lambda x: model.predict_proba(x).astype(float)
+            if custom_predict:
+                predict_fn_rf = lambda x: custom_predict(model, x).astype(float)
+            else:
+                predict_fn_rf = lambda x: model.predict_proba(x).astype(float)
             exp = explainer.explain_instance(X.to_numpy()[i], predict_fn_rf, num_features=len(X.columns.tolist()))
             dic = dict(list(exp.as_map().values())[0])
             values.append(dic.get(index))
