@@ -1,13 +1,18 @@
 from Robustness._sampling import sampleData
 from Robustness._plot import plotData
 from Robustness._importances import filter_on_importance_method
-from Robustness._scorers import get_scorer_sckit_learn
+from Robustness._scorers import get_scorer_sckit_learn, get_scorer
 from Noise._filter import filter_on_method, getLevels
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import random
 import tensorflow as tf
+import types
+import torch
+import torch.nn.functional as F
+import torch.nn as nn
+from torch.autograd import Variable
 
 def set_random_seed(random_state):
     np.random.seed(random_state)
@@ -21,24 +26,58 @@ def initialize_progress_bar(corruption_list, corruptions, df):
         total += ((len(feature_names) * len(levels)) * corruptions)
     return tqdm(total=total, desc="Total progress: ", position=0)
 
-def train_model(model, X, y):
+'''custom train should tak in the model, x and y. SHould return trained model. Custom train likely also need custom scoring function'''
+def custom_train_model(model, X, y, custom_train):
+    if not hasattr(custom_train, '__call__'):
+        raise Exception("Custom training must be a callable function")
+    try:
+        X = convert_to_numpy(X)
+        y = convert_to_numpy(y)
+        return custom_train(model, X, y)
+    except:
+        raise Exception("Could not train the model")
+
+def train_model(model, X, y, custom_train):
+    if custom_train != None:
+        return custom_train_model(model, X, y, custom_train)  
     model.fit(X, y.values.ravel())
     return model
 
-def baseline(df_train, X_test, y_test, model, metric, feature_importance_measure, label_name=None, random_state=None):
+def convert_to_numpy(col):
+    if isinstance(col, pd.DataFrame):
+        return col.to_numpy()
+    elif isinstance(col, pd.Series):
+        return col.to_numpy()
+    elif tf.is_tensor(col):
+        return col.numpy()
+    elif isinstance(col, np.ndarray):
+        return col
+    else:
+        raise Exception("could not convert {} to numpy".format(type(col)))
+
+def reset_model(model):
+    if isinstance(model, nn.Conv2d):
+        torch.nn.init.xavier_uniform(model.weight.data)
+
+    return model
+
+
+def baseline(df_train, X_test, y_test, model, metric, feature_importance_measure, label_name, random_state, custom_train, custom_predict):
     baseline_results = pd.DataFrame(columns=['feature_name', 'value', 'variance', 'score'])
     if (label_name is None):
         label_name = str(list(df_train)[-1])
     y = df_train[label_name]
     X = df_train.drop([label_name], axis=1)
-    model = train_model(model, X, y)
+    model = train_model(model, X, y, custom_train)
+    score = get_scorer(metric, model, X_test, y_test, custom_predict)
+    print("score", score)
     for feature_name in X.columns:
         index = df_train.columns.get_loc(feature_name)
         value, _ = filter_on_importance_method(model, index, X, y, random_state=random_state, scoring=metric, feature_importance_measure=feature_importance_measure)
         variance = np.var(X[feature_name])
-        scorer = get_scorer_sckit_learn(metric)
-        score = scorer._score_func(y_test, model.predict(X_test))
         baseline_results.loc[len(baseline_results.index)] = [feature_name, value, variance, score]
+        model = reset_model(model)
+    print("baseline results", baseline_results)
     return baseline_results, label_name
 
 def fill_in_missing_columns(corrupted_df, df_train):
@@ -66,19 +105,19 @@ def fill_in_column_names_for_indexes(df, corruption_list):
             method[key] = value
     return corruption_list
 
-def corruptData(df_train, X_test, y_test, model, metric, corruption_list, corruptions, column_names=None, y_train=None, label_name=None, feature_importance_measure=None, random_state=None, plot=True):
+def corruptData(df_train, X_test, y_test, model, metric, corruption_list, corruptions, column_names=None, y_train=None, label_name=None, feature_importance_measure=None, random_state=None, plot=True, custom_train=None, custom_predict=None):
     set_random_seed(random_state)
     df_train = return_df_from_array_with_indexes_as_columns(df_train, column_names, y_train, label_name)
     X_test = return_df_from_array_with_indexes_as_columns(X_test, column_names)
     corruption_list = fill_in_column_names_for_indexes(df_train, corruption_list)
     corrupted_df = pd.DataFrame(columns=list(df_train))
-    baseline_results, label_name = baseline(df_train, X_test, y_test, model, metric, feature_importance_measure, label_name)
+    baseline_results, label_name = baseline(df_train, X_test, y_test, model, metric, feature_importance_measure, label_name, random_state, custom_train, custom_predict)
     randomlist = random.sample(range(1, 1000), corruptions)
     progress_bar = initialize_progress_bar(corruption_list, corruptions, df_train)
     corruption_result_list = []
     for method in list(corruption_list):
         method_name = list(method.keys())[0]
-        method_corrupt_df, corruption_result, measured_property = corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importance_measure, method, randomlist, label_name, random_state, progress_bar)
+        method_corrupt_df, corruption_result, measured_property = corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importance_measure, method, randomlist, label_name, random_state, progress_bar, custom_train, custom_predict)
         corruption_result_list.append(corruption_result)
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values  
@@ -88,7 +127,7 @@ def corruptData(df_train, X_test, y_test, model, metric, corruption_list, corrup
     progress_bar.close()
     return corrupted_df, corruption_result
 
-def corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importance_measure, method, randomlist, label_name, random_state, progress_bar):
+def corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importance_measure, method, randomlist, label_name, random_state, progress_bar, custom_train, custom_predict):
     corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'score'])
     feature_names, levels = getLevels(method, df_train)
     method_corrupt_df = pd.DataFrame(columns=feature_names)
@@ -104,13 +143,16 @@ def corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importanc
                     X, y = sampleData(df_train, label_name, 0.4, random_state=random)
                 X = filter_on_method(X, list(method.keys())[0], feature_name, level, random_state)  # TODO: no point in passing the whole DF to change one column
                 average_variance.append(np.var(X[feature_name]))
-                model = train_model(model, X, y)
+                model = train_model(model, X, y, custom_train)
                 index = df_train.columns.get_loc(feature_name)
                 measured_value, measured_property = filter_on_importance_method(model, index, X, y, random_state=random, scoring=metric, feature_importance_measure=feature_importance_measure)
                 average_value.append(measured_value)
-                scorer = get_scorer_sckit_learn(metric)
-                a = scorer._score_func(y_test, model.predict(X_test))
-                average_score.append(a)
+
+                #corer = get_scorer_sckit_learn(metric)
+                #a = scorer._score_func(y_test, model.predict(X_test))
+                score = get_scorer(metric, model, X_test, y_test, custom_predict)
+
+                average_score.append(score)
                 progress_bar.update(1)
             method_corrupt_df[feature_name] = X[feature_name].values
             average_variance = np.average(average_variance)

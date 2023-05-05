@@ -41,7 +41,7 @@ def calculate_eli5_importances(model, index, X, y, random_state, scoring):
     if not isinstance(scoring, str):
         try:
             measured_property = "eli5_custom_score_function"
-            _, score_decreases = get_score_importances(scoring, y, np.array(X), n_iter=1, random_state=random_state)
+            _, score_decreases = get_score_importances(scoring, np.array(X), y, n_iter=1, random_state=random_state)
             feature_importances = np.mean(score_decreases, axis=0)
             return feature_importances[index], measured_property
         except:
@@ -49,7 +49,6 @@ def calculate_eli5_importances(model, index, X, y, random_state, scoring):
     else:
         try: 
             importances = PermutationImportance(model, scoring=scoring, random_state=random_state, n_iter=1, cv="prefit", refit=False).fit(X, y)
-            #perm.feature_importances_std_
             measured_property = "eli5 permutation importance"
             return importances.feature_importances_[index], measured_property
         except:
