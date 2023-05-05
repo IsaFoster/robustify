@@ -1,8 +1,8 @@
-from Robustness._sampling import sampleData
-from Robustness._plot import plotData
-from Robustness._importances import filter_on_importance_method
-from Robustness._scorers import get_scorer_sckit_learn, get_scorer
-from Robustness._train import reset_model, train_model
+from Robustness.utils._sampling import sampleData
+from Robustness.utils._plot import plotData
+from Robustness.utils._importances import filter_on_importance_method
+from Robustness.utils._scorers import get_scorer_sckit_learn, get_scorer
+from Robustness.utils._train import reset_model, train_model
 from Noise._filter import filter_on_method, getLevels
 import numpy as np
 import pandas as pd

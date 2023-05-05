@@ -7,7 +7,7 @@ import types
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from torch.autograd import Variable
+from Robustness.util._transform import convert_to_numpy
 
 '''custom train should tak in the model, x and y. SHould return trained model. Custom train likely also need custom scoring function'''
 def custom_train_model(model, X, y, custom_train):
@@ -31,14 +31,3 @@ def reset_model(model):
         torch.nn.init.xavier_uniform(model.weight.data)
     return model
 
-def convert_to_numpy(col):
-    if isinstance(col, pd.DataFrame):
-        return col.to_numpy()
-    elif isinstance(col, pd.Series):
-        return col.to_numpy()
-    elif tf.is_tensor(col):
-        return col.numpy()
-    elif isinstance(col, np.ndarray):
-        return col
-    else:
-        raise Exception("could not convert {} to numpy".format(type(col)))

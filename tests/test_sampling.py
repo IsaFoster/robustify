@@ -1,4 +1,4 @@
-from Robustness import _sampling
+from Robustness.utils import _sampling
 import pandas as pd
 import numpy as np
 

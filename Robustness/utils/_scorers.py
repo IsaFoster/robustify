@@ -2,7 +2,8 @@ from sklearn import metrics
 import pandas as pd
 import tensorflow as tf
 import numpy as np
-from inspect import signature
+from inspect import signature¨
+from Robustness.utils._transform import convert_to_numpy
 
 def get_scorer(metric, model, X_test, y_test, custom_predict):
     if isinstance(metric, str):
@@ -33,13 +34,3 @@ def get_custom_scorer(metric, model, X_test, y_test, custom_predict):
         else:
             return metric(y_pred, y_test)
     except: raise Exception ("soemthing went wrong")  
-
-def convert_to_numpy(col):
-    if isinstance(col, pd.DataFrame):
-        return col.to_numpy()
-    elif tf.is_tensor(col):
-        return col.numpy()
-    elif isinstance(col, np.ndarray):
-        return col
-    else:
-        raise Exception("could not convert {} to numpy").__format__(type(col))
