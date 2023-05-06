@@ -7,7 +7,7 @@ def filter_on_method(df, method, feature_name, level=None, random_state=None):
         'Gaussian': lambda: Gaussian_Noise(df, level, feature_name, random_state),
         'Poisson': lambda: Poisson_noise(df, feature_name, random_state)
     }
-    return switcher.get(method, lambda: print("Invalid corruption method for feature {}".format(feature_name)))()
+    return switcher.get(method, lambda: ValueError("Invalid corruption method for feature {}".format(feature_name)))()
 
 def get_feature_name_from_index(feature_names, df):
     return [list(df)[i] for i in feature_names]
@@ -21,6 +21,8 @@ def getLevels(methodSpecification, df=None):
             feature_names, levels = list(methodSpecification.values())[0], [-1]
         else:
             feature_names, levels = list(methodSpecification.values())[0][0], [-1]
+    else:
+        raise ValueError("Method {} not recognized".format(method))
     if all([isinstance(item, int) for item in feature_names]):
         feature_names = get_feature_name_from_index(feature_names, df)
     return feature_names, levels

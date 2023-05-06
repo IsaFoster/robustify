@@ -21,7 +21,7 @@ def set_random_seed(random_state):
     tf.random.set_seed(random_state) 
 
 def initialize_progress_bar(corruption_list, corruptions, df):
-    total = 0 
+    total = 1 
     for item in list(corruption_list):
         feature_names, levels = getLevels(item, df)
         total += ((len(feature_names) * len(levels)) * corruptions)
@@ -73,10 +73,11 @@ def corruptData(df_train, X_test, y_test, model, metric, corruption_list, corrup
     df_train = return_df_from_array_with_indexes_as_columns(df_train, column_names, y_train, label_name)
     X_test = return_df_from_array_with_indexes_as_columns(X_test, column_names)
     corruption_list = fill_in_column_names_for_indexes(df_train, corruption_list)
+    progress_bar = initialize_progress_bar(corruption_list, corruptions, df_train)
     corrupted_df = pd.DataFrame(columns=list(df_train))
     baseline_results, label_name = baseline(df_train, X_test, y_test, model, metric, feature_importance_measure, label_name, random_state, custom_train, custom_predict)
+    progress_bar.update(1)
     randomlist = random.sample(range(1, 1000), corruptions)
-    progress_bar = initialize_progress_bar(corruption_list, corruptions, df_train)
     corruption_result_list = []
     for method in list(corruption_list):
         method_name = list(method.keys())[0]
@@ -104,7 +105,7 @@ def corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importanc
                     X, y = sampleData(df_train, label_name, 1, random_state=random)
                 else: 
                     X, y = sampleData(df_train, label_name, 0.4, random_state=random)
-                X = filter_on_method(X, list(method.keys())[0], feature_name, level, random_state)  # TODO: no point in passing the whole DF to change one column
+                X = filter_on_method(X, list(method.keys())[0], feature_name, level, random_state)
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y, custom_train)
                 index = df_train.columns.get_loc(feature_name)
