@@ -16,9 +16,14 @@ def Poisson_noise(clean_data, feature_name=None, random_state=None):
     np.random.seed(random_state)
     if (isinstance(clean_data, pd.DataFrame)):
         data_col = clean_data[feature_name]
-        noise = np.random.poisson(lam=len(data_col), size=data_col.shape[0])   ## lam cannot be < 0 
-        clean_data[feature_name] = data_col + noise
+        index_data = np.searchsorted(np.unique(data_col), data_col)
+        noise = np.random.poisson(np.mean(data_col), size=data_col.shape)
+        noisy_index = np.clip(index_data + noise, min(index_data), max(index_data))
+        clean_data[feature_name] = np.take(np.unique(data_col), noisy_index)
         return clean_data
     if (isinstance(clean_data, (np.ndarray, np.generic))):
-        noise = np.random.poisson(np.mean(clean_data), len(clean_data))
-        return clean_data + noise 
+        index_data = np.searchsorted(np.unique(clean_data), clean_data)
+        noise = np.random.poisson(np.mean(clean_data), size=clean_data.shape)
+        noisy_index = np.clip(index_data + noise, min(index_data), max(index_data))
+        return np.take(np.unique(clean_data), noisy_index)
+

@@ -23,3 +23,6 @@ def test_poisson_noise_array_input_returns_array():
     noisy_array = Poisson_noise(test_data, random_state=10)
     assert (isinstance(noisy_array, np.ndarray))
 
+def test_poisson_noise_categories_remain():
+    noisy_array = Poisson_noise(test_data, random_state=10)
+    assert (np.unique(test_data).all() == np.unique(noisy_array).all())
