@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from Noise._filter import getLevels
+from Noise.utils._filter import getLevels
 
 def plotData(baseline_results, corruption_result_list, model_name, corruptions, measured_property, method_name, corruption_list):
     histogram_plot = []
