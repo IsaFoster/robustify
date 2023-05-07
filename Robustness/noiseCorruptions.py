@@ -1,19 +1,14 @@
 from Robustness.utils._sampling import sampleData
 from Robustness.utils._plot import plotData
 from Robustness.utils._importances import filter_on_importance_method
-from Robustness.utils._scorers import get_scorer_sckit_learn, get_scorer
+from Robustness.utils._scorers import get_scorer
 from Robustness.utils._train import reset_model, train_model
-from Noise._filter import filter_on_method, getLevels
+from Noise.utils._filter import filter_on_method, getLevels
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import random
 import tensorflow as tf
-import types
-import torch
-import torch.nn.functional as F
-import torch.nn as nn
-from torch.autograd import Variable
 
 def set_random_seed(random_state):
     np.random.seed(random_state)
