@@ -9,6 +9,7 @@ import pandas as pd
 from tqdm import tqdm
 import random
 import tensorflow as tf
+from sklearn.utils import Bunch
 
 def set_random_seed(random_state):
     np.random.seed(random_state)
@@ -73,18 +74,20 @@ def corruptData(df_train, X_test, y_test, model, metric, corruption_list, corrup
     baseline_results, label_name = baseline(df_train, X_test, y_test, model, metric, feature_importance_measure, label_name, random_state, custom_train, custom_predict)
     progress_bar.update(1)
     randomlist = random.sample(range(1, 1000), corruptions)
-    corruption_result_list = []
+    corruption_results = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'score'])
     for method in list(corruption_list):
         method_name = list(method.keys())[0]
         method_corrupt_df, corruption_result, measured_property = corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importance_measure, method, randomlist, label_name, random_state, progress_bar, custom_train, custom_predict)
-        corruption_result_list.append(corruption_result)
+        corruption_results = pd.concat([corruption_results, corruption_result])
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values  
     if (plot):
-        plotData(baseline_results, corruption_result_list, str(model), corruptions, measured_property, method_name, corruption_list)
+        plotData(baseline_results, corruption_results, str(model), corruptions, measured_property, method_name, corruption_list)
     corrupted_df = fill_in_missing_columns(corrupted_df, df_train)
     progress_bar.close()
-    return corrupted_df, corruption_result
+    corruption_results = corruption_results.sort_values(by=['feature_name', 'level'])
+    result = Bunch(corrupted_df=corrupted_df, corruption_result=corruption_result)
+    return result
 
 def corruptDataMethod(df_train, X_test, y_test, model, metric, feature_importance_measure, method, randomlist, label_name, random_state, progress_bar, custom_train, custom_predict):
     corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'score'])
