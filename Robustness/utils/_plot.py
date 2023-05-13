@@ -5,11 +5,9 @@ import plotly.graph_objects as go
 from Noise.utils._filter import getLevels
 
 def plotData(baseline_results, corruption_results, model_name, corruptions, measured_property, method_name, corruption_list):
-    df_plot_line = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'score'])
-    df_plot_bar = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'score'])
+    df_plot_line = df_plot_bar =pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'score'])
     bar_list = []
     line_list = []
-
     for corruption in corruption_list:
         features, levels = getLevels(corruption)
         if (len(levels) > 1):
@@ -26,9 +24,6 @@ def plotData(baseline_results, corruption_results, model_name, corruptions, meas
         plotNoiseCorruptionValuesHistogram(baseline_results, df_plot_bar, model_name, corruptions, measured_property, 'value', bar_list)
         plotNoiseCorruptionValuesHistogram(baseline_results, df_plot_bar, model_name, corruptions, measured_property, 'variance', bar_list)
         plotNoiseCorruptionScoresHistogram(baseline_results, df_plot_bar, model_name, corruptions, measured_property, 'score', bar_list) 
-
-
-
 
 def get_colors_from_fig(fig):
     colors = []
@@ -83,6 +78,12 @@ def plotButtons(corruption_list, featureNames):
             button_layout[0].update({'buttons': button_values})
     return button_layout, visible_features
 
+def sort_df_by_list(df, feature, order): 
+    df[feature] = df[feature].astype("category")
+    df[feature] = df[feature].cat.set_categories(order)
+    df = df.sort_values([feature]) 
+    return df
+
 def plotNoiseCorruptionValues(baseline_results, corruption_results, model_name, corruptions, measured_property, measured_name, corruptions_list):
     title = "Average {} of {} over {} {} corruptions at increasing noise levels".format(measured_name.replace("_", " "), measured_property, corruptions, model_name)
     fig = px.line(corruption_results, x="level", y=measured_name, color='feature_name')
@@ -97,17 +98,11 @@ def plotNoiseCorruptionValues(baseline_results, corruption_results, model_name, 
 def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_results, model_name, corruptions, measured_property, measured_name, corruptions_list):
     title = "Average {} of {} for features for {} over {} noise corruptions".format(measured_name.replace("_", " "), measured_property, model_name, corruptions)
     results = pd.DataFrame(columns=['feature_name', measured_name, measured_name +'_noisy'])
-    baseline_results = baseline_results.sort_values("feature_name")
-    for corruption_result in corruption_results:
-        results_temp = pd.DataFrame(columns=['feature_name', measured_name, measured_name+'_noisy'])
-        corruption_result = corruption_result.sort_values("feature_name")
-        results_temp['feature_name'] = corruption_result['feature_name'].unique().tolist()
-        results_temp['feature_name'] = results_temp['feature_name'].astype(str)
-        results_temp[measured_name] = baseline_results[baseline_results['feature_name'].isin(results_temp['feature_name'].values.tolist())][measured_name].values.tolist()
-        results_temp[measured_name+'_noisy'] = corruption_result[measured_name].values.tolist()
-        results_temp = results_temp.sort_values(measured_name, ascending=False)
-        results = pd.concat([results, results_temp], axis=0)
-    results = results.reset_index()
+    order = corruption_results['feature_name'].unique().tolist()
+    results['feature_name'] = corruption_results.sort_values("feature_name")['feature_name'].unique().tolist()
+    results[measured_name] = baseline_results.sort_values("feature_name")[baseline_results['feature_name'].isin(results['feature_name'].values.tolist())][measured_name].values.tolist()
+    results[measured_name+'_noisy'] = corruption_results.sort_values("feature_name")[measured_name].values.tolist() 
+    results = sort_df_by_list(results, "feature_name", order)
     fig = go.Figure()
     for (index, rowData) in results.iterrows():
         fig.add_trace(
@@ -123,7 +118,7 @@ def plotNoiseCorruptionValuesHistogram(baseline_results, corruption_results, mod
             go.Bar(x=[rowData["feature_name"]], 
                    y=[rowData[measured_name+'_noisy']], 
                    name=rowData['feature_name'],  
-                   marker_color = 'rgba' + str(hex_to_rgba(colors[index][1:], 0.5, 1.2)), 
+                   marker_color = 'rgba' + str(hex_to_rgba(colors[order.index(rowData["feature_name"])][1:], 0.5, 1.2)), 
                    showlegend=False,
                    legendgroup=index,
                    width=0.4)
@@ -144,15 +139,8 @@ def plotNoiseCorruptionScoresHistogram(baseline_results, corruption_results, mod
     title = "Average {} for {} over {} noise corruptions".format(measured_name.replace("_", " "), model_name, corruptions)
     results = pd.DataFrame(columns=['feature_name', measured_name])
     baseline_results = baseline_results.sort_values("feature_name")
-    for corruption_result in corruption_results:
-        results_temp = pd.DataFrame(columns=['feature_name', measured_name])
-        corruption_result = corruption_result.sort_values("feature_name")
-        results_temp['feature_name'] = corruption_result['feature_name'].unique().tolist()
-        results_temp['feature_name'] = results_temp['feature_name'].astype(str)
-        results_temp[measured_name] = corruption_result[measured_name].values.tolist()
-        results_temp = results_temp.sort_values(measured_name, ascending=False)
-        results = pd.concat([results, results_temp], axis=0)
-    results = results.reset_index(drop=True)
+    results['feature_name'] = corruption_results['feature_name'].unique().tolist()
+    results[measured_name] = corruption_results[measured_name].values.tolist()
     data = []
     data.insert(0, {"feature_name": "baseline", measured_name: baseline_results[measured_name].iloc[0]})
     results = pd.concat([pd.DataFrame(data), results], ignore_index=True)
