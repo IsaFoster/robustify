@@ -34,9 +34,9 @@ def get_custom_scorer(metric, model, X_test, y_test, custom_predict):
         raise
 
 def validate_score(score):
-    if score == None or isinstance(score, (str, bool)):
+    if score is None or isinstance(score, (str, bool)):
         raise TypeError("Score must be a quantitative value, not {}".format(type(score)))  
-    if len(score) != 1 or isinstance(score, (list, dict, tuple)):
+    if isinstance(score, (list, dict, tuple)):
         raise ValueError("Score must be a single value, not {}".format(type(score)))
 
     
