@@ -48,7 +48,7 @@ def fill_in_missing_columns(corrupted_df, X_train):
 def return_df_from_array_with_indexes_as_columns(X, column_names, y=None, label_name=None):
     if (isinstance(X, (np.ndarray, np.generic, list))):
         df = pd.DataFrame(X, columns = column_names)
-        if (label_name == None):
+        if (label_name is None):
             label_name = str(len(df.columns))
         if (y is not None) and (label_name not in df):
             df[label_name] = y

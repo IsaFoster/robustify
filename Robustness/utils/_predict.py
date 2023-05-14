@@ -16,7 +16,7 @@ def get_prediction(model, X, custom_predict):
             raise
 
 def verify_predictions(X, y_pred,custom_predict):
-    if y_pred == None:
+    if y_pred is None:
         raise TypeError("No predictions produced by method {}".format(custom_predict.__name__))
     if len(X) != len(y_pred):
         raise ValueError("Length of predictions by method {} must match length of input".format(custom_predict.__name__))
