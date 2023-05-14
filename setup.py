@@ -16,7 +16,7 @@ setup(
     install_requires=['numpy==1.24.3', 
                       'sklearn==0.0', 
                       'matplotlib==3.6.2', 
-                      'pandas==1.5.1', 
+                      'pandas==2.0.1', 
                       'plotly==5.11.0', 
                       'tqdm==4.64.1',
                       'chart_studio==1.1.0', 
