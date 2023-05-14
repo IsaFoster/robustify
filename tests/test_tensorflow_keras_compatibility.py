@@ -28,32 +28,33 @@ corruption_list_classification = [
     {'Gaussian': [[1, 3], [0.3]]}]
 
 def run_corruption_classification(model):
-    return corruptData(X_train_classification, 
-                        X_test_classification, 
-                        y_test_classification, 
-                        model, 
-                        'r2',
-                        corruption_list_classification, 
-                        corruptions=10,
-                        y_train=y_train_classification, 
-                        label_name='species', 
-                        column_names=['sepal_length', 'sepal_width', 'petal_length', 'petal_width'], 
-                        random_state=10, 
-                        plot=False)
+    return corruptData(model,
+                       corruption_list_classification, 
+                       X_train_classification, 
+                       X_test_classification,
+                       'r2', 
+                       y_train_classification, 
+                       y_test_classification, 
+                       column_names=['sepal_length', 'sepal_width', 'petal_length', 'petal_width'],
+                       label_name='species', 
+                       corruptions=10,
+                       random_state=10, 
+                       plot=False)
 
 def run_corruption_regression(model):
-    return corruptData(X_train_regression, 
-                        X_test_regression, y_test_regression, 
-                        model, 
-                        "r2",
-                        corruption_list_regression, 
-                        10, 
-                        y_train=y_train_regression,
-                        random_state=10, 
-                        column_names=['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6'],
-                        feature_importance_measure="eli5",
-                        label_name='diabetes',
-                        plot=False)
+    return corruptData(model,
+                       corruption_list_regression,  
+                       X_train_regression, 
+                       X_test_regression,
+                       "r2",
+                       y_train_regression,
+                       y_test_regression,
+                       ['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6'],
+                       'diabetes',
+                       "eli5",
+                       10,
+                       random_state=10,
+                       plot=False)
 
 def test_tensorflow_is_reproducible():
     model_1 = tf.keras.Sequential([
@@ -62,7 +63,7 @@ def test_tensorflow_is_reproducible():
     model_1.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=0.1),
     loss='mean_absolute_error')
-    corrupted_df_1, corruption_result_1 = run_corruption_regression(model_1)
+    result = run_corruption_regression(model_1)
 
     model_2 = tf.keras.Sequential([
     layers.Dense(units=1)
@@ -70,10 +71,10 @@ def test_tensorflow_is_reproducible():
     model_2.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=0.1),
     loss='mean_absolute_error')
-    corrupted_df_2, corruption_result_2 = run_corruption_regression(model_2)
+    result_2 = run_corruption_regression(model_2)
     
-    assert (corrupted_df_1.equals(corrupted_df_2))
-    assert (corruption_result_1.equals(corruption_result_2))
+    assert (result.corrupted_df.equals(result_2.corrupted_df))
+    assert (result.corruption_result.equals(result_2.corruption_result))
 
 def test_linear_model_regression():
     model = tf.keras.Sequential([
@@ -83,10 +84,10 @@ def test_linear_model_regression():
     optimizer=tf.keras.optimizers.Adam(learning_rate=0.1),
     loss='mean_absolute_error')
 
-    corrupted_df, corruption_result = run_corruption_regression(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_regression(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_linear_model_classification():
     model = tf.keras.Sequential([
@@ -96,10 +97,10 @@ def test_linear_model_classification():
     optimizer=tf.keras.optimizers.Adam(learning_rate=0.1),
     loss='mean_absolute_error')
 
-    corrupted_df, corruption_result = run_corruption_classification(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_classification(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 
 def test_dnn_model_regression():
@@ -112,10 +113,10 @@ def test_dnn_model_regression():
     optimizer=tf.keras.optimizers.Adam(learning_rate=0.1),
     loss='mean_absolute_error')
 
-    corrupted_df, corruption_result = run_corruption_regression(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_regression(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_dnn_model_classification():
     model = keras.Sequential([
@@ -127,7 +128,7 @@ def test_dnn_model_classification():
         optimizer='adam',
         metrics=tf.metrics.BinaryAccuracy(threshold=0.0))
 
-    corrupted_df, corruption_result = run_corruption_classification(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_classification(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)

@@ -23,115 +23,115 @@ corruption_list_classification = [
     {'Gaussian': [[0, 2], [0.2]]},
     {'Gaussian': [[1, 3], [0.3]]}]
 
-
 def run_corruption_classification(model):
-    return corruptData(X_train_classification, 
-                        X_test_classification, 
-                        y_test_classification, 
-                        model, 
-                        'accuracy',
-                        corruption_list_classification, 
-                        corruptions=10,
-                        y_train=y_train_classification, 
-                        label_name='species', 
-                        column_names=['sepal_length', 'sepal_width', 'petal_length', 'petal_width'], 
-                        random_state=10, 
-                        plot=False)
+    return corruptData(model,
+                       corruption_list_classification,
+                       X_train_classification, 
+                       X_test_classification, 
+                       'accuracy',
+                       y_train_classification, 
+                       y_test_classification,  
+                       column_names=['sepal_length', 'sepal_width', 'petal_length', 'petal_width'], 
+                       label_name='species', 
+                       corruptions=10,
+                       random_state=10, 
+                       plot=False)
 
 def run_corruption_regression(model):
-    return corruptData(X_train_regression, 
-                        X_test_regression, y_test_regression, 
-                        model, 
-                        "r2",
-                        corruption_list_regression, 
-                        10, 
-                        y_train=y_train_regression,
-                        random_state=10, 
-                        plot=False)
+    return corruptData(model,
+                       corruption_list_regression, 
+                       X_train_regression, 
+                       X_test_regression, 
+                       "r2",
+                       y_train_regression,
+                       y_test_regression,
+                       corruptions=10,
+                       random_state=10,
+                       plot=False)
 
 def test_linear_model_regression():
     model = linear_model.LinearRegression()
-    corrupted_df, corruption_result = run_corruption_regression(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_regression(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_linear_model_classification():
     model = linear_model.RidgeClassifier()
-    corrupted_df, corruption_result = run_corruption_classification(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_classification(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_SVM_model_regression():
     model = svm.SVR()
-    corrupted_df, corruption_result = run_corruption_regression(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_regression(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_SVM_model_classification():
     model = svm.SVC(decision_function_shape='ovo')
-    corrupted_df, corruption_result = run_corruption_classification(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_classification(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_KNN_model_regression():
     model = neighbors.KNeighborsRegressor()
-    corrupted_df, corruption_result = run_corruption_regression(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_regression(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_KNN_model_classification():
     model = neighbors.KNeighborsClassifier()
-    corrupted_df, corruption_result = run_corruption_classification(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_classification(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_GP_model_regression():
     model = gaussian_process.GaussianProcessRegressor()
-    corrupted_df, corruption_result = run_corruption_regression(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_regression(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_GP_model_classification():
     model = gaussian_process.GaussianProcessClassifier()
-    corrupted_df, corruption_result = run_corruption_classification(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_classification(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_DT_model_regression():
     model = tree.DecisionTreeRegressor()
-    corrupted_df, corruption_result = run_corruption_regression(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_regression(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_DT_model_classification():
     model = tree.DecisionTreeClassifier()
-    corrupted_df, corruption_result = run_corruption_classification(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_classification(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_NN_model_regression():
     model = neural_network.MLPRegressor()
-    corrupted_df, corruption_result = run_corruption_regression(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_regression(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 def test_NN_model_classification():
     model = neural_network.MLPClassifier()
-    corrupted_df, corruption_result = run_corruption_classification(model)
-    assert (corrupted_df is not None)
-    assert (corruption_result is not None)
-    assert (corruption_result.isnull().values.any() == False)
+    result = run_corruption_classification(model)
+    assert (result.corrupted_df is not None)
+    assert (result.corruption_result is not None)
+    assert (result.corruption_result.isnull().values.any() == False)
 
 
 
