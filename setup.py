@@ -29,7 +29,7 @@ setup(
                       'shap==0.41.0',
                       'torch==2.0.0'], # list of packages that are absolutely needed, not standard library
     setup_requires=['pytest-runner'], # only installed when required to run tests
-    tests_require=['pytest==7.2.2'],
+    tests_require=['pytest==7.3.1'],
     test_suite='tests',
 )
     
