@@ -1,7 +1,7 @@
 from sklearn import metrics
 from inspect import signature
-from Robustness.utils._transform import convert_to_numpy
-from Robustness.utils._predict import get_prediction
+from ._transform import convert_to_numpy
+from ._predict import get_prediction
 
 def get_scorer(metric, model, X_test, y_test, custom_predict):
     if isinstance(metric, str):

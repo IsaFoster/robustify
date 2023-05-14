@@ -9,7 +9,7 @@
 Welcome to Robustify, a GitHub repository focused on evaluating the effects of adding structurally conserving noise to data. The goal is to provide a comprehensive set of tools for researchers and practitioners interested in exploring the impact of noise on the score and robustness of their machine learning models. The repository includes a variety of noise generation and augmentation techniques, as well as methods for evaluating the effects of noise on model performance, robustness metrics and visualizations. 
 
 <p align="center">
-  <img src="https://github.com/IsaFoster/Robustify/blob/ed05ecac1f5eb39c4858b292eccf63f077454e1a/docs/images/robustify.png" width="800" />
+  <img src="https://github.com/IsaFoster/robustify/blob/ed05ecac1f5eb39c4858b292eccf63f077454e1a/docs/images/robustify.png" width="800" />
 </p>
 
 ## Install
@@ -54,7 +54,7 @@ See the [Wiki][1] for documentation of the availabel methods.
 
 License is MIT.
 
-[1]: https://github.com/IsaFoster/Robustify/wiki
+[1]: https://github.com/IsaFoster/robustify/wiki
 [2]: https://scikit-learn.org/stable/index.html
 [3]: https://scikit-learn.org/stable/modules/generated/sklearn.inspection.permutation_importance.html
 [4]: https://github.com/TeamHG-Memex/eli5

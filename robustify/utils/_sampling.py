@@ -1,4 +1,4 @@
-def sampleData(df, labelColumn, frac, random_state=None):
+def sample_data(df, labelColumn, frac, random_state=None):
     if frac == 1:
         y = df[[labelColumn]].squeeze()
         X = df.drop([labelColumn], axis=1)

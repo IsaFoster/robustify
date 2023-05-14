@@ -1,4 +1,4 @@
-from Robustness.utils._transform import convert_to_numpy
+from ._transform import convert_to_numpy
 
 def get_prediction(model, X, custom_predict):
     if custom_predict != None:
