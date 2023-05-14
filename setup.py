@@ -17,7 +17,7 @@ setup(
                       'sklearn==0.0', 
                       'matplotlib==3.6.2', 
                       'pandas==2.0.1', 
-                      'plotly==5.11.0', 
+                      'plotly==5.14.1', 
                       'tqdm==4.64.1',
                       'chart_studio==1.1.0', 
                       'python-dotenv==0.21.0',
