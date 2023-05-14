@@ -13,7 +13,7 @@ setup(
         "Intended Audience :: Science/Research",
         "Programming Language :: Python :: 3.10",
     ],
-    install_requires=['numpy==1.24.2', 
+    install_requires=['numpy==1.24.3', 
                       'sklearn==0.0', 
                       'matplotlib==3.6.2', 
                       'pandas==1.5.1', 
