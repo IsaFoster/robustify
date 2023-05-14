@@ -23,7 +23,7 @@ setup(
                       'python-dotenv==0.21.0',
                       'tensorflow==2.11.1',
                       'kaleido==0.2.1',
-                      'ipython==8.11.0',
+                      'ipython==8.13.2',
                       'eli5==0.13.0',
                       'lime==0.2.0.1',
                       'shap==0.41.0',
