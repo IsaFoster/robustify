@@ -20,7 +20,7 @@ setup(
                       'plotly==5.14.1', 
                       'tqdm==4.64.1',
                       'chart_studio==1.1.0', 
-                      'python-dotenv==0.21.0',
+                      'python-dotenv==1.0.0',
                       'tensorflow==2.11.1',
                       'kaleido==0.2.1',
                       'ipython==8.11.0',
