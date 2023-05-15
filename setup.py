@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 setup(
     name='robustify',
     packages=find_packages(include=['robustify', 'tests']),
-    version='0.0.1',
+    version='0.0.3',
     readme = "README.md",
     description = "Robustify:" ,
     long_description="A python library focused on evaluating the effects of adding structurally conserving noise to data. The goal is to provide a comprehensive set of tools for researchers and practitioners interested in exploring the impact of noise on the score and robustness of their machine learning models.",
