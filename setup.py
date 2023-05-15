@@ -14,7 +14,7 @@ setup(
         "Programming Language :: Python :: 3.10",
     ],
     install_requires=['numpy==1.24.3', 
-                      'sklearn==0.0', 
+                      'sklearn==0.0.post5', 
                       'matplotlib==3.6.2', 
                       'pandas==2.0.1', 
                       'plotly==5.14.1', 
