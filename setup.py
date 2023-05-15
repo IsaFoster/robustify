@@ -12,6 +12,7 @@ setup(
     readme="README.md",
     description="Robustify:" ,
     long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Isabel Foster',
     license='MIT',
     classifiers=[
