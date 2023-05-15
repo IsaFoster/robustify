@@ -21,7 +21,7 @@ setup(
                       'tqdm==4.64.1',
                       'chart_studio==1.1.0', 
                       'python-dotenv==1.0.0',
-                      'tensorflow==2.11.1',
+                      'tensorflow==2.12.0',
                       'kaleido==0.2.1',
                       'ipython==8.11.0',
                       'eli5==0.13.0',
