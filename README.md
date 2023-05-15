@@ -1,6 +1,6 @@
 [![codecov](https://codecov.io/gh/IsaFoster/MasterThesis/branch/main/graph/badge.svg?token=9CWBWHNZML)](https://app.codecov.io/gh/IsaFoster/MasterThesis/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CodeQL](https://github.com/IsaFoster/MasterThesis/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/IsaFoster/MasterThesis/actions/workflows/github-code-scanning/codeql)
+[![CodeQL](https://github.com/IsaFoster/robustify/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/IsaFoster/robustify/actions/workflows/codeql-analysis.yml)
 [![Build](https://github.com/IsaFoster/MasterThesis/actions/workflows/python-package.yml/badge.svg)](https://github.com/IsaFoster/MasterThesis/actions/workflows/python-package.yml)
 
 
