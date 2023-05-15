@@ -15,7 +15,7 @@ setup(
     ],
     install_requires=['numpy==1.24.3', 
                       'scikit-learn==1.2.2', 
-                      'matplotlib==3.6.2', 
+                      'matplotlib==3.7.1', 
                       'pandas==2.0.1', 
                       'plotly==5.14.1', 
                       'tqdm==4.64.1',
