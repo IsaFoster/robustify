@@ -1,6 +1,4 @@
-from Robustness.noiseCorruptions import corruptData
-import pandas as pd
-import numpy as np
+from robustify import corrupt_data
 from sklearn.model_selection import train_test_split
 from sklearn import datasets, linear_model, svm, neighbors, gaussian_process, tree, neural_network
 
@@ -24,7 +22,7 @@ corruption_list_classification = [
     {'Gaussian': [[1, 3], [0.3]]}]
 
 def run_corruption_classification(model):
-    return corruptData(model,
+    return corrupt_data(model,
                        corruption_list_classification,
                        X_train_classification, 
                        X_test_classification, 
@@ -33,19 +31,19 @@ def run_corruption_classification(model):
                        y_test_classification,  
                        column_names=['sepal_length', 'sepal_width', 'petal_length', 'petal_width'], 
                        label_name='species', 
-                       corruptions=10,
+                       n_corruptions=10,
                        random_state=10, 
                        plot=False)
 
 def run_corruption_regression(model):
-    return corruptData(model,
+    return corrupt_data(model,
                        corruption_list_regression, 
                        X_train_regression, 
                        X_test_regression, 
                        "r2",
                        y_train_regression,
                        y_test_regression,
-                       corruptions=10,
+                       n_corruptions=10,
                        random_state=10,
                        plot=False)
 
