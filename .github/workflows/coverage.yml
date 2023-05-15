@@ -1,4 +1,5 @@
 name: Codecov
+
 on:
   push:
     branches: [ "main" ]
@@ -6,33 +7,46 @@ on:
     branches: [ "main" ]
 
 jobs:
-  run:
-    runs-on: ${{ matrix.os }}
+  build:
+
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    env:
-      OS: ${{ matrix.os }}
-      PYTHON: '3.10'
+        python-version: ["3.10"]
+
     steps:
-    - uses: actions/checkout@master
-    - name: Setup Python
-      uses: actions/setup-python@master
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
       with:
-        python-version: 3.10
-    - name: Generate coverage report
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
       run: |
-        pip install pytest
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest
+        pip install -e . 
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pytest -W ignore tests/test_sampling.py
+        pytest -W ignore tests/test_gaussianNoise.py
+        pytest -W ignore tests/test_scikt-learn_compatibility.py
+        pytest -W ignore tests/test_poissonNoise.py
+        pytest -W ignore tests/test_tensorflow_keras_compatibility.py
+    - name: Generate Report if master is pulled
+      run: |
+        pip install codecov
         pip install pytest-cov
         pytest --cov=./ --cov-report=xml
-    - name: Upload coverage to Codecov
+        codecov
+    - name: Upload coverage reports to Codecov with GitHub Action
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        directory: ./coverage/reports/
-        env_vars: OS,PYTHON
-        fail_ci_if_error: true
-        files: ./coverage1.xml,./coverage2.xml,!./cache
-        flags: unittests
-        name: codecov-umbrella
-        verbose: true
+        fail_ci_if_error: false
