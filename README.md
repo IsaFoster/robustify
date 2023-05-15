@@ -14,10 +14,11 @@ Welcome to Robustify, a GitHub repository focused on evaluating the effects of a
 
 ## Install
 Robustify can be installed from either PyPI or conda-forge:
+
 <pre>
-pip install robustify
+pip install RobustifyToolkit
 <i>or</i>
-<del>conda install -c conda-forge robustify </del>
+<del>conda install -c conda-forge RobustifyToolkit </del>
 </pre>
 
 ## Usages
