@@ -15,7 +15,7 @@ Robustify can be installed from either PyPI or conda-forge:
 <pre>
 pip install robustify
 <i>or</i>
-conda install -c conda-forge robustify
+<del>conda install -c conda-forge robustify </del>
 </pre>
 
 ## Usages
