@@ -6,9 +6,9 @@ long_description = (this_directory / "README.md").read_text()
 
 from setuptools import find_packages, setup
 setup(
-    name='robustify',
+    name='RobustifyToolkit',
     packages=find_packages(include=['robustify', 'tests']),
-    version='0.0.4',
+    version='0.0.5',
     readme="README.md",
     description="Robustify:" ,
     long_description=long_description,
@@ -16,11 +16,15 @@ setup(
     author='Isabel Foster',
     license='MIT',
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "Intended Audience :: Science/Research",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
     install_requires=['numpy', 
                       'scikit-learn', 

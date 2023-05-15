@@ -1,6 +1,8 @@
 [![codecov](https://codecov.io/gh/IsaFoster/robustify/branch/main/graph/badge.svg?token=9CWBWHNZML)](https://app.codecov.io/gh/IsaFoster/robustify/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CodeQL](https://github.com/IsaFoster/robustify/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/IsaFoster/robustify/actions/workflows/codeql-analysis.yml)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/RobustifyToolkit)](https://pypi.org/project/RobustifyToolkit/)
+[![PyPI](https://badge.fury.io/py/RobustifyToolkit.svg)](https://badge.fury.io/py/RobustifyToolkit)
 [![Build](https://github.com/IsaFoster/MasterThesis/actions/workflows/python-package.yml/badge.svg)](https://github.com/IsaFoster/MasterThesis/actions/workflows/python-package.yml)
 
 
@@ -12,10 +14,11 @@ Welcome to Robustify, a GitHub repository focused on evaluating the effects of a
 
 ## Install
 Robustify can be installed from either PyPI or conda-forge:
+
 <pre>
-pip install robustify
+pip install RobustifyToolkit
 <i>or</i>
-<del>conda install -c conda-forge robustify </del>
+<del>conda install -c conda-forge RobustifyToolkit </del>
 </pre>
 
 ## Usages
