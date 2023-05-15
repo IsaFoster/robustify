@@ -1,8 +1,8 @@
 from setuptools import find_packages, setup
 setup(
-    name='Robustify',
+    name='robustify',
     packages=find_packages(include=['robustify', 'tests']),
-    version='0.2.0',
+    version='0.0.1',
     description='no description',
     author='Isabel Foster',
     license='MIT',
