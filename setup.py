@@ -7,8 +7,8 @@ long_description = (this_directory / "README.md").read_text()
 from setuptools import find_packages, setup
 setup(
     name='RobustifyToolkit',
-    packages=find_packages(include=['robustify', 'robustify.noise', 'robustify.utils' 'tests']),
-    version='0.0.7-alpha',
+    packages=find_packages(include=['robustify', 'robustify.noise', 'robustify.utils', 'tests']),
+    version='0.0.8-alpha',
     readme="README.md",
     description="Robustify:" ,
     long_description=long_description,
