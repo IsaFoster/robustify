@@ -1,10 +1,10 @@
-from robustify.noise.continuous import gaussian_Noise
+from robustify.noise.continuous import gaussian_noise
 from robustify.noise.discrete import poisson_noise, binomial_noise
 
 def filter_on_method(df, method, feature_name, level=None, random_state=None):
     switcher = {
         'Binomial': lambda: binomial_noise(df, level, feature_name, random_state),
-        'Gaussian': lambda: gaussian_Noise(df, level, feature_name, random_state),
+        'Gaussian': lambda: gaussian_noise(df, level, feature_name, random_state),
         'Poisson': lambda: poisson_noise(df, feature_name, random_state)
     }
     return switcher.get(method, lambda: ValueError("Invalid corruption method for feature {}".format(feature_name)))()

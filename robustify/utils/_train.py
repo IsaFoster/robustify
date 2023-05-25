@@ -28,7 +28,7 @@ def reset_model(model):
         torch.nn.init.xavier_uniform(model.weight.data)
     return model
 
-def train_baseline(df_train, X_test, y_test, model, scorer, feature_importance_measure, label_name, random_state, custom_train, custom_predict):
+def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name, random_state, custom_train, custom_predict):
     """ Train a baseline model on hte data without anny corruptions. 
     """
     baseline_results = pd.DataFrame(columns=['feature_name', 'value', 'variance', 'score'])
@@ -40,7 +40,7 @@ def train_baseline(df_train, X_test, y_test, model, scorer, feature_importance_m
     score = get_scorer(scorer, model, X_test, y_test, custom_predict)
     for feature_name in X.columns:
         index = df_train.columns.get_loc(feature_name)
-        value, _ = filter_on_importance_method(model, index, X, y, random_state=random_state, scoring=scorer, feature_importance_measure=feature_importance_measure, custom_predict=custom_predict)
+        value, _ = filter_on_importance_method(model, index, X, y, random_state=random_state, scoring=scorer, measure=measure, custom_predict=custom_predict)
         variance = np.var(X[feature_name])
         baseline_results.loc[len(baseline_results.index)] = [feature_name, value, variance, score]
         model = reset_model(model)

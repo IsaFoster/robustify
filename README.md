@@ -51,7 +51,7 @@ Feature importance is an important concept in machine learning that allows us to
 ### Scikit-learn
 
 ## Documentation
-See the [Wiki][1] for documentation of the availabel methods. 
+See the [Wiki][1] for documentation of the available methods. 
 
 License is MIT.
 

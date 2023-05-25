@@ -8,7 +8,7 @@ from setuptools import find_packages, setup
 setup(
     name='RobustifyToolkit',
     packages=find_packages(include=['robustify', 'robustify.noise', 'robustify.utils', 'tests']),
-    version='0.0.8-alpha',
+    version='0.1.0',
     readme="README.md",
     description="Robustify:" ,
     long_description=long_description,
@@ -40,8 +40,8 @@ setup(
                       'eli5',
                       'lime',
                       'shap',
-                      'torch'], # list of packages that are absolutely needed, not standard library
-    setup_requires=['pytest-runner'], # only installed when required to run tests
+                      'torch'],
+    setup_requires=['pytest-runner'], 
     tests_require=['pytest==7.3.1'],
     test_suite='tests',
 )

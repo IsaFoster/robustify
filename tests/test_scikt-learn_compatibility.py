@@ -2,7 +2,6 @@ from robustify import corrupt_data
 from sklearn.model_selection import train_test_split
 from sklearn import datasets, linear_model, svm, neighbors, gaussian_process, tree, neural_network
 
-# features ['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']
 diabetes = datasets.load_diabetes()
 X_regression = diabetes.data
 y_regression = diabetes.target
@@ -12,7 +11,6 @@ corruption_list_regression = [
     {'Binomial': [[1], [0.1]]},
     {'Gaussian': [[2, 3, 4, 5, 6, 7, 8, 9], [0.2]]}]
 
-# ['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)', 'petal width (cm)']
 iris = datasets.load_iris()
 X_classification = iris.data
 y_classification = iris.target
@@ -130,6 +128,3 @@ def test_NN_model_classification():
     assert (result.corrupted_df is not None)
     assert (result.corruption_result is not None)
     assert (result.corruption_result.isnull().values.any() == False)
-
-
-
