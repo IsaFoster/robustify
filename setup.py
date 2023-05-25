@@ -8,7 +8,7 @@ from setuptools import find_packages, setup
 setup(
     name='RobustifyToolkit',
     packages=find_packages(include=['robustify', 'tests']),
-    version='0.0.5',
+    version='0.0.6',
     readme="README.md",
     description="Robustify:" ,
     long_description=long_description,
