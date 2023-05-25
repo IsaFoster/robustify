@@ -154,7 +154,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
 
     if plot:
         plot_data(baseline_results, corruption_results, str(model), n_corruptions,
-                  measured_property, method_name, corruption_list)
+                  measured_property, corruption_list)
     corrupted_df = fill_missing_columns(corrupted_df, df_train)
     progress_bar.close()
     corruption_results = corruption_results.sort_values(by=['feature_name', 'level'])
