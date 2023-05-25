@@ -5,14 +5,14 @@ from eli5.permutation_importance import get_score_importances
 from lime import lime_tabular
 import shap
 
-def filter_on_importance_method(model, index, X, y, random_state, scoring, feature_importance_measure, custom_predict):
+def filter_on_importance_method(model, index, X, y, random_state, scoring, measure, custom_predict):
     switcher = {
         None: lambda: check_for_deafult_properties(model, index, X, y, random_state, scoring),
         'eli5': lambda: calculate_eli5_importances(model, index, X, y, random_state, scoring),
         'lime': lambda: calculate_lime_importances(model, index, X, y, random_state, scoring, custom_predict),
         'shap': lambda: calculate_shap_importances(model, index, X, y, random_state, scoring)
     }
-    return switcher.get(feature_importance_measure, lambda: print("Invalid importance measure for {}".format(str(model))))()
+    return switcher.get(measure, lambda: print("Invalid importance measure for {}".format(str(model))))()
 
 def check_for_deafult_properties(model, index, X, y, random_state, scoring):
     if hasattr(model, 'feature_importances_'):
