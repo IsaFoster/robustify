@@ -2,7 +2,7 @@ from robustify import poisson_noise
 import numpy as np
 import pandas as pd
 
-df = pd.read_csv('tests/test_column_poission.csv', index_col=0)
+df = pd.read_csv('tests/resources/test_column_poission.csv', index_col=0)
 test_data = df['jet_n'].values
 
 def test_poisson_random_state_is_set():
