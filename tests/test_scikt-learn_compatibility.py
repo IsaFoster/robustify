@@ -31,7 +31,7 @@ def run_corruption_classification(model):
                        label_name='species', 
                        n_corruptions=10,
                        random_state=10, 
-                       plot=False)
+                       show_plots=False)
 
 def run_corruption_regression(model):
     return corrupt_data(model,
@@ -43,7 +43,7 @@ def run_corruption_regression(model):
                        y_test_regression,
                        n_corruptions=10,
                        random_state=10,
-                       plot=False)
+                       show_plots=False)
 
 def test_linear_model_regression():
     model = linear_model.LinearRegression()

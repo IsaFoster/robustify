@@ -22,18 +22,19 @@ def plot_data(baseline_results, corruption_results, model_name, corruptions,
                                      corruption_results[
                                          corruption_results['feature_name'].isin(features)]])
     if len(line_list) > 0:
-        plot_corruption_values(baseline_results, df_plot_line, model_name, corruptions,
+        fig_1 = plot_corruption_values(baseline_results, df_plot_line, model_name, corruptions,
                                measured_property, 'value', line_list)
-        plot_corruption_values(baseline_results, df_plot_line, model_name, corruptions,
+        fig_2 = plot_corruption_values(baseline_results, df_plot_line, model_name, corruptions,
                                measured_property, 'variance', line_list)
-        plot_corruption_values(baseline_results, df_plot_line, model_name, corruptions,
+        fig_3 = plot_corruption_values(baseline_results, df_plot_line, model_name, corruptions,
                                measured_property,'score', line_list)
     if len(bar_list) > 0:
-        plot_corruption_values_hist(baseline_results, df_plot_bar, model_name, corruptions,
+        fig_1 = plot_corruption_values_hist(baseline_results, df_plot_bar, model_name, corruptions,
                                     measured_property, 'value', bar_list)
-        plot_corruption_values_hist(baseline_results, df_plot_bar, model_name, corruptions,
+        fig_2 = plot_corruption_values_hist(baseline_results, df_plot_bar, model_name, corruptions,
                                     measured_property, 'variance', bar_list)
-        plot_corruption_scores_hist(baseline_results, df_plot_bar, model_name, corruptions, 'score')
+        fig_3 = plot_corruption_scores_hist(baseline_results, df_plot_bar, model_name, corruptions, 'score')
+    return fig_1, fig_2, fig_3
 
 def get_colors_from_fig(fig):
     colors = []
@@ -107,7 +108,7 @@ def plot_corruption_values(baseline_results, corruption_results, model_name, cor
         fig.add_hline(y=baseline_results[measured_name].iloc[0], line_dash="dash", line_width=4)
     else:
         fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
-    fig.show()
+    return fig
 
 def plot_corruption_values_hist(baseline_results, corruption_results, model_name,
                                 corruptions, measured_property, measured_name, corruptions_list):
@@ -154,7 +155,7 @@ def plot_corruption_values_hist(baseline_results, corruption_results, model_name
               bargroupgap=0,
               barmode='group')
     fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
-    fig.show()
+    return fig
 
 def plot_corruption_scores_hist(baseline_results, corruption_results, model_name,
                                 corruptions, measured_name):
@@ -205,4 +206,4 @@ def plot_corruption_scores_hist(baseline_results, corruption_results, model_name
             font={"size": 18},
             yaxis_range=[results[measured_name].min() - score_diff,
                          results[measured_name].max() + score_diff])
-    fig.show()
+    return fig

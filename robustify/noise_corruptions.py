@@ -28,7 +28,7 @@ def set_random_seed(random_state):
 def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
                  y_test=None, column_names=None, label_name=None, measure=None,
                  n_corruptions=10, random_state=None, custom_train=None, 
-                 custom_predict=None, plot=True):
+                 custom_predict=None, show_plots=True):
     """ Perform noise corruption on tabular data.
 
     Parameters
@@ -110,7 +110,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
         ndarray, tensor, or dataframe of same length as X. Not required if model
         object has predict method with signature predict(X).
 	
-    plot: bool, default=True
+    show_plots: bool, default=True
         Determines whether plots of feature importances, variance and score are
         shown. 
           
@@ -125,6 +125,12 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
         corruption_result: DataFrame
             The value, variance and score (as defined by the scorer) for each
             feature and each level specified in corruption_list.
+        value_plot: Figure
+            A plot showing the average value of the specified features for each noise corruption. 
+        variance_plot: Figure
+            A plot showing the average variance of the value of the specified features for each noise corruption. 
+        score_plot: Figure
+            A plot showing the average score of the specified features for each noise corruption. 
     """
     set_random_seed(random_state)
     df_train = df_from_array(X_train, column_names, y_train, label_name)
@@ -152,13 +158,18 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values
 
-    if plot:
-        plot_data(baseline_results, corruption_results, str(model), n_corruptions,
+    
+    value_plot, variance_plot, score_plot = plot_data(baseline_results, corruption_results, str(model), n_corruptions,
                   measured_property, corruption_list)
+    if show_plots:
+        value_plot.show()
+        variance_plot.show()
+        score_plot.show()
+        
     corrupted_df = fill_missing_columns(corrupted_df, df_train)
     progress_bar.close()
     corruption_results = corruption_results.sort_values(by=['feature_name', 'level'])
-    result = Bunch(corrupted_df=corrupted_df, corruption_result=corruption_result)
+    result = Bunch(corrupted_df=corrupted_df, corruption_result=corruption_result, value_plot=value_plot, variance_plot=variance_plot, score_plot=score_plot)
     return result
 
 def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
