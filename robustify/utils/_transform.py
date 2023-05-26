@@ -22,14 +22,17 @@ def df_from_array(X, column_names, y=None, label_name=None):
     corresponding to the column position. 
     Make sure column names are strings to avoid errors with indexation. 
     """
+    if (label_name is None):
+        label_name = str(len(column_names))
+    if y is None: column_names = column_names + [label_name]    
+    df = pd.DataFrame(X, columns = column_names)
     if (isinstance(X, (np.ndarray, np.generic, list))):
-        df = pd.DataFrame(X, columns = column_names)
-        if (label_name is None):
-            label_name = str(len(df.columns))
         if (y is not None) and (label_name not in df):
             df[label_name] = y
         df.columns = df.columns.astype(str)
         return df
+    if isinstance(X, pd.DataFrame) and y is not None:
+        X[label_name] = y
     return X
 
 def check_corruptions(df, corruption_list):
