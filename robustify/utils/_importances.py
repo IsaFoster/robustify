@@ -6,6 +6,7 @@ from lime import lime_tabular
 import shap
 
 def filter_on_importance_method(model, index, X, y, random_state, scoring, measure, custom_predict):
+    if measure: measure = measure.lower()
     switcher = {
         None: lambda: check_for_deafult_properties(model, index, X, y, random_state, scoring),
         'eli5': lambda: calculate_eli5_importances(model, index, X, y, random_state, scoring),
