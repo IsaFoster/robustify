@@ -40,7 +40,7 @@ setup(
                       'eli5',
                       'lime',
                       'shap',
-                      'torch']
+                      'torch'],
     setup_requires=['pytest-runner'], 
     tests_require=['pytest==7.3.1'],
     test_suite='tests',
