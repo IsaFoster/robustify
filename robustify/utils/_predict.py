@@ -10,7 +10,7 @@ def get_prediction(model, X, custom_predict):
             raise
     else:
         try:
-            y_pred = model.predict(X)
+            y_pred = model.predict(X.values)
             return convert_to_numpy(y_pred)
         except Exception:
             raise

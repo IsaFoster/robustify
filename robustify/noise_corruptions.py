@@ -13,7 +13,6 @@ from .utils._filter import filter_on_method, get_levels
 from .utils._progress import initialize_progress_bar
 from .utils._transform import df_from_array, check_corruptions, fill_missing_columns
 
-
 def set_random_seed(random_state):
     """ Set random seed for different packages
     Parameters
@@ -80,8 +79,9 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
         if None. Not required if X_train is a dataframe with column names.
 	
     label_name: str or int, deafult=None
-        Column name or column index corresponding to the target values. Required
-        if y_train or y_test are None.
+        Column name or column index corresponding to the target values. Required 
+        if y_train or y_test are None and X_train is a DataFrame containg the 
+        target values.
 	
     measure: {None, "eli5", "lime", "shap"}, default=None
         If None default is either coef_ or feature_importances_ attributes where
@@ -133,8 +133,8 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
             A plot showing the average score of the specified features for each noise corruption. 
     """
     set_random_seed(random_state)
-    df_train = df_from_array(X_train, column_names, y_train, label_name)
-    X_test = df_from_array(X_test, column_names)
+    df_train, label_name = df_from_array(X_train, column_names, y_train, label_name)
+    X_test, _ = df_from_array(X_test, column_names)
     corruption_list = check_corruptions(df_train, corruption_list)
     progress_bar = initialize_progress_bar(corruption_list, n_corruptions, df_train)
     corrupted_df = pd.DataFrame(columns=list(df_train))

@@ -17,23 +17,60 @@ def convert_to_numpy(col):
     else:
         raise Exception("could not convert {} to numpy".format(type(col)))
     
-def df_from_array(X, column_names, y=None, label_name=None):
+def df_from_array(X, column_names=None, y=None, label_name=None):
     """ Transform X and y (if supplied) to a DataFrame with either provided column names or indexes 
     corresponding to the column position. 
     Make sure column names are strings to avoid errors with indexation. 
     """
-    if (label_name is None):
-        label_name = str(len(column_names))
-    if y is None: column_names = column_names + [label_name]    
-    df = pd.DataFrame(X, columns = column_names)
-    if (isinstance(X, (np.ndarray, np.generic, list))):
-        if (y is not None) and (label_name not in df):
-            df[label_name] = y
-        df.columns = df.columns.astype(str)
-        return df
-    if isinstance(X, pd.DataFrame) and y is not None:
-        X[label_name] = y
-    return X
+    if isinstance(X, (np.ndarray, np.generic, list)):
+        df, label_name = df_from_ndarray(X, column_names, y, label_name)
+    elif isinstance(X, pd.DataFrame):
+        df, label_name = df_from_df(X, y, label_name)
+    return df, label_name
+
+def get_label_name(length, label_name):
+    if label_name is None:
+        label_name = str(length)
+    return label_name
+
+def df_from_ndarray(X, column_names, y, label_name):
+    """ Transform X and y (if supplied) to a DataFrame from ndarray. Check allowed parametet 
+    compatibility
+    """
+    if y is not None and label_name is not None:
+        df = pd.DataFrame(X, columns = column_names)
+        df[label_name] = y
+    elif column_names is not None and y is not None:
+        label_name = get_label_name(len(column_names), label_name)
+        df = pd.DataFrame(X, columns = column_names)
+        df[label_name] = y
+    elif column_names is not None:
+        if len(column_names) == X.shape[1]:
+            df = pd.DataFrame(X, columns = column_names)
+        elif len(column_names) == (X.shape[1]+1):
+            df = pd.DataFrame(X, columns= column_names[:-1])
+        else:
+            label_name = get_label_name(len(column_names), label_name)
+            df = pd.DataFrame(X, columns= column_names+[label_name])
+    elif y is not None:
+        df = pd.DataFrame(X)
+        df[get_label_name(df.shape[1], label_name)] = y
+    else:
+        df = pd.DataFrame(X)
+    df.columns = df.columns.astype(str)
+    return df, label_name
+
+def df_from_df(df, y, label_name):
+    """ Transform X and y (if supplied) to a DataFrame from DataFrame. Check allowed parametet 
+    compatibility
+    """
+    if  y is not None and label_name is not None:
+        df[label_name] = y
+    elif y is not None:
+        label_name = str(df.shape[1])
+        df[label_name] = y
+    df.columns = df.columns.astype(str)
+    return df, label_name
 
 def check_corruptions(df, corruption_list):
     """ Helper method to simplify the corruption instructions. Returns the feature names as strings for 
