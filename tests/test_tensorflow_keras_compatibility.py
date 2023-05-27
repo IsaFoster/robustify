@@ -35,7 +35,7 @@ def run_corruption_classification(model):
                        label_name='species', 
                        n_corruptions=10,
                        random_state=10, 
-                       plot=False)
+                       show_plots=False)
 
 def run_corruption_regression(model):
     return corrupt_data(model,
@@ -50,7 +50,7 @@ def run_corruption_regression(model):
                        "eli5",
                        10,
                        random_state=10,
-                       plot=False)
+                       show_plots=False)
 
 def test_tensorflow_is_reproducible():
     model_1 = tf.keras.Sequential([

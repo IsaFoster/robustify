@@ -20,7 +20,7 @@ def custom_train_model(model, X, y, custom_train):
 def train_model(model, X, y, custom_train):
     if custom_train != None:
         return custom_train_model(model, X, y, custom_train)  
-    model.fit(X, y.values.ravel())
+    model.fit(X.values, y.values.ravel())
     return model
 
 def reset_model(model):
