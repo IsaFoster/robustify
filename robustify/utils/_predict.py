@@ -1,4 +1,9 @@
 from ._transform import convert_to_numpy
+import tensorflow as tf
+import keras
+
+def is_keras_model(model):
+    return isinstance(model, (tf.keras.Model, keras.Model, tf.estimator.Estimator))
 
 def get_prediction(model, X, custom_predict):
     if custom_predict != None:
@@ -10,7 +15,10 @@ def get_prediction(model, X, custom_predict):
             raise
     else:
         try:
-            y_pred = model.predict(X.values)
+            if is_keras_model(model):
+                y_pred = model.predict(X.values, verbose=0)
+            else:
+                y_pred = model.predict(X.values)
             return convert_to_numpy(y_pred)
         except Exception:
             raise

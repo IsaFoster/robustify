@@ -5,7 +5,11 @@ import torch
 import numpy as np
 import pandas as pd
 import torch.nn as nn
+import tensorflow as tf
+import keras
 
+def is_keras_model(model):
+    return isinstance(model, (tf.keras.Model, keras.Model, tf.estimator.Estimator))
 
 def custom_train_model(model, X, y, custom_train):
     if not hasattr(custom_train, '__call__'):
@@ -20,7 +24,10 @@ def custom_train_model(model, X, y, custom_train):
 def train_model(model, X, y, custom_train):
     if custom_train != None:
         return custom_train_model(model, X, y, custom_train)  
-    model.fit(X.values, y.values.ravel())
+    if is_keras_model(model):
+        model.fit(X.values, y.values.ravel(), verbose=0)
+    else:
+        model.fit(X.values, y.values.ravel())
     return model
 
 def reset_model(model):
