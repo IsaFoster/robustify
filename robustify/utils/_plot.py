@@ -119,8 +119,8 @@ def plot_corruption_values_hist(baseline_results, corruption_results, model_name
     results['feature_name'] = corruption_results.sort_values(
         "feature_name")['feature_name'].unique().tolist()
     results[measured_name] = baseline_results.sort_values(
-        "feature_name")[baseline_results['feature_name'].isin(
-        results['feature_name'].values.tolist())][measured_name].values.tolist()
+        "feature_name").loc[baseline_results['feature_name'].isin(
+        results['feature_name'].values.tolist()).tolist()][measured_name].values.tolist()
     results[measured_name+'_noisy'] = corruption_results.sort_values(
         "feature_name")[measured_name].values.tolist() 
     results = sort_df_by_list(results, "feature_name", order)

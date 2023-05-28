@@ -153,6 +153,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
                                                                 measure, method, randomlist, label_name,
                                                                 random_state, progress_bar, custom_train,
                                                                 custom_predict)
+                                                                
         corruption_results = pd.concat([corruption_results, corruption_result])
 
         for column_name in list(method_corrupt_df):
@@ -169,7 +170,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
     corrupted_df = fill_missing_columns(corrupted_df, df_train)
     progress_bar.close()
     corruption_results = corruption_results.sort_values(by=['feature_name', 'level'])
-    result = Bunch(corrupted_df=corrupted_df, corruption_result=corruption_result, value_plot=value_plot, variance_plot=variance_plot, score_plot=score_plot)
+    result = Bunch(corrupted_df=corrupted_df, corruption_result=corruption_results, value_plot=value_plot, variance_plot=variance_plot, score_plot=score_plot)
     return result
 
 def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
