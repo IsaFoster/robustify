@@ -6,4 +6,4 @@ from ._progress import initialize_progress_bar
 from ._sampling import sample_data
 from ._scorers import get_scorer, get_scorer_sckit_learn, get_custom_scorer, validate_score
 from ._train import custom_train_model, train_model ,reset_model, train_baseline
-from ._transform import convert_to_numpy, df_from_array, check_corruptions, fill_missing_columns
+from ._transform import convert_to_numpy, df_from_array, check_corruptions, fill_missing_columns, normalize_max_min

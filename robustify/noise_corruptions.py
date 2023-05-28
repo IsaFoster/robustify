@@ -11,7 +11,7 @@ from .utils._scorers import get_scorer
 from .utils._train import reset_model, train_model, train_baseline
 from .utils._filter import filter_on_method, get_levels
 from .utils._progress import initialize_progress_bar
-from .utils._transform import df_from_array, check_corruptions, fill_missing_columns
+from .utils._transform import df_from_array, check_corruptions, fill_missing_columns, normalize_max_min
 
 def set_random_seed(random_state):
     """ Set random seed for different packages
@@ -155,6 +155,8 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
         corruption_results = pd.concat([corruption_results, corruption_result])
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values
+    baseline_results['value']=normalize_max_min(baseline_results['value'])
+    corruption_results['value']=normalize_max_min(corruption_results['value'])    
     value_plot, variance_plot, score_plot = plot_data(baseline_results, corruption_results, str(model), n_corruptions,
                   measured_property, corruption_list)
     if show_plots:
