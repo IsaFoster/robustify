@@ -145,7 +145,6 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
     randomlist = random.sample(range(1, 1000), n_corruptions)
     corruption_results = pd.DataFrame(columns=['feature_name', 'level',
                                                'value', 'variance', 'score'])
-
     for method in list(corruption_list):
         method_name = list(method.keys())[0]
         method_corrupt_df, corruption_result, measured_property = perform_corruption(
@@ -153,13 +152,9 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
                                                                 measure, method, randomlist, label_name,
                                                                 random_state, progress_bar, custom_train,
                                                                 custom_predict)
-                                                                
         corruption_results = pd.concat([corruption_results, corruption_result])
-
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values
-
-    
     value_plot, variance_plot, score_plot = plot_data(baseline_results, corruption_results, str(model), n_corruptions,
                   measured_property, corruption_list)
     if show_plots:
