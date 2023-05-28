@@ -3,7 +3,7 @@ from sklearn import datasets
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
-from robustify.utils._transform import df_from_array 
+from robustify.utils._transform import df_from_array, normalize_max_min
 
 def setup():
     column_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
@@ -59,3 +59,13 @@ def test_df_no_names():
     column_names, label_name, X_ndarray, y_ndarray, Xy_ndarray = setup()
     X, _ = df_from_array(pd.DataFrame(Xy_ndarray), y=None, label_name=None)
     assert (list(X) == ['0', '1', '2', '3', '4'])
+
+def test_normalize():
+    column_names, _, X_ndarray, _, _ = setup()
+    df = pd.DataFrame(X_ndarray, columns=column_names)
+    normalized_col = normalize_max_min(df["sepal_length"])
+    assert (len(normalized_col) == len(df["sepal_length"]))
+    assert (normalized_col.max() == 1)
+    assert (normalized_col.min() == 0)
+
+

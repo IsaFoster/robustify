@@ -91,3 +91,6 @@ def fill_missing_columns(corrupted_df, X_train):
         if corrupted_df[column_name].isnull().all(): 
             corrupted_df[column_name] = X_train[column_name].values
     return corrupted_df
+
+def normalize_max_min(column):
+    return (column-column.min())/(column.max()-column.min())

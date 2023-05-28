@@ -132,7 +132,8 @@ def plot_corruption_values_hist(baseline_results, corruption_results, model_name
                    y=[row_data[measured_name]],
                    name=row_data['feature_name'],
                    legendgroup=index,
-                   width=0.4)
+                   width=0.4,
+                   text="~{:0.3f}".format(row_data[measured_name]))
                 )
     colors = get_colors_from_fig(fig)
     for (index, row_data) in results.iterrows():
@@ -144,7 +145,8 @@ def plot_corruption_values_hist(baseline_results, corruption_results, model_name
                     row_data["feature_name"])][1:], 0.5, 1.2)),
                    showlegend=False,
                    legendgroup=index,
-                   width=0.4)
+                   width=0.4,
+                   text="~{:0.3f}".format(row_data[measured_name+'_noisy']))
                 )
     buttons, visible_features = plot_buttons(corruptions_list,
                                              results['feature_name'].values.tolist())
@@ -155,6 +157,9 @@ def plot_corruption_values_hist(baseline_results, corruption_results, model_name
               font={"size":18},
               bargroupgap=0,
               barmode='group')
+    fig.update_traces(
+        textposition="outside",
+        texttemplate='%{text}')
     fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
     return fig
 
@@ -176,8 +181,12 @@ def plot_corruption_scores_hist(baseline_results, corruption_results, model_name
             go.Bar(x=[row_data["feature_name"]],
                    y=[row_data[measured_name]],
                    name=row_data['feature_name'],
-                   legendgroup=index)
+                   legendgroup=index,
+                   text="~{:0.3f}".format(row_data[measured_name]))
                 )
+    fig.update_traces(
+        textposition="outside",
+        texttemplate='%{text}')
     fig.add_hline(y=baseline_results[measured_name].iloc[0], line_dash="dash", line_width=4)
     score_diff = results[measured_name].max() - results[measured_name].min()
     fig.update_layout(dict(updatemenus=[dict(
