@@ -104,6 +104,7 @@ def plot_corruption_values(baseline_results, corruption_results, model_name, cor
                                              corruption_results['feature_name'].unique().tolist())
     fig.update_layout(dict(updatemenus=buttons), xaxis_title="Feature",
                       yaxis_title=measured_property, title=title, font=dict(size=18))
+    fig.update_traces(line=dict(width=4))
     if measured_name == "score":
         fig.add_hline(y=baseline_results[measured_name].iloc[0], line_dash="dash", line_width=4)
     else:
@@ -119,8 +120,8 @@ def plot_corruption_values_hist(baseline_results, corruption_results, model_name
     results['feature_name'] = corruption_results.sort_values(
         "feature_name")['feature_name'].unique().tolist()
     results[measured_name] = baseline_results.sort_values(
-        "feature_name")[baseline_results['feature_name'].isin(
-        results['feature_name'].values.tolist())][measured_name].values.tolist()
+        "feature_name").loc[baseline_results['feature_name'].isin(
+        results['feature_name'].values.tolist()).tolist()][measured_name].values.tolist()
     results[measured_name+'_noisy'] = corruption_results.sort_values(
         "feature_name")[measured_name].values.tolist() 
     results = sort_df_by_list(results, "feature_name", order)
