@@ -5,6 +5,7 @@
 [![PyPI](https://badge.fury.io/py/RobustifyToolkit.svg)](https://badge.fury.io/py/RobustifyToolkit)
 [![Build](https://github.com/IsaFoster/MasterThesis/actions/workflows/python-package.yml/badge.svg)](https://github.com/IsaFoster/MasterThesis/actions/workflows/python-package.yml)
 
+## Note: I am excited to announce that the library is now in its alpha stage of development! This means there can potentially be major changes between releases and there will be bugs🐛. If you encounter a bug or unexpected behaviour, please report it [here](https://github.com/IsaFoster/robustify/discussions/categories/bugs). If you are interested in contributing to the project read [this]().
 
 Welcome to Robustify, a GitHub repository focused on evaluating the effects of adding structurally conserving noise to data. The goal is to provide a comprehensive set of tools for researchers and practitioners interested in exploring the impact of noise on the score and robustness of their machine learning models. The repository includes a variety of noise generation and augmentation techniques, as well as methods for evaluating the effects of noise on model performance, robustness metrics and visualizations. 
 
