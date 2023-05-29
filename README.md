@@ -10,7 +10,7 @@
 Welcome to Robustify, a GitHub repository focused on evaluating the effects of adding structurally conserving noise to data. The goal is to provide a comprehensive set of tools for researchers and practitioners interested in exploring the impact of noise on the score and robustness of their machine learning models. The repository includes a variety of noise generation and augmentation techniques, as well as methods for evaluating the effects of noise on model performance, robustness metrics and visualizations. 
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/IsaFoster/robustify/ed05ecac1f5eb39c4858b292eccf63f077454e1a/docs/images/robustify.png" width="800" />
+  <img src="https://raw.githubusercontent.com/IsaFoster/robustify/main/docs/images/robustify.png" width="800" />
 </p>
 
 ## Install
