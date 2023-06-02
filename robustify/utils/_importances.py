@@ -4,13 +4,17 @@ from eli5.sklearn import PermutationImportance
 from eli5.permutation_importance import get_score_importances
 from lime import lime_tabular
 import shap
+import tensorflow as tf
+import keras
+import sklearn
+import pandas as pd
 
 def filter_on_importance_method(model, index, X, y, random_state, scoring, measure, custom_predict):
     if measure: measure = measure.lower()
     switcher = {
         None: lambda: check_for_deafult_properties(model, index, X, y, random_state, scoring),
         'eli5': lambda: calculate_eli5_importances(model, index, X, y, random_state, scoring),
-        'shap': lambda: calculate_shap_importances(model, index, X),
+        'shap': lambda: calculate_shap_importances(model, index, X, random_state, custom_predict),
         'lime': lambda: calculate_lime_importances(model, index, X, custom_predict)
     }
     return switcher.get(measure, lambda:
@@ -82,12 +86,57 @@ def calculate_lime_importances(model, index, X, custom_predict):
     except:
         raise Exception("Could not compute lime importances")
 
-def calculate_shap_importances(model, index, X):
-    try:
-        measured_property = "shap"
-        explainer = shap.Explainer(model)
-        shap_values = explainer(X)
-        average_values = [sum(sub_list) / len(sub_list) for sub_list in zip(*shap_values.data)]
-        return average_values[index], measured_property
-    except:
-        raise Exception("Could not compute shap importances")
+def is_keras_touch_model(model):
+    return isinstance(model, (tf.keras.Model, keras.Model, tf.estimator.Estimator))
+
+def is_tree_model(model):
+    return isinstance(model, (sklearn.ensemble._forest.RandomForestRegressor, sklearn.ensemble._forest.RandomForestClassifier))
+
+# model agnostic shap: explainer = shap.KernelExplainer(model.predict_proba, X_train, link="logit")
+# shap_values = explainer.shap_values(X_test, nsamples=100)
+def calculate_shap_importances(model, index, X, random_state, custom_predict):
+    measured_property = "shap"
+    if is_keras_touch_model(model):
+        assert (False)
+        #reg 
+        # rather than use the whole training set to estimate expected values, we summarize with
+        # a set of weighted kmeans, each weighted by the number of points they represent.
+        X_train_summary = shap.kmeans(X, 10)
+        explainer = shap.KernelExplainer(model.predict, X_train_summary)
+        shap_values = explainer.shap_values(X)
+        # clas
+        explainer = shap.KernelExplainer(model.predict_proba, X)
+        shap_values = explainer.shap_values(X)
+    elif is_tree_model(model):
+        if custom_predict:
+            assert (False)
+            model_pred = lambda x: custom_predict(model, x)
+            explainer = shap.Explainer(model_pred, X)
+        elif hasattr(model, "predict_proba"):
+            explainer = shap.KernelExplainer(model.predict_proba, X, seed=random_state)
+            shap_values = explainer.shap_values(X)
+            average_values = np.sum(np.abs(shap_values).mean(1), axis=0)
+        else:
+            explainer = shap.TreeExplainer(model, seed=random_state)
+            shap_values = explainer.shap_values(X)
+            average_values = np.abs(shap_values).mean(0)
+            
+        return average_values[index], measured_property            
+    else:
+        if custom_predict:
+            assert (False)
+            model_pred = lambda x: custom_predict(model, x)
+            explainer = shap.Explainer(model_pred, X)
+        elif hasattr(model, "predict_proba"):
+            explainer = shap.Explainer(model.predict, X, seed=random_state)
+            shap_values = explainer(X)
+        else:
+            f = lambda x: model.predict(x)
+            med = X.median().values.reshape((1,X.shape[1]))
+            explainer = shap.Explainer(f, med, seed=random_state)
+            shap_values = explainer(X) ###OBS NOT HTERE shap_values = explainer.shap_values(X_test)
+        average_values = [sum(sub_list) / len(sub_list) for sub_list in zip(*shap_values.values)]
+        return average_values[index], measured_property   
+    raise Exception("Could not compute shap importances")
+    return average_values[index], measured_property
+    
