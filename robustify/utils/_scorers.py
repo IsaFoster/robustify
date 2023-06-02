@@ -25,7 +25,7 @@ def get_custom_scorer(metric, model, X_test, y_test, custom_predict):
         y_pred = get_prediction(model, X_test, custom_predict)
         sig = signature(metric)
         if len(sig.parameters) ==3:
-            score = metric(model, y_pred, y_test)
+            score = metric(model, X_test, y_test)
         else:
             score = metric(y_pred, y_test)
         validate_score(score)

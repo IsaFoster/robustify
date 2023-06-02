@@ -15,10 +15,11 @@ def get_prediction(model, X, custom_predict):
             raise
     else:
         try:
+            X = convert_to_numpy(X)
             if is_keras_model(model):
-                y_pred = model.predict(X.values, verbose=0)
+                y_pred = model.predict(X, verbose=0)
             else:
-                y_pred = model.predict(X.values)
+                y_pred = model.predict(X)
             return convert_to_numpy(y_pred)
         except Exception:
             raise
