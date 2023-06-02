@@ -1,5 +1,7 @@
 from robustify.noise.continuous import gaussian_noise
 from robustify.noise.discrete import poisson_noise, binomial_noise
+import tensorflow as tf
+import keras
 
 def filter_on_method(df, method, feature_name, level=None, random_state=None):
     switcher = {
@@ -26,4 +28,7 @@ def get_levels(methodSpecification, df=None):
     if all([isinstance(item, int) for item in feature_names]):
         feature_names = get_feature_name_from_index(feature_names, df)
     return feature_names, levels
+
+def is_keras_model(model):
+    return isinstance(model, (tf.keras.Model, keras.Model, tf.estimator.Estimator))
     
