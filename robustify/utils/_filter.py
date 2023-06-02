@@ -30,7 +30,7 @@ def get_levels(methodSpecification, df=None):
         feature_names = get_feature_name_from_index(feature_names, df)
     return feature_names, levels
     
-def is_keras_touch_model(model):
+def is_keras_model(model):
     return isinstance(model, (tf.keras.Model, keras.Model, tf.estimator.Estimator))
 
 def is_tree_model(model):

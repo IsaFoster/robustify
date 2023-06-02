@@ -4,7 +4,7 @@ from eli5.sklearn import PermutationImportance
 from eli5.permutation_importance import get_score_importances
 from lime import lime_tabular
 import shap
-from ._filter import is_keras_touch_model, is_tree_model
+from ._filter import is_keras_model, is_tree_model
 
 def filter_on_importance_method(model, index, X, y, random_state, scoring, measure, custom_predict):
     if measure: measure = measure.lower()
@@ -88,7 +88,12 @@ def calculate_lime_importances(model, index, X, custom_predict):
 # shap_values = explainer.shap_values(X_test, nsamples=100)
 def calculate_shap_importances(model, index, X, random_state, custom_predict):
     measured_property = "shap"
-    if is_keras_touch_model(model):
+    if custom_predict:
+        assert (False)
+        model_pred = lambda x: custom_predict(model, x)
+        explainer = shap.Explainer(model_pred, X)
+        shap_values = explainer(X)
+    if is_keras_model(model):
         assert (False)
         #reg 
         # rather than use the whole training set to estimate expected values, we summarize with
@@ -100,35 +105,24 @@ def calculate_shap_importances(model, index, X, random_state, custom_predict):
         explainer = shap.KernelExplainer(model.predict_proba, X)
         shap_values = explainer.shap_values(X)
     elif is_tree_model(model):
-        if custom_predict:
-            assert (False)
-            model_pred = lambda x: custom_predict(model, x)
-            explainer = shap.Explainer(model_pred, X)
-        elif hasattr(model, "predict_proba"):
+        if  hasattr(model, "predict_proba"):
             explainer = shap.KernelExplainer(model.predict_proba, X, seed=random_state)
             shap_values = explainer.shap_values(X)
             average_values = np.sum(np.abs(shap_values).mean(1), axis=0)
         else:
             explainer = shap.TreeExplainer(model, seed=random_state)
             shap_values = explainer.shap_values(X)
-            average_values = np.abs(shap_values).mean(0)
-            
-        return average_values[index], measured_property            
+            average_values = np.abs(shap_values).mean(0)            
     else:
-        if custom_predict:
-            assert (False)
-            model_pred = lambda x: custom_predict(model, x)
-            explainer = shap.Explainer(model_pred, X)
-        elif hasattr(model, "predict_proba"):
+        if hasattr(model, "predict_proba"):
             explainer = shap.Explainer(model.predict, X, seed=random_state)
             shap_values = explainer(X)
         else:
             f = lambda x: model.predict(x)
             med = X.median().values.reshape((1,X.shape[1]))
             explainer = shap.Explainer(f, med, seed=random_state)
-            shap_values = explainer(X) ###OBS NOT HTERE shap_values = explainer.shap_values(X_test)
+            shap_values = explainer(X) 
         average_values = [sum(sub_list) / len(sub_list) for sub_list in zip(*shap_values.values)]
-        return average_values[index], measured_property   
+    return average_values[index], measured_property   
     raise Exception("Could not compute shap importances")
-    return average_values[index], measured_property
     
