@@ -1,9 +1,7 @@
 from ._transform import convert_to_numpy
+from ._filter import is_keras_model
 import tensorflow as tf
 import keras
-
-def is_keras_model(model):
-    return isinstance(model, (tf.keras.Model, keras.Model, tf.estimator.Estimator))
 
 def get_prediction(model, X, custom_predict):
     if custom_predict != None:

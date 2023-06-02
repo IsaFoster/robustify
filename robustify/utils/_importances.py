@@ -4,10 +4,7 @@ from eli5.sklearn import PermutationImportance
 from eli5.permutation_importance import get_score_importances
 from lime import lime_tabular
 import shap
-import tensorflow as tf
-import keras
-import sklearn
-import pandas as pd
+from ._filter import is_keras_touch_model, is_tree_model
 
 def filter_on_importance_method(model, index, X, y, random_state, scoring, measure, custom_predict):
     if measure: measure = measure.lower()
@@ -86,11 +83,6 @@ def calculate_lime_importances(model, index, X, custom_predict):
     except:
         raise Exception("Could not compute lime importances")
 
-def is_keras_touch_model(model):
-    return isinstance(model, (tf.keras.Model, keras.Model, tf.estimator.Estimator))
-
-def is_tree_model(model):
-    return isinstance(model, (sklearn.ensemble._forest.RandomForestRegressor, sklearn.ensemble._forest.RandomForestClassifier))
 
 # model agnostic shap: explainer = shap.KernelExplainer(model.predict_proba, X_train, link="logit")
 # shap_values = explainer.shap_values(X_test, nsamples=100)

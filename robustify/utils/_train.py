@@ -1,15 +1,13 @@
 from ._importances import filter_on_importance_method
 from ._scorers import get_scorer
 from ._transform import convert_to_numpy
+from ._filter import is_keras_model
 import torch
 import numpy as np
 import pandas as pd
 import torch.nn as nn
 import tensorflow as tf
 import keras
-
-def is_keras_model(model):
-    return isinstance(model, (tf.keras.Model, keras.Model, tf.estimator.Estimator))
 
 def custom_train_model(model, X, y, custom_train):
     if not hasattr(custom_train, '__call__'):

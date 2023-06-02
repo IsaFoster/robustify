@@ -1,4 +1,4 @@
-from ._filter import filter_on_method, get_feature_name_from_index, get_levels
+from ._filter import filter_on_method, get_feature_name_from_index, get_levels, is_keras_touch_model, is_tree_model
 from ._importances import filter_on_importance_method, check_for_deafult_properties, calculate_permuation_importances, calculate_eli5_importances, calculate_lime_importances, calculate_shap_importances
 from ._plot import plot_data
 from ._predict import get_prediction, verify_predictions
