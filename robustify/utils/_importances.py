@@ -83,36 +83,18 @@ def calculate_lime_importances(model, index, X, custom_predict):
     except:
         raise Exception("Could not compute lime importances")
 
-
-# model agnostic shap: explainer = shap.KernelExplainer(model.predict_proba, X_train, link="logit")
-# shap_values = explainer.shap_values(X_test, nsamples=100)
 def calculate_shap_importances(model, index, X, random_state, custom_predict):
     measured_property = "shap"
     if custom_predict:
+        #TODO: determine which method to usee for custom predict
         assert (False)
         model_pred = lambda x: custom_predict(model, x)
         explainer = shap.Explainer(model_pred, X)
         shap_values = explainer(X)
-    if is_keras_model(model):
-        assert (False)
-        #reg 
-        # rather than use the whole training set to estimate expected values, we summarize with
-        # a set of weighted kmeans, each weighted by the number of points they represent.
-        X_train_summary = shap.kmeans(X, 10)
-        explainer = shap.KernelExplainer(model.predict, X_train_summary)
-        shap_values = explainer.shap_values(X)
-        # clas
-        explainer = shap.KernelExplainer(model.predict_proba, X)
-        shap_values = explainer.shap_values(X)
+    elif is_keras_model(model):
+        average_values = shap_values_keras(model, X, random_state)
     elif is_tree_model(model):
-        if  hasattr(model, "predict_proba"):
-            explainer = shap.KernelExplainer(model.predict_proba, X, seed=random_state)
-            shap_values = explainer.shap_values(X)
-            average_values = np.sum(np.abs(shap_values).mean(1), axis=0)
-        else:
-            explainer = shap.TreeExplainer(model, seed=random_state)
-            shap_values = explainer.shap_values(X)
-            average_values = np.abs(shap_values).mean(0)            
+        average_values =shap_values_tree(model, X, random_state)
     else:
         if hasattr(model, "predict_proba"):
             explainer = shap.Explainer(model.predict, X, seed=random_state)
@@ -126,3 +108,24 @@ def calculate_shap_importances(model, index, X, random_state, custom_predict):
     return average_values[index], measured_property   
     raise Exception("Could not compute shap importances")
     
+def shap_values_keras(model, X, random_state):
+    X_train_summary = shap.kmeans(X, 50)
+    # TODO: check classification after issue #100
+    def f(X):
+        return model.predict(X, verbose=0)
+
+    explainer = shap.KernelExplainer(f, X_train_summary, seed=random_state)
+    shap_values = explainer.shap_values(X, nsamples=100)
+    average_values = np.sum(np.abs(shap_values).mean(1), axis=0)
+    return average_values
+
+def shap_values_tree(model, X, random_state):
+    if  hasattr(model, "predict_proba"):
+        explainer = shap.KernelExplainer(model.predict_proba, X, seed=random_state)
+        shap_values = explainer.shap_values(X)
+        average_values = np.sum(np.abs(shap_values).mean(1), axis=0)
+    else:
+        explainer = shap.TreeExplainer(model, seed=random_state)
+        shap_values = explainer.shap_values(X)
+        average_values = np.abs(shap_values).mean(0)   
+    return average_values
