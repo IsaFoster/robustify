@@ -35,7 +35,7 @@ setup(
                       'chart_studio<=1.1.0', 
                       'python-dotenv<=1.0.0',
                       'tensorflow<=2.12.0',
-                      'kaleido<=0.2.1',
+                      'kaleido<=0.2.1.post1',
                       'ipython<=8.12.2',
                       'eli5<=0.13.0',
                       'lime<=0.2.0.1',
