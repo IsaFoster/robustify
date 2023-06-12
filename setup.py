@@ -30,7 +30,7 @@ setup(
                       'scikit-learn<=1.2.2', 
                       'matplotlib<=3.7.1', 
                       'pandas<=2.0.2', 
-                      'plotly<=5.14.1', 
+                      'plotly<=5.15.0', 
                       'tqdm<=4.65.0',
                       'chart_studio<=1.1.0', 
                       'python-dotenv<=1.0.0',
