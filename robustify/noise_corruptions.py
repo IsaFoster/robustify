@@ -11,7 +11,7 @@ from .utils._scorers import get_scorer
 from .utils._train import reset_model, train_model, train_baseline
 from .utils._filter import filter_on_method, get_levels
 from .utils._progress import initialize_progress_bar
-from .utils._transform import df_from_array, check_corruptions, fill_missing_columns, normalize_max_min
+from .utils._transform import df_from_array, check_corruptions, fill_missing_columns, normalize_max_min, make_scaler
 
 def set_random_seed(random_state):
     """ Set random seed for different packages
@@ -141,7 +141,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
     corruption_list = check_corruptions(df_train, corruption_list)
     progress_bar = initialize_progress_bar(corruption_list, n_corruptions, df_train)
     corrupted_df = pd.DataFrame(columns=list(df_train))
-    baseline_results, label_name = train_baseline(df_train, X_test, y_test, model,
+    baseline_results, label_name, scaler = train_baseline(df_train, X_test, y_test, model,
                                                   scorer, measure, label_name, random_state,
                                                   custom_train, custom_predict, normalize)
     progress_bar.update(1)
@@ -154,12 +154,16 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
                                                                 df_train, X_test, y_test, model, scorer,
                                                                 measure, method, randomlist, label_name,
                                                                 random_state, progress_bar, custom_train,
-                                                                custom_predict, normalize)
+                                                                custom_predict, normalize, scaler)
         corruption_results = pd.concat([corruption_results, corruption_result])
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values
-    baseline_results['value']=normalize_max_min(baseline_results['value'])
-    corruption_results['value']=normalize_max_min(corruption_results['value'])    
+
+    baseline_value_scaler = make_scaler(baseline_results[['value']])
+    corruption_value_scaler = make_scaler(corruption_results[['value']])
+    baseline_results['value']=normalize_max_min(baseline_results[['value']], baseline_value_scaler)
+    corruption_results['value']=normalize_max_min(corruption_results[['value']], corruption_value_scaler)
+
     value_plot, variance_plot, score_plot = plot_data(baseline_results, corruption_results, str(model), n_corruptions,
                   measured_property, corruption_list)
     if show_plots:
@@ -175,13 +179,15 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
 
 def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
                        randomlist, label_name, random_state, progress_bar,
-                       custom_train, custom_predict, normalize):
+                       custom_train, custom_predict, normalize, scaler):
     """ Perfroms a specific noise corruption on features. 
 
     Will perfrom corruptions n_corruptions times (determined by randomlist) and
     average the value, variance and score for each level and for for each
     feature. 
     """
+    if normalize: 
+        X_test = normalize_max_min(X_test, scaler)
     corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'score'])
     feature_names, levels = get_levels(method, df_train)
     method_corrupt_df = pd.DataFrame(columns=feature_names)
@@ -196,7 +202,7 @@ def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
                 else:
                     X, y = sample_data(df_train, label_name, 0.4, random_state=random_int)
                 if normalize: 
-                    X = X.transform(lambda x: normalize_max_min(x))
+                    X = normalize_max_min(X, scaler)
                 X = filter_on_method(X, list(method.keys())[0], feature_name, level, random_state)
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y, custom_train)

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from sklearn.preprocessing import MinMaxScaler
 from ._filter import get_levels
 
 def convert_to_numpy(col):
@@ -92,5 +93,13 @@ def fill_missing_columns(corrupted_df, X_train):
             corrupted_df[column_name] = X_train[column_name].values
     return corrupted_df
 
-def normalize_max_min(column):
-    return (column-column.min())/(column.max()-column.min())
+def make_scaler(X):
+    scaler = MinMaxScaler()
+    scaler.fit(X)
+    return scaler
+
+def normalize_max_min(X, scaler):
+    if isinstance(X, pd.DataFrame):
+        X[list(X)] = scaler.transform(X)
+        return X
+    return scaler.transform(X)

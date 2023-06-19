@@ -1,6 +1,6 @@
 from ._importances import filter_on_importance_method
 from ._scorers import get_scorer
-from ._transform import convert_to_numpy, normalize_max_min
+from ._transform import convert_to_numpy, normalize_max_min, make_scaler
 import torch
 import numpy as np
 import pandas as pd
@@ -44,7 +44,11 @@ def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name,
     y = df_train[label_name]
     X = df_train.drop([label_name], axis=1)
     if normalize:
-        X = X.transform(lambda x: normalize_max_min(x))
+        scaler = make_scaler(X)
+        X = normalize_max_min(X, scaler)
+        X_test = normalize_max_min(X_test, scaler)
+    else:
+        scaler = None
     model = train_model(model, X, y, custom_train)
     score = get_scorer(scorer, model, X_test, y_test, custom_predict)
     for feature_name in X.columns:
@@ -53,4 +57,4 @@ def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name,
         variance = np.var(X[feature_name])
         baseline_results.loc[len(baseline_results.index)] = [feature_name, value, variance, score]
         model = reset_model(model)
-    return baseline_results, label_name
+    return baseline_results, label_name, scaler
