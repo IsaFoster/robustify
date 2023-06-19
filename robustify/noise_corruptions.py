@@ -27,7 +27,7 @@ def set_random_seed(random_state):
 def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
                  y_test=None, column_names=None, label_name=None, measure=None,
                  n_corruptions=10, random_state=None, custom_train=None, 
-                 custom_predict=None, show_plots=True):
+                 custom_predict=None, show_plots=True, normalize=True):
     """ Perform noise corruption on tabular data.
 
     Parameters
@@ -113,6 +113,9 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
     show_plots: bool, default=True
         Determines whether plots of feature importances, variance and score are
         shown. 
+    
+    normalize: bool, deafult=True
+        Normalize the data before training the model. Uses min-max normalization.
           
     Returns
     -------
@@ -140,7 +143,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
     corrupted_df = pd.DataFrame(columns=list(df_train))
     baseline_results, label_name = train_baseline(df_train, X_test, y_test, model,
                                                   scorer, measure, label_name, random_state,
-                                                  custom_train, custom_predict)
+                                                  custom_train, custom_predict, normalize)
     progress_bar.update(1)
     randomlist = random.sample(range(1, 1000), n_corruptions)
     corruption_results = pd.DataFrame(columns=['feature_name', 'level',
@@ -151,7 +154,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
                                                                 df_train, X_test, y_test, model, scorer,
                                                                 measure, method, randomlist, label_name,
                                                                 random_state, progress_bar, custom_train,
-                                                                custom_predict)
+                                                                custom_predict, normalize)
         corruption_results = pd.concat([corruption_results, corruption_result])
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values
@@ -172,7 +175,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
 
 def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
                        randomlist, label_name, random_state, progress_bar,
-                       custom_train, custom_predict):
+                       custom_train, custom_predict, normalize):
     """ Perfroms a specific noise corruption on features. 
 
     Will perfrom corruptions n_corruptions times (determined by randomlist) and
@@ -192,6 +195,8 @@ def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
                     X, y = sample_data(df_train, label_name, 1, random_state=random_int)
                 else:
                     X, y = sample_data(df_train, label_name, 0.4, random_state=random_int)
+                if normalize: 
+                    X = X.transform(lambda x: normalize_max_min(x))
                 X = filter_on_method(X, list(method.keys())[0], feature_name, level, random_state)
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y, custom_train)

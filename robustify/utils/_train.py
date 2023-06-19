@@ -1,6 +1,6 @@
 from ._importances import filter_on_importance_method
 from ._scorers import get_scorer
-from ._transform import convert_to_numpy
+from ._transform import convert_to_numpy, normalize_max_min
 import torch
 import numpy as np
 import pandas as pd
@@ -35,14 +35,16 @@ def reset_model(model):
         torch.nn.init.xavier_uniform(model.weight.data)
     return model
 
-def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name, random_state, custom_train, custom_predict):
-    """ Train a baseline model on hte data without anny corruptions. 
+def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name, random_state, custom_train, custom_predict, normalize):
+    """ Train a baseline model on the data without any corruptions. 
     """
     baseline_results = pd.DataFrame(columns=['feature_name', 'value', 'variance', 'score'])
     if (label_name is None):
         label_name = str(list(df_train)[-1])
     y = df_train[label_name]
     X = df_train.drop([label_name], axis=1)
+    if normalize:
+        X = X.transform(lambda x: normalize_max_min(x))
     model = train_model(model, X, y, custom_train)
     score = get_scorer(scorer, model, X_test, y_test, custom_predict)
     for feature_name in X.columns:

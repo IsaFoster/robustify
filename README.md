@@ -4,6 +4,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/RobustifyToolkit)](https://pypi.org/project/RobustifyToolkit/)
 [![PyPI](https://badge.fury.io/py/RobustifyToolkit.svg)](https://badge.fury.io/py/RobustifyToolkit)
 [![Build](https://github.com/IsaFoster/MasterThesis/actions/workflows/build.yml/badge.svg)](https://github.com/IsaFoster/MasterThesis/actions/workflows/build.yml)
+[![Downloads](https://img.shields.io/pypi/dm/robustifytoolkit)](https://pypi.org/project/RobustifyToolkit/)
 
 ## Note: I am excited to announce that the library is now in its alpha stage of development! This means there can potentially be major changes between releases and there will be bugs🐛. If you encounter a bug or unexpected behaviour, please report it [here](https://github.com/IsaFoster/robustify/discussions/categories/bugs). If you are interested in contributing to the project read [this](CONTRIBUTING.md).
 

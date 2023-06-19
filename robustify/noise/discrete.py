@@ -9,7 +9,7 @@ def binomial_noise(clean_data, level, feature_name=None, random_state=None):
     clean_data: ndarray or dataframe of shape (n_samples, n_features)
         Array of the feature values that will be permuted. If dataframe,
         feature_name is required to determine which feature the noise should be
-        applied to. .
+        applied to.
     level: float
         The probability of each value to be permuted. If 0, feature is returned
         without changes. If 1, every value is flipped.
