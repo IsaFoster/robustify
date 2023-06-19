@@ -26,7 +26,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
-    install_requires=['numpy<=1.24.3', 
+    install_requires=['numpy<=1.25.0', 
                       'scikit-learn<=1.2.2', 
                       'matplotlib<=3.7.1', 
                       'pandas<=2.0.2', 
