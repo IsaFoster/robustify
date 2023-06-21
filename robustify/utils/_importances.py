@@ -4,6 +4,7 @@ from eli5.sklearn import PermutationImportance
 from eli5.permutation_importance import get_score_importances
 from lime import lime_tabular
 import shap
+from ._filter import is_keras_model, is_tree_model
 from ._transform import convert_to_numpy
 
 def filter_on_importance_method(model, index, X, y, random_state, scoring, measure, custom_predict):
@@ -11,7 +12,7 @@ def filter_on_importance_method(model, index, X, y, random_state, scoring, measu
     switcher = {
         None: lambda: check_for_deafult_properties(model, index, X, y, random_state, scoring),
         'eli5': lambda: calculate_eli5_importances(model, index, X, y, random_state, scoring),
-        'shap': lambda: calculate_shap_importances(model, index, X),
+        'shap': lambda: calculate_shap_importances(model, index, X, random_state, custom_predict),
         'lime': lambda: calculate_lime_importances(model, index, X, custom_predict)
     }
     return switcher.get(measure, lambda:
@@ -72,12 +73,49 @@ def calculate_lime_importances(model, index, X, custom_predict):
     except:
         raise Exception("Could not compute lime importances")
 
-def calculate_shap_importances(model, index, X):
-    try:
-        measured_property = "shap"
-        explainer = shap.Explainer(model)
+def calculate_shap_importances(model, index, X, random_state, custom_predict):
+    measured_property = "shap"
+    if custom_predict:
+        #TODO: determine which method to usee for custom predict
+        assert (False)
+        model_pred = lambda x: custom_predict(model, x)
+        explainer = shap.Explainer(model_pred, X)
         shap_values = explainer(X)
-        average_values = [sum(sub_list) / len(sub_list) for sub_list in zip(*shap_values.data)]
-        return average_values[index], measured_property
-    except:
-        raise Exception("Could not compute shap importances")
+    elif is_keras_model(model):
+        average_values = shap_values_keras(model, X, random_state)
+    elif is_tree_model(model):
+        average_values =shap_values_tree(model, X, random_state)
+    else:
+        if hasattr(model, "predict_proba"):
+            explainer = shap.Explainer(model.predict, X, seed=random_state)
+            shap_values = explainer(X)
+        else:
+            f = lambda x: model.predict(x)
+            med = X.median().values.reshape((1,X.shape[1]))
+            explainer = shap.Explainer(f, med, seed=random_state)
+            shap_values = explainer(X) 
+        average_values = [sum(sub_list) / len(sub_list) for sub_list in zip(*shap_values.values)]
+    return average_values[index], measured_property   
+    raise Exception("Could not compute shap importances")
+    
+def shap_values_keras(model, X, random_state):
+    X_train_summary = shap.kmeans(X, 50)
+    # TODO: check classification after issue #100
+    def f(X):
+        return model.predict(X, verbose=0)
+
+    explainer = shap.KernelExplainer(f, X_train_summary, seed=random_state)
+    shap_values = explainer.shap_values(X, nsamples=100)
+    average_values = np.sum(np.abs(shap_values).mean(1), axis=0)
+    return average_values
+
+def shap_values_tree(model, X, random_state):
+    if  hasattr(model, "predict_proba"):
+        explainer = shap.KernelExplainer(model.predict_proba, X, seed=random_state)
+        shap_values = explainer.shap_values(X)
+        average_values = np.sum(np.abs(shap_values).mean(1), axis=0)
+    else:
+        explainer = shap.TreeExplainer(model, seed=random_state)
+        shap_values = explainer.shap_values(X)
+        average_values = np.abs(shap_values).mean(0)   
+    return average_values

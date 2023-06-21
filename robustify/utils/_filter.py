@@ -2,6 +2,8 @@ from robustify.noise.continuous import gaussian_noise, gaussian_noise_dep
 from robustify.noise.discrete import poisson_noise, binomial_noise
 import tensorflow as tf
 import keras
+import sklearn
+
 
 def filter_on_method(df, method, feature_name, dep, level=None, random_state=None):
     switcher = {
@@ -35,4 +37,6 @@ def get_levels(methodSpecification, df=None):
 
 def is_keras_model(model):
     return isinstance(model, (tf.keras.Model, keras.Model, tf.estimator.Estimator))
-    
+
+def is_tree_model(model):
+    return isinstance(model, (sklearn.ensemble._forest.RandomForestRegressor, sklearn.ensemble._forest.RandomForestClassifier))

@@ -1,6 +1,7 @@
 from ._importances import filter_on_importance_method
 from ._scorers import get_scorer
-from ._transform import convert_to_numpy, normalize_max_min, make_scaler
+from ._transform import convert_to_numpy
+from ._filter import is_keras_model
 import torch
 import numpy as np
 import pandas as pd
