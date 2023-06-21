@@ -21,7 +21,10 @@ def filter_on_importance_method(model, index, X, y, random_state, scoring, measu
 def check_for_deafult_properties(model, index, X, y, random_state, scoring):
     if hasattr(model, 'feature_importances_'):
         measured_property = 'feature importance'
-        return model.feature_importances_[index], measured_property
+        if index is not None:
+            return model.feature_importances_[index], measured_property
+        else:
+            return model.feature_importances_, measured_property 
     elif hasattr(model, 'coef_'):
         measured_property = 'coefficients'
         if isinstance(model.coef_[0], (np.ndarray, list)):
@@ -39,56 +42,47 @@ def check_for_deafult_properties(model, index, X, y, random_state, scoring):
         return calculate_permuation_importances(model, index, X, y, random_state, scoring)
 
 def calculate_permuation_importances(model, index, X, y, random_state, scoring):
-    try:
-        measured_property = 'permutation importance'
-        importances = permutation_importance(model, convert_to_numpy(X), convert_to_numpy(y),
-                                             n_repeats=1, random_state=random_state,
-                                             n_jobs=-1, scoring=scoring)
-        if index is not None:
-            return importances.importances_mean[index], measured_property
-        else:
-            return importances.importances_mean, measured_property
-    except:
-        raise Exception("cound not calculate coefficients or feature importance")
+    measured_property = 'permutation importance'
+    importances = permutation_importance(model, convert_to_numpy(X), convert_to_numpy(y),
+                                            n_repeats=1, random_state=random_state,
+                                            n_jobs=-1, scoring=scoring)
+    if index is not None:
+        return importances.importances_mean[index], measured_property
+    else:
+        return importances.importances_mean, measured_property
 
 def calculate_eli5_importances(model, index, X, y, random_state, scoring):
-    try:
-        importances = PermutationImportance(model, scoring=scoring, random_state=random_state,
-                                            n_iter=1, cv="prefit", refit=False).fit(X, y)
-        measured_property = "eli5 permutation importance"
-        if index is not None:
-            return importances.feature_importances_[index], measured_property
-        else:
-            return importances.feature_importances_, measured_property
-    except:
-        raise Exception("Could not compute eli5 importances") 
+    importances = PermutationImportance(model, scoring=scoring, random_state=random_state,
+                                        n_iter=1, cv="prefit", refit=False).fit(X, y)
+    measured_property = "eli5 permutation importance"
+    if index is not None:
+        return importances.feature_importances_[index], measured_property
+    else:
+        return importances.feature_importances_, measured_property
 
 def calculate_lime_importances(model, index, X, custom_predict):
-    try:
-        measured_property = "lime explainer"
-        explainer = lime_tabular.LimeTabularExplainer(
-            training_data=X.to_numpy(),
-            feature_names=X.columns.tolist(),
-            class_names=['data_type'],
-            mode='classification',
-            verbose=False)
-        values = []
-        for i in range(int((X.shape[0]/10))):
-            if custom_predict:
-                predict_fn_rf = lambda x: custom_predict(model, x).astype(float)
-            else:
-                predict_fn_rf = lambda x: model.predict_proba(x).astype(float)
-            exp = explainer.explain_instance(X.to_numpy()[i], predict_fn_rf, 
-                                             num_features=len(X.columns.tolist()))
-            dic = dict(list(exp.as_map().values())[0])
-            if index is not None:
-                values.append(dic.get(index))
-            else:
-                values.append(dic) ## will not work 
-        average_value = np.mean(values, axis=0)
-        return average_value, measured_property
-    except:
-        raise Exception("Could not compute lime importances")
+    measured_property = "lime explainer"
+    explainer = lime_tabular.LimeTabularExplainer(
+        training_data=X.to_numpy(),
+        feature_names=X.columns.tolist(),
+        class_names=['data_type'],
+        mode='classification',
+        verbose=False)
+    values = []
+    for i in range(int((X.shape[0]/10))):
+        if custom_predict:
+            predict_fn_rf = lambda x: custom_predict(model, x).astype(float)
+        else:
+            predict_fn_rf = lambda x: model.predict_proba(x).astype(float)
+        exp = explainer.explain_instance(X.to_numpy()[i], predict_fn_rf, 
+                                            num_features=len(X.columns.tolist()))
+        dic = dict(list(exp.as_map().values())[0])
+        if index is not None:
+            values.append(dic.get(index))
+        else:
+            values.append(dic) ## will not work 
+    average_value = np.mean(values, axis=0)
+    return average_value, measured_property
 
 def calculate_shap_importances(model, index, X, random_state, custom_predict):
     measured_property = "shap"
@@ -120,7 +114,6 @@ def calculate_shap_importances(model, index, X, random_state, custom_predict):
     
 def shap_values_keras(model, X, random_state):
     X_train_summary = shap.kmeans(X, 50)
-    # TODO: check classification after issue #100
     def f(X):
         return model.predict(X, verbose=0)
 
