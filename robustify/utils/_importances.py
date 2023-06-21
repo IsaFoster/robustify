@@ -5,6 +5,7 @@ from eli5.permutation_importance import get_score_importances
 from lime import lime_tabular
 import shap
 from ._filter import is_keras_model, is_tree_model
+from ._transform import convert_to_numpy
 
 def filter_on_importance_method(model, index, X, y, random_state, scoring, measure, custom_predict):
     if measure: measure = measure.lower()
@@ -32,32 +33,21 @@ def check_for_deafult_properties(model, index, X, y, random_state, scoring):
 def calculate_permuation_importances(model, index, X, y, random_state, scoring):
     try:
         measured_property = 'permutation importance'
-        importances = permutation_importance(model, X, y, n_repeats=1,
-                                             random_state=random_state,
+        importances = permutation_importance(model, convert_to_numpy(X), convert_to_numpy(y),
+                                             n_repeats=1, random_state=random_state,
                                              n_jobs=-1, scoring=scoring)
         return importances.importances_mean[index], measured_property
     except:
         raise Exception("cound not calculate coefficients or feature importance")
 
 def calculate_eli5_importances(model, index, X, y, random_state, scoring):
-    if not isinstance(scoring, str):
-        try:
-            measured_property = "eli5_custom_score_function"
-            _, score_decreases = get_score_importances(scoring, np.array(X),
-                                                       y, n_iter=1,
-                                                       random_state=random_state)
-            feature_importances = np.mean(score_decreases, axis=0)
-            return feature_importances[index], measured_property
-        except:
-            raise Exception("Could not compute eli5 importances")
-    else:
-        try:
-            importances = PermutationImportance(model, scoring=scoring, random_state=random_state,
-                                                n_iter=1, cv="prefit", refit=False).fit(X, y)
-            measured_property = "eli5 permutation importance"
-            return importances.feature_importances_[index], measured_property
-        except:
-            raise Exception("Could not compute eli5 importances") 
+    try:
+        importances = PermutationImportance(model, scoring=scoring, random_state=random_state,
+                                            n_iter=1, cv="prefit", refit=False).fit(X, y)
+        measured_property = "eli5 permutation importance"
+        return importances.feature_importances_[index], measured_property
+    except:
+        raise Exception("Could not compute eli5 importances") 
 
 def calculate_lime_importances(model, index, X, custom_predict):
     try:

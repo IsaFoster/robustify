@@ -4,6 +4,7 @@ import tensorflow as tf
 import keras
 import sklearn
 
+
 def filter_on_method(df, method, feature_name, level=None, random_state=None):
     switcher = {
         'Binomial': lambda: binomial_noise(df, level, feature_name, random_state),
