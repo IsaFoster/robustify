@@ -10,7 +10,7 @@ def plot_data(baseline_results, corruption_results, model_name, corruptions,
     bar_list = []
     line_list = []
     for corruption in corruption_list:
-        features, levels = get_levels(corruption)
+        features, levels, _ = get_levels(corruption)
         if len(levels) > 1:
             line_list.append(corruption)
             df_plot_line = pd.concat([df_plot_line,
@@ -80,7 +80,7 @@ def plot_buttons(corruption_list, featureNames):
     ]
     if corruption_list != None:
         for noise_method in corruption_list:
-            visible_features, levels = get_levels(noise_method)
+            visible_features, levels, _ = get_levels(noise_method)
             button_values = button_layout[0]['buttons']
             button_values.append(dict(
                     args=[{"visible": [i in visible_features for i in featureNames]}],

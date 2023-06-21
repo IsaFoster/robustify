@@ -141,9 +141,9 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
     corruption_list = check_corruptions(df_train, corruption_list)
     progress_bar = initialize_progress_bar(corruption_list, n_corruptions, df_train)
     corrupted_df = pd.DataFrame(columns=list(df_train))
-    baseline_results, label_name, scaler = train_baseline(df_train, X_test, y_test, model,
+    baseline_results, label_name = train_baseline(df_train, X_test, y_test, model,
                                                   scorer, measure, label_name, random_state,
-                                                  custom_train, custom_predict, normalize)
+                                                  custom_train, custom_predict)
     progress_bar.update(1)
     randomlist = random.sample(range(1, 1000), n_corruptions)
     corruption_results = pd.DataFrame(columns=['feature_name', 'level',
@@ -154,7 +154,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
                                                                 df_train, X_test, y_test, model, scorer,
                                                                 measure, method, randomlist, label_name,
                                                                 random_state, progress_bar, custom_train,
-                                                                custom_predict, normalize, scaler)
+                                                                custom_predict)
         corruption_results = pd.concat([corruption_results, corruption_result])
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values
@@ -179,17 +179,15 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
 
 def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
                        randomlist, label_name, random_state, progress_bar,
-                       custom_train, custom_predict, normalize, scaler):
+                       custom_train, custom_predict):
     """ Perfroms a specific noise corruption on features. 
 
     Will perfrom corruptions n_corruptions times (determined by randomlist) and
     average the value, variance and score for each level and for for each
     feature. 
     """
-    if normalize: 
-        X_test = normalize_max_min(X_test, scaler)
     corruption_result = pd.DataFrame(columns=['feature_name', 'level', 'value', 'variance', 'score'])
-    feature_names, levels = get_levels(method, df_train)
+    feature_names, levels, optional_param = get_levels(method, df_train)
     method_corrupt_df = pd.DataFrame(columns=feature_names)
     for level in levels:
         for feature_name in feature_names:
@@ -197,13 +195,13 @@ def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
             average_score = []
             average_variance = []
             for random_int in randomlist:
-                if random_int == randomlist[-1]:
+                y = df_train[label_name]
+                X = df_train.drop([label_name], axis=1)
+                '''if random_int == randomlist[-1]:
                     X, y = sample_data(df_train, label_name, 1, random_state=random_int)
                 else:
-                    X, y = sample_data(df_train, label_name, 0.4, random_state=random_int)
-                if normalize: 
-                    X = normalize_max_min(X, scaler)
-                X = filter_on_method(X, list(method.keys())[0], feature_name, level, random_state)
+                    X, y = sample_data(df_train, label_name, 0.4, random_state=random_int)'''
+                X = filter_on_method(X, list(method.keys())[0], feature_name, optional_param, level, random_int)
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y, custom_train)
                 index = df_train.columns.get_loc(feature_name)

@@ -35,7 +35,7 @@ def reset_model(model):
         torch.nn.init.xavier_uniform(model.weight.data)
     return model
 
-def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name, random_state, custom_train, custom_predict, normalize):
+def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name, random_state, custom_train, custom_predict):
     """ Train a baseline model on the data without any corruptions. 
     """
     baseline_results = pd.DataFrame(columns=['feature_name', 'value', 'variance', 'score'])
@@ -43,12 +43,6 @@ def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name,
         label_name = str(list(df_train)[-1])
     y = df_train[label_name]
     X = df_train.drop([label_name], axis=1)
-    if normalize:
-        scaler = make_scaler(X)
-        X = normalize_max_min(X, scaler)
-        X_test = normalize_max_min(X_test, scaler)
-    else:
-        scaler = None
     model = train_model(model, X, y, custom_train)
     score = get_scorer(scorer, model, X_test, y_test, custom_predict)
     for feature_name in X.columns:
@@ -57,4 +51,4 @@ def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name,
         variance = np.var(X[feature_name])
         baseline_results.loc[len(baseline_results.index)] = [feature_name, value, variance, score]
         model = reset_model(model)
-    return baseline_results, label_name, scaler
+    return baseline_results, label_name

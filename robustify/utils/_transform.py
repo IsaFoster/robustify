@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, RobustScaler
 from ._filter import get_levels
 
 def convert_to_numpy(col):
@@ -40,7 +40,7 @@ def df_from_ndarray(X, column_names, y, label_name):
     """
     if y is not None and label_name is not None:
         df = pd.DataFrame(X, columns = column_names)
-        df[label_name] = y
+        df[label_name] = convert_to_numpy(y)
     elif column_names is not None and y is not None:
         label_name = get_label_name(len(column_names), label_name)
         df = pd.DataFrame(X, columns = column_names)
@@ -78,9 +78,12 @@ def check_corruptions(df, corruption_list):
     the dataframe to avoid indexation errors. 
     """
     for method in corruption_list:
-        feature_names_string, levels = get_levels(method, df)
+        feature_names_string, levels, optional = get_levels(method, df)
         for key, value in method.items():
-            value = [feature_names_string, levels]
+            if optional is not None:
+                value = [feature_names_string, levels, optional]
+            else:
+                value = [feature_names_string, levels]
             method[key] = value
     return corruption_list
 
