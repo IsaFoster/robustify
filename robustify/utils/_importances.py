@@ -25,9 +25,17 @@ def check_for_deafult_properties(model, index, X, y, random_state, scoring):
     elif hasattr(model, 'coef_'):
         measured_property = 'coefficients'
         if isinstance(model.coef_[0], (np.ndarray, list)):
-            return model.coef_[0][index], measured_property
-        return model.coef_[index], measured_property
+            if index is not None:
+                return model.coef_[0][index], measured_property
+            else:
+                return model.coef_[0], measured_property
+        if index is not None:
+            return model.coef_[index], measured_property
+        else:
+            return model.coef_, measured_property
     else:
+        if is_keras_model:
+            return calculate_eli5_importances(model, index, X, y, random_state, scoring)
         return calculate_permuation_importances(model, index, X, y, random_state, scoring)
 
 def calculate_permuation_importances(model, index, X, y, random_state, scoring):
@@ -36,7 +44,10 @@ def calculate_permuation_importances(model, index, X, y, random_state, scoring):
         importances = permutation_importance(model, convert_to_numpy(X), convert_to_numpy(y),
                                              n_repeats=1, random_state=random_state,
                                              n_jobs=-1, scoring=scoring)
-        return importances.importances_mean[index], measured_property
+        if index is not None:
+            return importances.importances_mean[index], measured_property
+        else:
+            return importances.importances_mean, measured_property
     except:
         raise Exception("cound not calculate coefficients or feature importance")
 
@@ -45,7 +56,10 @@ def calculate_eli5_importances(model, index, X, y, random_state, scoring):
         importances = PermutationImportance(model, scoring=scoring, random_state=random_state,
                                             n_iter=1, cv="prefit", refit=False).fit(X, y)
         measured_property = "eli5 permutation importance"
-        return importances.feature_importances_[index], measured_property
+        if index is not None:
+            return importances.feature_importances_[index], measured_property
+        else:
+            return importances.feature_importances_, measured_property
     except:
         raise Exception("Could not compute eli5 importances") 
 
@@ -67,7 +81,10 @@ def calculate_lime_importances(model, index, X, custom_predict):
             exp = explainer.explain_instance(X.to_numpy()[i], predict_fn_rf, 
                                              num_features=len(X.columns.tolist()))
             dic = dict(list(exp.as_map().values())[0])
-            values.append(dic.get(index))
+            if index is not None:
+                values.append(dic.get(index))
+            else:
+                values.append(dic) ## will not work 
         average_value = np.mean(values, axis=0)
         return average_value, measured_property
     except:
@@ -95,7 +112,10 @@ def calculate_shap_importances(model, index, X, random_state, custom_predict):
             explainer = shap.Explainer(f, med, seed=random_state)
             shap_values = explainer(X) 
         average_values = [sum(sub_list) / len(sub_list) for sub_list in zip(*shap_values.values)]
-    return average_values[index], measured_property   
+    if index is None:
+        return average_values[index], measured_property   
+    else:
+        return average_values, measured_property   
     raise Exception("Could not compute shap importances")
     
 def shap_values_keras(model, X, random_state):

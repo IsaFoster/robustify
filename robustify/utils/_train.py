@@ -46,10 +46,11 @@ def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name,
     X = df_train.drop([label_name], axis=1)
     model = train_model(model, X, y, custom_train)
     score = get_scorer(scorer, model, X_test, y_test, custom_predict)
-    for feature_name in X.columns:
-        index = df_train.columns.get_loc(feature_name)
-        value, _ = filter_on_importance_method(model, index, X, y, random_state=random_state, scoring=scorer, measure=measure, custom_predict=custom_predict)
-        variance = np.var(X[feature_name])
-        baseline_results.loc[len(baseline_results.index)] = [feature_name, value, variance, score]
-        model = reset_model(model)
+    value, _ = filter_on_importance_method(model, None, X, y, random_state=random_state, scoring=scorer, measure=measure, custom_predict=custom_predict)
+    variance = np.var(X)
+    baseline_results["feature_name"] = list(X.columns)
+    baseline_results["value"] = value
+    baseline_results["variance"] = variance.values
+    baseline_results["score"] = np.repeat(score,len(list(X.columns)))
+    model = reset_model(model)
     return baseline_results, label_name
