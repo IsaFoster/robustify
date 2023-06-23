@@ -1,0 +1,34 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Robustify
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Isabel
+    family-names: Foster
+identifiers:
+  - type: url
+    value: 'https://github.com/IsaFoster/robustify'
+repository-code: 'https://github.com/IsaFoster/robustify'
+abstract: >-
+  Welcome to Robustify, a GitHub repository focused on
+  evaluating the effects of adding structurally conserving
+  noise to data. The goal is to provide a comprehensive set
+  of tools for researchers and practitioners interested in
+  exploring the impact of noise on the score and robustness
+  of their machine learning models. The repository includes
+  a variety of noise generation and augmentation techniques,
+  as well as methods for evaluating the effects of noise on
+  model performance, robustness metrics and visualizations.
+keywords:
+  - Machine learning
+  - robust
+  - noise
+license: MIT
+commit: '1784524'
+version: v0.1.1
+date-released: '2023-05-27'
