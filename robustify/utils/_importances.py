@@ -12,18 +12,18 @@ import warnings
 warnings.filterwarnings(action='ignore', category=FutureWarning)
 warnings.filterwarnings(action='ignore', category=UserWarning)
 
-def filter_on_importance_method(model, index, X, y, X_test, random_state, scoring, measure, custom_predict):
+def filter_on_importance_method(model, index, X, y, X_test, y_test, random_state, scoring, measure, custom_predict):
     if measure: measure = measure.lower()
     switcher = {
-        None: lambda: check_for_deafult_properties(model, index, X, y, X_test, random_state, scoring),
-        'eli5': lambda: calculate_eli5_importances(model, index, X, y, X_test, random_state, scoring),
+        None: lambda: check_for_deafult_properties(model, index, X, y, X_test, y_test, random_state, scoring),
+        'eli5': lambda: calculate_eli5_importances(model, index, X, y, X_test, y_test, random_state, scoring),
         'shap': lambda: calculate_shap_importances(model, index, X, X_test, random_state, custom_predict),
         'lime': lambda: calculate_lime_importances(model, index, X, X_test, custom_predict)
     }
     return switcher.get(measure, lambda:
                         print("Invalid importance measure for {}".format(str(model))))()
 
-def check_for_deafult_properties(model, index, X, y, X_test, random_state, scoring):
+def check_for_deafult_properties(model, index, X, y, X_test, y_test, random_state, scoring):
     if hasattr(model, 'feature_importances_'):
         measured_property = 'feature importance'
         if index is not None:
@@ -43,12 +43,12 @@ def check_for_deafult_properties(model, index, X, y, X_test, random_state, scori
             return model.coef_, measured_property
     else:
         if is_keras_model:
-            return calculate_eli5_importances(model, index, X, y, X_test, random_state, scoring)
-        return calculate_permuation_importances(model, index, X, y, X_test, random_state, scoring)
+            return calculate_eli5_importances(model, index, X, y, X_test, y_test, random_state, scoring)
+        return calculate_permuation_importances(model, index, X, y, X_test, y_test, random_state, scoring)
 
-def calculate_permuation_importances(model, index, X, y, X_test, random_state, scoring):
+def calculate_permuation_importances(model, index, X, y, X_test, y_test, random_state, scoring):
     measured_property = 'permutation importance'
-    importances = permutation_importance(model, convert_to_numpy(X), convert_to_numpy(y),
+    importances = permutation_importance(model, convert_to_numpy(X_test), convert_to_numpy(y_test),
                                             n_repeats=1, random_state=random_state,
                                             n_jobs=-1, scoring=scoring)
     if index is not None:
@@ -56,9 +56,9 @@ def calculate_permuation_importances(model, index, X, y, X_test, random_state, s
     else:
         return importances.importances_mean, measured_property
 
-def calculate_eli5_importances(model, index, X, y, X_test, random_state, scoring):
+def calculate_eli5_importances(model, index, X, y, X_test, y_test, random_state, scoring):
     importances = PermutationImportance(model, scoring=scoring, random_state=random_state,
-                                        n_iter=1, cv="prefit", refit=False).fit(X, y)
+                                        n_iter=1, cv="prefit", refit=False).fit(X_test, y_test)
     measured_property = "eli5 permutation importance"
     if index is not None:
         return importances.feature_importances_[index], measured_property
@@ -89,9 +89,9 @@ def calculate_lime_importances(model, index, X, X_test, custom_predict):
         else:
             predict_fn_rf = lambda x: model.predict_proba(x).astype(float)
         try:
-            exp = explainer_classification.explain_instance(X.iloc[i], predict_fn_rf, num_features=len(X.columns.tolist()))
+            exp = explainer_classification.explain_instance(X_test.iloc[i], predict_fn_rf, num_features=len(X.columns.tolist()))
         except: 
-            exp = explainer_regression.explain_instance(X.iloc[i], predict_fn_rf, num_features=len(X.columns.tolist()))
+            exp = explainer_regression.explain_instance(X_test.iloc[i], predict_fn_rf, num_features=len(X.columns.tolist()))
         dic = dict(list(exp.as_map().values())[0])
         if index is not None:
             values.append(dic.get(index))
@@ -120,12 +120,12 @@ def calculate_shap_importances(model, index, X, X_test, random_state, custom_pre
     else:
         if hasattr(model, "predict_proba"):
             explainer = shap.Explainer(model.predict, X, seed=random_state, silent=True)
-            shap_values = explainer(X)
+            shap_values = explainer(X_test)
         else:
             f = lambda x: model.predict(x)
             med = X.median().values.reshape((1,X.shape[1]))
             explainer = shap.Explainer(f, med, seed=random_state, silent=True)
-            shap_values = explainer(X) 
+            shap_values = explainer(X_test) 
         average_values = [sum(sub_list) / len(sub_list) for sub_list in zip(*shap_values.values)]
     if index is not None:
         return average_values[index], measured_property   
@@ -144,7 +144,7 @@ def shap_values_keras(model, X, X_test, random_state):
 
 def shap_values_tree(model, X, X_test, random_state):
     explainer = shap.TreeExplainer(model, seed=random_state, silent=True)
-    shap_values = explainer.shap_values(X)
+    shap_values = explainer.shap_values(X_test)
     average_values = np.mean(shap_values, axis=0)
     average_values = np.mean(average_values, axis=0)
     return average_values

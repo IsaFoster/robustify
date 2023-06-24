@@ -194,17 +194,20 @@ def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
             for random_int in randomlist:
                 y = df_train[label_name]
                 X = df_train.drop([label_name], axis=1)
+                df_test = X_test
+                df_test[label_name] = y_test.values
                 X = filter_on_method(X, list(method.keys())[0], feature_name, optional_param, level, random_int)
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y, custom_train)
                 index = df_train.columns.get_loc(feature_name)
                 X_sampled, y_sampled = sample_data(df_train, label_name, min(10000/len(df_train), 1), random_state=random_int)
-                X_test_sampled = sample_X(X_test, min(1000/len(df_train), 1), random_state=random_state) 
-                measured_value, measured_property = filter_on_importance_method(model, index, X_sampled, y_sampled, X_test_sampled,
-                                                                        random_state=random_int,
-                                                                        scoring=scorer,
-                                                                        measure=measure,
-                                                                        custom_predict=custom_predict)
+                X_test_sampled, y_test_sampled = sample_data(df_test, label_name, min(1000/len(df_test), 1), random_state=random_state)
+                measured_value, measured_property = filter_on_importance_method(model, index, X_sampled, y_sampled, 
+                                                                                X_test_sampled, y_test_sampled,
+                                                                                random_state=random_int,
+                                                                                scoring=scorer,
+                                                                                measure=measure,
+                                                                                custom_predict=custom_predict)
                 average_value.append(measured_value)
                 score = get_scorer(scorer, model, X_test, y_test, custom_predict)
                 average_score.append(score)
