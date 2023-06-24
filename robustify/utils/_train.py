@@ -2,6 +2,7 @@ from ._importances import filter_on_importance_method
 from ._scorers import get_scorer
 from ._transform import convert_to_numpy
 from ._filter import is_keras_model
+from ._sampling import sample_data
 import torch
 import numpy as np
 import pandas as pd
@@ -28,7 +29,7 @@ def train_model(model, X, y, custom_train):
     if is_keras_model(model):
         model.fit(X.values, y.values.ravel(), verbose=0)
     else:
-        model.fit(X.values, y.values.ravel())
+        model.fit(X, y.values.ravel())
     return model
 
 def reset_model(model):
@@ -46,10 +47,11 @@ def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name,
     X = df_train.drop([label_name], axis=1)
     model = train_model(model, X, y, custom_train)
     score = get_scorer(scorer, model, X_test, y_test, custom_predict)
-    value, _ = filter_on_importance_method(model, None, X, y, random_state=random_state, scoring=scorer, measure=measure, custom_predict=custom_predict)
+    X_sampled, y_sampled = sample_data(df_train, label_name, min(10000/len(df_train), 1), random_state=random_state) 
+    values, _ = filter_on_importance_method(model, None, X_sampled, y_sampled, random_state=random_state, scoring=scorer, measure=measure, custom_predict=custom_predict)
     variance = np.var(X)
     baseline_results["feature_name"] = list(X.columns)
-    baseline_results["value"] = value
+    baseline_results["value"] = values
     baseline_results["variance"] = variance.values
     baseline_results["score"] = np.repeat(score,len(list(X.columns)))
     model = reset_model(model)

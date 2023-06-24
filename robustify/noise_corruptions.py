@@ -24,7 +24,7 @@ def set_random_seed(random_state):
     random.seed(random_state)
     tf.random.set_seed(random_state)
 
-def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
+def corrupt_data(model, corruption_list, X_train, X_test, score_func, y_train=None,
                  y_test=None, column_names=None, label_name=None, measure=None,
                  n_corruptions=10, random_state=None, custom_train=None, 
                  custom_predict=None, show_plots=True, normalize=True):
@@ -142,7 +142,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
     progress_bar = initialize_progress_bar(corruption_list, n_corruptions, df_train)
     corrupted_df = pd.DataFrame(columns=list(df_train))
     baseline_results, label_name = train_baseline(df_train, X_test, y_test, model,
-                                                  scorer, measure, label_name, random_state,
+                                                  score_func, measure, label_name, random_state,
                                                   custom_train, custom_predict)
     progress_bar.update(1)
     randomlist = random.sample(range(1, 1000), n_corruptions)
@@ -151,26 +151,23 @@ def corrupt_data(model, corruption_list, X_train, X_test, scorer, y_train=None,
     for method in list(corruption_list):
         method_name = list(method.keys())[0]
         method_corrupt_df, corruption_result, measured_property = perform_corruption(
-                                                                df_train, X_test, y_test, model, scorer,
+                                                                df_train, X_test, y_test, model, score_func,
                                                                 measure, method, randomlist, label_name,
                                                                 random_state, progress_bar, custom_train,
                                                                 custom_predict)
         corruption_results = pd.concat([corruption_results, corruption_result])
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values
-
     baseline_value_scaler = make_scaler(baseline_results[['value']])
     corruption_value_scaler = make_scaler(corruption_results[['value']])
-    baseline_results['value']=normalize_max_min(baseline_results[['value']], baseline_value_scaler)
-    corruption_results['value']=normalize_max_min(corruption_results[['value']], corruption_value_scaler)
-
+    baseline_results['value']=normalize_max_min(baseline_results[['value']].abs(), baseline_value_scaler)
+    corruption_results['value']=normalize_max_min(corruption_results[['value']].abs(), corruption_value_scaler)
     value_plot, variance_plot, score_plot = plot_data(baseline_results, corruption_results, str(model), n_corruptions,
                   measured_property, corruption_list)
     if show_plots:
         value_plot.show()
         variance_plot.show()
         score_plot.show()
-        
     corrupted_df = fill_missing_columns(corrupted_df, df_train)
     progress_bar.close()
     corruption_results = corruption_results.sort_values(by=['feature_name', 'level'])
@@ -197,15 +194,12 @@ def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
             for random_int in randomlist:
                 y = df_train[label_name]
                 X = df_train.drop([label_name], axis=1)
-                '''if random_int == randomlist[-1]:
-                    X, y = sample_data(df_train, label_name, 1, random_state=random_int)
-                else:
-                    X, y = sample_data(df_train, label_name, 0.4, random_state=random_int)'''
                 X = filter_on_method(X, list(method.keys())[0], feature_name, optional_param, level, random_int)
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y, custom_train)
                 index = df_train.columns.get_loc(feature_name)
-                measured_value, measured_property = filter_on_importance_method(model, index, X, y,
+                X_sampled, y_sampled = sample_data(df_train, label_name, min(10000/len(df_train), 1), random_state=random_int)  # TODO: USE VAL??
+                measured_value, measured_property = filter_on_importance_method(model, index, X_sampled, y_sampled,
                                                                         random_state=random_int,
                                                                         scoring=scorer,
                                                                         measure=measure,
