@@ -9,12 +9,8 @@ from ._filter import is_keras_model, is_tree_model
 from ._transform import convert_to_numpy
 import warnings
 
-def fxn():
-    warnings.warn("userWarn", UserWarning)
-
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    fxn()
+warnings.filterwarnings(action='ignore', category=FutureWarning)
+warnings.filterwarnings(action='ignore', category=UserWarning)
 
 def filter_on_importance_method(model, index, X, y, X_test, random_state, scoring, measure, custom_predict):
     if measure: measure = measure.lower()
@@ -138,14 +134,10 @@ def calculate_shap_importances(model, index, X, X_test, random_state, custom_pre
     raise Exception("Could not compute shap importances")
     
 def shap_values_keras(model, X, X_test, random_state):
-    ind = X.shape[0]/10
-    X_train_summary = shap.kmeans(X, 20)
+    X_train_summary = shap.kmeans(X, 50)
     def f(X):
         return model.predict(X, verbose=0)
-    #explainer = shap.DeepExplainer(model, X)
-    #shap_values = explainer.shap_values(X)
-
-    explainer = shap.KernelExplainer(f, X, seed=random_state, silent=True)
+    explainer = shap.KernelExplainer(f, X_train_summary, seed=random_state, silent=True)
     shap_values = explainer.shap_values(X_test, nsamples=100)
     average_values = np.sum(np.abs(shap_values).mean(1), axis=0)
     return average_values

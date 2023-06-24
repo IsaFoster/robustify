@@ -16,7 +16,7 @@ corruption_list_classification = [
     {'Gaussian': [[1, 3], [0.3]]}]
 
 def test_existing_measure():
-    importance, measured_property = filter_on_importance_method(model, 0, X_train_classification, y_train_classification, X_test_classification 10, "accuracy", "shap", None)
+    importance, measured_property = filter_on_importance_method(model, 0, X_train_classification, y_train_classification, X_test_classification, 10, "accuracy", "shap", None)
     assert (measured_property == "shap values")
     assert (isinstance(importance, float))
 
