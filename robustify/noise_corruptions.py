@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from sklearn.utils import Bunch
-from .utils._sampling import sample_data
+from .utils._sampling import sample_data, sample_X
 from .utils._plot import plot_data
 from .utils._importances import filter_on_importance_method
 from .utils._scorers import get_scorer
@@ -198,8 +198,9 @@ def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
                 average_variance.append(np.var(X[feature_name]))
                 model = train_model(model, X, y, custom_train)
                 index = df_train.columns.get_loc(feature_name)
-                X_sampled, y_sampled = sample_data(df_train, label_name, min(10000/len(df_train), 1), random_state=random_int)  # TODO: USE VAL??
-                measured_value, measured_property = filter_on_importance_method(model, index, X_sampled, y_sampled,
+                X_sampled, y_sampled = sample_data(df_train, label_name, min(10000/len(df_train), 1), random_state=random_int)
+                X_test_sampled = sample_X(X_test, min(1000/len(df_train), 1), random_state=random_state) 
+                measured_value, measured_property = filter_on_importance_method(model, index, X_sampled, y_sampled, X_test_sampled,
                                                                         random_state=random_int,
                                                                         scoring=scorer,
                                                                         measure=measure,

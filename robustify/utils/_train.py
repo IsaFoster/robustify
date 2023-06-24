@@ -2,7 +2,7 @@ from ._importances import filter_on_importance_method
 from ._scorers import get_scorer
 from ._transform import convert_to_numpy
 from ._filter import is_keras_model
-from ._sampling import sample_data
+from ._sampling import sample_data, sample_X
 import torch
 import numpy as np
 import pandas as pd
@@ -35,7 +35,18 @@ def train_model(model, X, y, custom_train):
 def reset_model(model):
     if isinstance(model, nn.Conv2d):
         torch.nn.init.xavier_uniform(model.weight.data)
+    if is_keras_model(model):
+        reinitialize(model)
     return model
+
+def reinitialize(model):
+    for layer in model.layers:
+        if hasattr(layer,"kernel_initializer"):
+            layer.kernel.assign(layer.kernel_initializer(tf.shape(layer.kernel)))
+        if hasattr(layer,"bias_initializer"):
+            layer.bias.assign(layer.bias_initializer(tf.shape(layer.bias)))
+        if hasattr(layer,"recurrent_initializer"):
+            layer.recurrent_kernel.assign(layer.recurrent_initializer(tf.shape(layer.recurrent_kernel)))
 
 def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name, random_state, custom_train, custom_predict):
     """ Train a baseline model on the data without any corruptions. 
@@ -48,7 +59,8 @@ def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name,
     model = train_model(model, X, y, custom_train)
     score = get_scorer(scorer, model, X_test, y_test, custom_predict)
     X_sampled, y_sampled = sample_data(df_train, label_name, min(10000/len(df_train), 1), random_state=random_state) 
-    values, _ = filter_on_importance_method(model, None, X_sampled, y_sampled, random_state=random_state, scoring=scorer, measure=measure, custom_predict=custom_predict)
+    X_test_sampled = sample_X(X_test, min(1000/len(df_train), 1), random_state=random_state) 
+    values, _ = filter_on_importance_method(model, None, X_sampled, y_sampled, X_test_sampled, random_state=random_state, scoring=scorer, measure=measure, custom_predict=custom_predict)
     variance = np.var(X)
     baseline_results["feature_name"] = list(X.columns)
     baseline_results["value"] = values
