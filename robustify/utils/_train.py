@@ -58,8 +58,8 @@ def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name,
     X = df_train.drop([label_name], axis=1)
     model = train_model(model, X, y, custom_train)
     score = get_scorer(scorer, model, X_test, y_test, custom_predict)
-    df_test = X_test
-    df_test[label_name] = y_test.values
+    df_test = X_test.copy(deep=True)
+    df_test[label_name] = convert_to_numpy(y_test)
     X_sampled, y_sampled = sample_data(df_train, label_name, min(10000/len(df_train), 1), random_state=random_state) 
     X_test_sampled, y_test_sampled = sample_data(df_test, label_name, min(1000/len(df_test), 1), random_state=random_state)
     values, _ = filter_on_importance_method(model, None, X_sampled, y_sampled, X_test_sampled, y_test_sampled, random_state=random_state, scoring=scorer, measure=measure, custom_predict=custom_predict)

@@ -1,7 +1,5 @@
 from ._transform import convert_to_numpy
 from ._filter import is_keras_model
-import tensorflow as tf
-import keras
 
 def get_prediction(model, X, custom_predict):
     if custom_predict != None:
