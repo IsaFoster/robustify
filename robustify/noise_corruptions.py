@@ -151,9 +151,8 @@ def corrupt_data(model, corruption_list, X_train, X_test, score_func, y_train=No
     for method in list(corruption_list):
         method_corrupt_df, corruption_result, measured_property = perform_corruption(
                                                                 df_train, X_test, y_test, model, score_func,
-                                                                measure, method, randomlist, label_name,
-                                                                random_state, progress_bar, custom_train,
-                                                                custom_predict)
+                                                                measure, method, randomlist, label_name, progress_bar, 
+                                                                custom_train, custom_predict)
         corruption_results = pd.concat([corruption_results, corruption_result])
         for column_name in list(method_corrupt_df):
             corrupted_df[column_name] = method_corrupt_df[column_name].values
@@ -161,7 +160,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, score_func, y_train=No
     corruption_value_scaler = make_scaler(corruption_results[['value']])
     baseline_results['value']=normalize_max_min(baseline_results[['value']].abs(), baseline_value_scaler)
     corruption_results['value']=normalize_max_min(corruption_results[['value']].abs(), corruption_value_scaler)
-    value_plot, variance_plot, score_plot = plot_data(baseline_results, corruption_results, str(model), n_corruptions,
+    value_plot, variance_plot, score_plot = plot_data(baseline_results, corruption_results,
                   measured_property, corruption_list)
     if show_plots:
         value_plot.show()
@@ -174,7 +173,7 @@ def corrupt_data(model, corruption_list, X_train, X_test, score_func, y_train=No
     return result
 
 def perform_corruption(df_train, X_test, y_test, model, scorer, measure, method,
-                       randomlist, label_name, random_state, progress_bar,
+                       randomlist, label_name, progress_bar,
                        custom_train, custom_predict):
     """ Perfroms a specific noise corruption on features. 
 

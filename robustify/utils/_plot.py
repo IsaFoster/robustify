@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from plotly.express.colors import sample_colorscale
 from ._filter import get_levels
 
-def plot_data(baseline_results, corruption_results, model_name, corruptions,
+def plot_data(baseline_results, corruption_results,
               measured_property, corruption_list):
     df_plot_line = df_plot_bar =pd.DataFrame(columns=['feature_name', 'level',
                                                       'value', 'variance', 'score'])
@@ -24,18 +24,18 @@ def plot_data(baseline_results, corruption_results, model_name, corruptions,
                                      corruption_results[
                                          corruption_results['feature_name'].isin(features)]])
     if len(line_list) > 0:
-        fig_1 = plot_corruption_values(baseline_results, df_plot_line, model_name, corruptions,
+        fig_1 = plot_corruption_values(baseline_results, df_plot_line,
                                measured_property, 'value', line_list)
-        fig_2 = plot_corruption_values(baseline_results, df_plot_line, model_name, corruptions,
+        fig_2 = plot_corruption_values(baseline_results, df_plot_line,
                                measured_property, 'variance', line_list)
-        fig_3 = plot_corruption_values(baseline_results, df_plot_line, model_name, corruptions,
+        fig_3 = plot_corruption_values(baseline_results, df_plot_line,
                                measured_property,'score', line_list)
     if len(bar_list) > 0:
-        fig_1 = plot_corruption_values_hist(baseline_results, df_plot_bar, model_name, corruptions,
+        fig_1 = plot_corruption_values_hist(baseline_results, df_plot_bar,
                                     measured_property, 'value', bar_list)
-        fig_2 = plot_corruption_values_hist(baseline_results, df_plot_bar, model_name, corruptions,
+        fig_2 = plot_corruption_values_hist(baseline_results, df_plot_bar,
                                     measured_property, 'variance', bar_list)
-        fig_3 = plot_corruption_scores_hist(baseline_results, df_plot_bar, model_name, corruptions, 'score')
+        fig_3 = plot_corruption_scores_hist(baseline_results, df_plot_bar, 'score')
     return fig_1, fig_2, fig_3
 
 def get_colors_from_fig(fig):
@@ -73,7 +73,7 @@ def plot_buttons(corruption_list, featureNames):
                 method="restyle"
             )
         ]),
-        active=len(corruption_list)+1,
+        active=2,
         pad={"r": 10, "t": 10},
         showactive=True,
         x=1,
@@ -91,6 +91,7 @@ def plot_buttons(corruption_list, featureNames):
                     label=str(list(noise_method.keys())[0]) + ' ' + str(levels).replace('[', ''),
                     method="restyle"))
             button_layout[0].update({'buttons': button_values})
+    visible_features, _, _ = get_levels(corruption_list[0])
     return button_layout, visible_features
 
 def sort_df_by_list(df, feature, order):
@@ -99,15 +100,13 @@ def sort_df_by_list(df, feature, order):
     df = df.sort_values([feature], ignore_index=True)
     return df
 
-def plot_corruption_values(baseline_results, corruption_results, model_name, corruptions,
+def plot_corruption_values(baseline_results, corruption_results,
                            measured_property, measured_name, corruptions_list):
-    title = "Average {} of {} over {} {} corruptions at increasing noise levels".format(
-        measured_name.replace("_", " "), measured_property, corruptions, model_name)
     fig = px.line(corruption_results, x="level", y=measured_name, color='feature_name')
     buttons, visible_features = plot_buttons(corruptions_list,
                                              corruption_results['feature_name'].unique().tolist())
     fig.update_layout(dict(updatemenus=buttons), xaxis_title="Feature",
-                      yaxis_title=measured_property, title=title, font=dict(size=18))
+                      yaxis_title=measured_property, font=dict(size=18))
     fig.update_traces(line=dict(width=4))
     if measured_name == "score":
         fig.add_hline(y=baseline_results[measured_name].iloc[0], line_dash="dash", line_width=4)
@@ -115,10 +114,7 @@ def plot_corruption_values(baseline_results, corruption_results, model_name, cor
         fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
     return fig
 
-def plot_corruption_values_hist(baseline_results, corruption_results, model_name,
-                                corruptions, measured_property, measured_name, corruptions_list):
-    title = "Average {} of {} for features for {} over {} noise corruptions".format(
-        measured_name.replace("_", " "), measured_property, model_name, corruptions)
+def plot_corruption_values_hist(baseline_results, corruption_results, measured_property, measured_name, corruptions_list):
     results = pd.DataFrame(columns=['feature_name', measured_name, measured_name +'_noisy'])
     order = corruption_results['feature_name'].unique().tolist()
     results['feature_name'] = corruption_results.sort_values(
@@ -160,7 +156,6 @@ def plot_corruption_values_hist(baseline_results, corruption_results, model_name
                                              results['feature_name'].values.tolist())
     
     fig.update_layout(dict(updatemenus=buttons,),
-              title=title,
               xaxis_title="Feature",
               yaxis_title=measured_property,
               font={"size":18},
@@ -174,10 +169,7 @@ def plot_corruption_values_hist(baseline_results, corruption_results, model_name
     fig.update_traces(visible=False, selector=lambda t: not t.name in visible_features)
     return fig
 
-def plot_corruption_scores_hist(baseline_results, corruption_results, model_name,
-                                corruptions, measured_name):
-    title = "Average {} for {} over {} noise corruptions".format(
-        measured_name.replace("_", " "), model_name, corruptions)
+def plot_corruption_scores_hist(baseline_results, corruption_results, measured_name):
     results = pd.DataFrame(columns=['feature_name', measured_name])
     baseline_results = baseline_results.sort_values("feature_name")
     results['feature_name'] = corruption_results['feature_name'].unique().tolist()
@@ -223,7 +215,6 @@ def plot_corruption_scores_hist(baseline_results, corruption_results, model_name
             xanchor="right",
             y=1.1,
             yanchor="top"),],),
-            title=title,
             xaxis_title="Feature",
             yaxis_title=measured_name,
             font={"size": 18},
