@@ -1,6 +1,8 @@
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.express.colors import sample_colorscale
 from ._filter import get_levels
 
 def plot_data(baseline_results, corruption_results, model_name, corruptions,
@@ -44,7 +46,9 @@ def get_colors_from_fig(fig):
 
 def hex_to_rgba(hex, alpha, factor=1):
     rgb = []
-    for i in (0, 2, 4):
+    hex = tuple([int(i) for i in hex[3:-1].split(",")])
+    hex = '#%02x%02x%02x' % hex #rgb to hex
+    for i in (1, 3, 5):
         decimal = int(hex[i:i+2], 16)
         decimal = int(decimal * factor)
         decimal = min(decimal, 255)
@@ -92,7 +96,7 @@ def plot_buttons(corruption_list, featureNames):
 def sort_df_by_list(df, feature, order):
     df[feature] = df[feature].astype("category")
     df[feature] = df[feature].cat.set_categories(order)
-    df = df.sort_values([feature])
+    df = df.sort_values([feature], ignore_index=True)
     return df
 
 def plot_corruption_values(baseline_results, corruption_results, model_name, corruptions,
@@ -125,14 +129,17 @@ def plot_corruption_values_hist(baseline_results, corruption_results, model_name
     results[measured_name+'_noisy'] = corruption_results.sort_values(
         "feature_name")[measured_name].values.tolist() 
     results = sort_df_by_list(results, "feature_name", order)
+    scale = sample_colorscale('viridis', np.linspace(0, 1, len(results)))
     fig = go.Figure()
     for (index, row_data) in results.iterrows():
         fig.add_trace(
             go.Bar(x=[row_data["feature_name"]],
                    y=[row_data[measured_name]],
                    name=row_data['feature_name'],
-                   legendgroup=index,
+                   legendgroup = "Baseline",
+                   legendgrouptitle_text="Baseline",
                    width=0.4,
+                   marker_color=scale[index],
                    text="~{:0.3f}".format(row_data[measured_name]))
                 )
     colors = get_colors_from_fig(fig)
@@ -141,22 +148,26 @@ def plot_corruption_values_hist(baseline_results, corruption_results, model_name
             go.Bar(x=[row_data["feature_name"]],
                    y=[row_data[measured_name+'_noisy']],
                    name=row_data['feature_name'],
+                   showlegend=True,
+                   legendgrouptitle_text="Noisy",
+                   legendgroup="Noisy",
                    marker_color = 'rgba' + str(hex_to_rgba(colors[order.index(
                     row_data["feature_name"])][1:], 0.5, 1.2)),
-                   showlegend=False,
-                   legendgroup=index,
                    width=0.4,
                    text="~{:0.3f}".format(row_data[measured_name+'_noisy']))
                 )
     buttons, visible_features = plot_buttons(corruptions_list,
                                              results['feature_name'].values.tolist())
+    
     fig.update_layout(dict(updatemenus=buttons,),
               title=title,
               xaxis_title="Feature",
               yaxis_title=measured_property,
               font={"size":18},
               bargroupgap=0,
-              barmode='group')
+              barmode='group',
+              legend=dict(groupclick="toggleitem"))
+              
     fig.update_traces(
         textposition="outside",
         texttemplate='%{text}')
@@ -175,6 +186,7 @@ def plot_corruption_scores_hist(baseline_results, corruption_results, model_name
     data.insert(0, {"feature_name": "baseline", measured_name:
                     baseline_results[measured_name].iloc[0]})
     results = pd.concat([pd.DataFrame(data), results], ignore_index=True)
+    scale = sample_colorscale('viridis', np.linspace(0, 1, len(results)))
     fig = go.Figure()
     for (index, row_data) in results.iterrows():
         fig.add_trace(
@@ -182,6 +194,7 @@ def plot_corruption_scores_hist(baseline_results, corruption_results, model_name
                    y=[row_data[measured_name]],
                    name=row_data['feature_name'],
                    legendgroup=index,
+                   marker_color=scale[index],
                    text="~{:0.3f}".format(row_data[measured_name]))
                 )
     fig.update_traces(
