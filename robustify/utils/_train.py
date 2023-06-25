@@ -2,12 +2,16 @@ from ._importances import filter_on_importance_method
 from ._scorers import get_scorer
 from ._transform import convert_to_numpy
 from ._filter import is_keras_model
+from ._sampling import sample_data
 import torch
 import numpy as np
 import pandas as pd
 import torch.nn as nn
 import tensorflow as tf
 import keras
+
+def is_keras_model(model):
+    return isinstance(model, (tf.keras.Model, keras.Model, tf.estimator.Estimator))
 
 def custom_train_model(model, X, y, custom_train):
     if not hasattr(custom_train, '__call__'):
@@ -25,16 +29,27 @@ def train_model(model, X, y, custom_train):
     if is_keras_model(model):
         model.fit(X.values, y.values.ravel(), verbose=0)
     else:
-        model.fit(X.values, y.values.ravel())
+        model.fit(X, y.values.ravel())
     return model
 
 def reset_model(model):
     if isinstance(model, nn.Conv2d):
         torch.nn.init.xavier_uniform(model.weight.data)
+    if is_keras_model(model):
+        reinitialize(model)
     return model
 
+def reinitialize(model):
+    for layer in model.layers:
+        if hasattr(layer,"kernel_initializer"):
+            layer.kernel.assign(layer.kernel_initializer(tf.shape(layer.kernel)))
+        if hasattr(layer,"bias_initializer"):
+            layer.bias.assign(layer.bias_initializer(tf.shape(layer.bias)))
+        if hasattr(layer,"recurrent_initializer"):
+            layer.recurrent_kernel.assign(layer.recurrent_initializer(tf.shape(layer.recurrent_kernel)))
+
 def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name, random_state, custom_train, custom_predict):
-    """ Train a baseline model on hte data without anny corruptions. 
+    """ Train a baseline model on the data without any corruptions. 
     """
     baseline_results = pd.DataFrame(columns=['feature_name', 'value', 'variance', 'score'])
     if (label_name is None):
@@ -43,10 +58,15 @@ def train_baseline(df_train, X_test, y_test, model, scorer, measure, label_name,
     X = df_train.drop([label_name], axis=1)
     model = train_model(model, X, y, custom_train)
     score = get_scorer(scorer, model, X_test, y_test, custom_predict)
-    for feature_name in X.columns:
-        index = df_train.columns.get_loc(feature_name)
-        value, _ = filter_on_importance_method(model, index, X, y, random_state=random_state, scoring=scorer, measure=measure, custom_predict=custom_predict)
-        variance = np.var(X[feature_name])
-        baseline_results.loc[len(baseline_results.index)] = [feature_name, value, variance, score]
-        model = reset_model(model)
+    df_test = X_test.copy(deep=True)
+    df_test[label_name] = convert_to_numpy(y_test)
+    X_sampled, y_sampled = sample_data(df_train, label_name, min(10000/len(df_train), 1), random_state=random_state) 
+    X_test_sampled, y_test_sampled = sample_data(df_test, label_name, min(1000/len(df_test), 1), random_state=random_state)
+    values, _ = filter_on_importance_method(model, None, X_sampled, y_sampled, X_test_sampled, y_test_sampled, random_state=random_state, scoring=scorer, measure=measure, custom_predict=custom_predict)
+    variance = np.var(X)
+    baseline_results["feature_name"] = list(X.columns)
+    baseline_results["value"] = values
+    baseline_results["variance"] = variance.values
+    baseline_results["score"] = np.repeat(score,len(list(X.columns)))
+    model = reset_model(model)
     return baseline_results, label_name

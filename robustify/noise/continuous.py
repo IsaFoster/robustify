@@ -1,6 +1,7 @@
 
 import numpy as np
 import pandas as pd
+import math
 
 def gaussian_noise(clean_data, percentage, feature_name=None, random_state=None):
     """
@@ -32,5 +33,20 @@ def gaussian_noise(clean_data, percentage, feature_name=None, random_state=None)
         return clean_data
     if isinstance(clean_data, (np.ndarray, np.generic, list)):
         noise = (clean_data * percentage) * np.random.normal(0, 1, len(clean_data))
+        return clean_data + noise
+    
+def gaussian_noise_dep(clean_data, percentage, feature_name=None, dep=None, random_state=None):
+    def add(E):
+        return math.sqrt(E/1000)/1000
+    conv = np.vectorize(add)
+
+    np.random.seed(random_state)
+    if isinstance(clean_data, pd.DataFrame):
+        data_col = clean_data[feature_name]
+        noise = (data_col * conv(dep)) * np.random.normal(0, 1, len(data_col))
+        clean_data[feature_name] = data_col + noise
+        return clean_data
+    if isinstance(clean_data, (np.ndarray, np.generic, list)):
+        noise = (clean_data * conv(dep)) * np.random.normal(0, 1, len(clean_data))
         return clean_data + noise
     

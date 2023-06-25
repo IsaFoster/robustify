@@ -14,7 +14,8 @@ def get_scorer(metric, model, X_test, y_test, custom_predict):
 def get_scorer_sckit_learn(metric, model, X_test, y_test, custom_predict):
     try: 
         scorer = metrics.get_scorer(metric)
-        return scorer._score_func(y_test, get_prediction(model, X_test, custom_predict)) 
+        y_pred = get_prediction(model, X_test, custom_predict)
+        return scorer._score_func(convert_to_numpy(y_test), convert_to_numpy(y_pred)) 
     except Exception:
         raise
     
