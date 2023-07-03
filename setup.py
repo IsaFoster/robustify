@@ -27,7 +27,7 @@ setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
     install_requires=['numpy<=1.24.3', 
-                      'scikit-learn<=1.2.2', 
+                      'scikit-learn<=1.3.0', 
                       'matplotlib<=3.7.1', 
                       'pandas<=2.0.2', 
                       'plotly<=5.15.0', 
