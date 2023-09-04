@@ -36,7 +36,7 @@ setup(
                       'python-dotenv<=1.0.0',
                       'tensorflow<=2.12.0',
                       'kaleido<=0.2.1',
-                      'ipython<=8.12.2',
+                      'ipython<=8.15.0',
                       'eli5<=0.13.0',
                       'lime<=0.2.0.1',
                       'shap<=0.41.0',
