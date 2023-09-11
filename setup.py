@@ -42,7 +42,7 @@ setup(
                       'shap<=0.41.0',
                       'torch<=2.0.1'],
     setup_requires=['pytest-runner'], 
-    tests_require=['pytest==7.3.1'],
+    tests_require=['pytest==7.4.2'],
     test_suite='tests',
 )
     
